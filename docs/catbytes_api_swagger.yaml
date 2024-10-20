@@ -6,13 +6,7 @@ info:
     Some useful links:
     - [CatBytes backend repository](https://github.com/catbytes-community/webplatform-backend)
 
-  termsOfService: http://swagger.io/terms/
-  contact:
-    email: apiteam@swagger.io
-  license:
-    name: Apache 2.0
-    url: http://www.apache.org/licenses/LICENSE-2.0.html
-  version: 1.0.11
+  version: 1.0.0
 externalDocs:
   description: Find out more about Swagger
   url: http://swagger.io
@@ -115,7 +109,7 @@ paths:
       tags:
         - application
       summary: Perform action on application
-      description: This endpoint is used to either approve or deny an application. 
+      description: This endpoint is used to either approve or deny an application. (We're going to provide a (enum) list of actions available)
       operationId: editApplication
       parameters:
         - name: application_id
@@ -310,38 +304,3 @@ components:
             example: 1
         xml:
           name: user
-   
-    ApiResponse:
-      type: object
-      properties:
-        code:
-          type: integer
-          format: int32
-        type:
-          type: string
-        message:
-          type: string
-      xml:
-        name: '##default'
-  requestBodies:
-    UserArray:
-      description: List of user object
-      content:
-        application/json:
-          schema:
-            type: array
-            items:
-              $ref: '#/components/schemas/User'
-  securitySchemes:
-    petstore_auth:
-      type: oauth2
-      flows:
-        implicit:
-          authorizationUrl: https://petstore3.swagger.io/oauth/authorize
-          scopes:
-            write:pets: modify pets in your account
-            read:pets: read your pets
-    api_key:
-      type: apiKey
-      name: api_key
-      in: header
