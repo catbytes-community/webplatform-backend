@@ -44,8 +44,10 @@ paths:
                   type: string
                   example: I'm passionate about C++ programming
       responses:
-        default:
-          description: successful operation
+        '409':
+          description: Application already exists
+        '200':
+          description: Successful operation
     get:
       tags:
         - application
@@ -191,7 +193,7 @@ paths:
             type: integer
       responses:
         '200':
-          description: successful operation
+          description: Successful operation
           content:
             application/json:
               schema:
@@ -248,8 +250,14 @@ paths:
                     type: string
                     example: NewLastName    
       responses:
-        default:
-          description: successful operation
+        '200':
+          description: Successful operation
+        '400':
+          description: Invalid user id supplied
+        '403':
+          description: You don't have the rights to edit this user
+        '404':
+          description: User not found
     delete:
       tags:
         - user
@@ -264,8 +272,12 @@ paths:
           schema:
             type: integer
       responses:
+        '200':
+          description: Successful operation
         '400':
           description: Invalid user_id supplied
+        '403':
+          description: You don't have the rights to edit this user
         '404':
           description: User not found
 
