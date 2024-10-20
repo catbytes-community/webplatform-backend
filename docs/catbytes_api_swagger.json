@@ -58,8 +58,11 @@
           }
         },
         "responses": {
-          "default": {
-            "description": "successful operation"
+          "200": {
+            "description": "Successful operation"
+          },
+          "409": {
+            "description": "Application already exists"
           }
         }
       },
@@ -289,7 +292,7 @@
         ],
         "responses": {
           "200": {
-            "description": "successful operation",
+            "description": "Successful operation",
             "content": {
               "application/json": {
                 "schema": {
@@ -376,8 +379,17 @@
           }
         },
         "responses": {
-          "default": {
-            "description": "successful operation"
+          "200": {
+            "description": "Successful operation"
+          },
+          "400": {
+            "description": "Invalid user id supplied"
+          },
+          "403": {
+            "description": "You don't have the rights to edit this user"
+          },
+          "404": {
+            "description": "User not found"
           }
         }
       },
@@ -400,8 +412,14 @@
           }
         ],
         "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
           "400": {
             "description": "Invalid user_id supplied"
+          },
+          "403": {
+            "description": "You don't have the rights to edit this user"
           },
           "404": {
             "description": "User not found"
