@@ -3,6 +3,10 @@ info:
   title: CatBytes Web Platform
   description: |-
     This is CatBytes Web Platform API specification.
+    
+    !
+    Please note, this is an initial draft of the API, all payloads and response bodies are very likely to change.
+    
     Some useful links:
     - [CatBytes backend repository](https://github.com/catbytes-community/webplatform-backend)
 
@@ -18,6 +22,8 @@ tags:
     description: New users applications
   - name: user
     description: User related operations
+  - name: mentor
+    description: Mentor related operations
 
 paths:
   /application:
@@ -177,6 +183,7 @@ paths:
                   id:
                     type: integer
                     example: 42
+                    
   /user/{user_id}:
     get:
       tags:
@@ -280,7 +287,207 @@ paths:
           description: You don't have the rights to edit this user
         '404':
           description: User not found
-
+          
+  /mentor:
+    post:
+      tags:
+        - mentor
+      summary: Create mentor - in request state
+      description: Creates new mentor entity and puts in 'in-review' state
+      operationId: createMentor
+      requestBody:
+        description: Data user inserted on registration
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: Jane Doe
+                experience:
+                  type: string
+                  example: I'm working with 3D for 3 years already
+                contact_info:
+                  type: string
+                  example: janedoe in discord
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 42
+    get:
+      tags:
+        - mentor
+      summary: Get mentors - filtered
+      description: This endpoint is used for displaying both active and in-review mentors
+      operationId: getMentors
+      parameters: 
+        - name: type
+          in: query
+          description: The type of mentor entities to fetch. **active** OR **inreview**. 
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  applications:
+                    type: array
+                    items:
+                      type: object
+                    example: [{"mentor_id": 1, "name": "Jane Doe", "description": "I'm working with 3D for 3 years already"}, {"mentor_id": 2, "name": "Mary Roe", "description": "I love frontend"}]
+        '400':
+          description: Invalid query parameter
+        '403':
+          description: User is not allowed to view mentors list (might happen for GET mentors under review)
+          
+  /mentor/{mentor_id}:
+    get:
+      tags:
+        - mentor
+      summary: Get mentor by id
+      description: ''
+      operationId: getMentorById
+      parameters:
+        - name: mentor_id
+          in: path
+          description: 'The id of mentor that needs to be fetched. Use 42 for testing. '
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 42
+                  name:
+                    type: string
+                    example: Jane Doe
+                  contact:
+                    type: string
+                    example: janedoe in discord
+                  experience:
+                    type: string
+                    example: I have an extended IT experience
+                  about:
+                    type: string
+                    example: I can help with ... 
+                  tags:
+                    type: array
+                    items:
+                      type: string
+                    example: ["nodejs", "fullstack"]
+        '400':
+          description: Invalid mentor id supplied
+        '404':
+          description: Mentor not found
+    put:
+      tags:
+        - mentor
+      summary: Update mentor
+      description: This can only be done by the logged in user with mentor role. Any changes that are performed in mentor's card come here.
+      operationId: updateMentor
+      parameters:
+        - name: mentor_id
+          in: path
+          description: id of mentor that need to be updated
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        description: Update an existing mentor info
+        content:
+          application/json:
+            schema:
+                type: object
+                properties:
+                  experience:
+                    type: string
+                    example: I have a very extended IT experience
+                  about:
+                    type: string
+                    example: I can pass my experience to you
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          description: Invalid mentor id supplied
+        '403':
+          description: You don't have the rights to edit this mentor
+        '404':
+          description: Mentor not found
+    post:
+      tags:
+        - mentor
+      summary: Update mentor status
+      description: This can only be done by the logged in user with moderator role. This endpoint is used to change state (for now) of mentor entity
+      operationId: changeMentor
+      parameters:
+        - name: mentor_id
+          in: path
+          description: id of mentor that need to be changed
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        description: Update an existing mentor entity status (enum("active", \"inactive", \"blocked"))
+        content:
+          application/json:
+            schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: active
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          description: Invalid mentor id or status supplied
+        '403':
+          description: You don't have the rights to edit this mentor
+        '404':
+          description: Mentor not found
+    delete:
+      tags:
+        - mentor
+      summary: Delete mentor entity
+      description: This can only be done by the logged in user with moderator or mentor role.
+      operationId: deleteMentor
+      parameters:
+        - name: mentor_id
+          in: path
+          description: The id of mentor that needs to be deleted
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          description: Invalid mentor_id supplied
+        '403':
+          description: You don't have the rights to edit this mentor
+        '404':
+          description: Mentor not found
 
 components:
   schemas:
