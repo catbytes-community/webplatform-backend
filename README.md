@@ -1,7 +1,7 @@
 ## 1. Setting up Local PostgreSQL instance <br />
 <b>  Step 1. </b> Install PostgreSQL. Download link: https://www.postgresql.org/download/
   <br /> 
-<b>   Step 2.</b>  Access the PostgreSQL interface using the command line:
+<b>   Step 2.</b>  Access the PostgreSQL interface using the command line:<br />
    ``` psql -U postgres ```
 
    Default password is  ```admin ```
@@ -47,6 +47,7 @@ DB_PORT=5432
 ```npm install @prisma/client```
 <b>  Step 2. </b> Initialize Prisma in your project<br />
 ```npx prisma init```
+<br />
 <b>  Step 3. </b> Update the `.env` file:<br />
 `DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE"` 
 <br />
