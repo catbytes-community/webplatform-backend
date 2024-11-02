@@ -1,0 +1,797 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "CatBytes Web Platform",
+    "description": "This is CatBytes Web Platform API specification.\n\n!\nPlease note, this is an initial draft of the API, all payloads and response bodies are very likely to change.\n\nSome useful links:\n- [CatBytes backend repository](https://github.com/catbytes-community/webplatform-backend)",
+    "version": "1.0.0"
+  },
+  "externalDocs": {
+    "description": "Find out more about Swagger",
+    "url": "http://swagger.io"
+  },
+  "servers": [
+    {
+      "url": "https://somepath.catbytes.io/api/v1"
+    }
+  ],
+  "tags": [
+    {
+      "name": "application",
+      "description": "New users applications"
+    },
+    {
+      "name": "user",
+      "description": "User related operations"
+    },
+    {
+      "name": "mentor",
+      "description": "Mentor related operations"
+    }
+  ],
+  "paths": {
+    "/application": {
+      "post": {
+        "tags": [
+          "application"
+        ],
+        "summary": "Create new user application",
+        "description": "Send new user application's data for review.",
+        "operationId": "createApplication",
+        "requestBody": {
+          "description": "Data user inserted on application",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "firstName": {
+                    "type": "string",
+                    "example": "Jane"
+                  },
+                  "lastName": {
+                    "type": "string",
+                    "example": "Doe"
+                  },
+                  "about": {
+                    "type": "string",
+                    "example": "I'm passionate about C++ programming"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "409": {
+            "description": "Application already exists"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "application"
+        ],
+        "summary": "Get all (active?) applications",
+        "description": "",
+        "operationId": "getApplications",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "applications": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      },
+                      "example": [
+                        {
+                          "application_id": 1,
+                          "name": "Jane Doe",
+                          "description": "I'm passionate about C++ programming"
+                        },
+                        {
+                          "application_id": 2,
+                          "name": "Mary Roe",
+                          "description": "I love frontend"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User is not allowed to view applications list"
+          }
+        }
+      }
+    },
+    "/application/{application_id}": {
+      "get": {
+        "tags": [
+          "application"
+        ],
+        "summary": "Get application by id",
+        "description": "",
+        "operationId": "getApplicationById",
+        "parameters": [
+          {
+            "name": "application_id",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "example": 2
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "Mary Roe"
+                    },
+                    "description": {
+                      "type": "string",
+                      "example": "I love frontend"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid application id supplied"
+          },
+          "403": {
+            "description": "User is not allowed to view applications"
+          },
+          "404": {
+            "description": "Application not found"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "application"
+        ],
+        "summary": "Perform action on application",
+        "description": "This endpoint is used to either approve or deny an application. (We're going to provide a (enum) list of actions available)",
+        "operationId": "editApplication",
+        "parameters": [
+          {
+            "name": "application_id",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Action with comment (the comment is stored in database along with closed application, no matter what the action was)",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "action": {
+                    "type": "string",
+                    "example": "deny"
+                  },
+                  "comment": {
+                    "type": "string",
+                    "example": "seems to be phishing"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "400": {
+            "description": "Unknown action"
+          },
+          "403": {
+            "description": "User is not allowed to edit applications"
+          },
+          "404": {
+            "description": "Application not found"
+          }
+        }
+      }
+    },
+    "/user": {
+      "post": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Create user",
+        "description": "First time authenticated user creation.",
+        "operationId": "createUser",
+        "requestBody": {
+          "description": "Data user inserted on registration",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string",
+                    "example": "theUser"
+                  },
+                  "firstName": {
+                    "type": "string",
+                    "example": "Jane"
+                  },
+                  "lastName": {
+                    "type": "string",
+                    "example": "Doe"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "example": 42
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/{user_id}": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Get user by user id",
+        "description": "",
+        "operationId": "getUserById",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "description": "The id of user that needs to be fetched. Use 42 for testing. ",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "example": 42
+                    },
+                    "username": {
+                      "type": "string",
+                      "example": "theUser"
+                    },
+                    "firstName": {
+                      "type": "string",
+                      "example": "Jane"
+                    },
+                    "lastName": {
+                      "type": "string",
+                      "example": "Doe"
+                    },
+                    "roles": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "example": [
+                        "mentee"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid user id supplied"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Update user",
+        "description": "This can only be done by the logged in user. Any changes that are performed in user profile come here.",
+        "operationId": "updateUser",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "description": "id of user that need to be updated",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Update an existent user in the store",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string",
+                    "example": "theUser"
+                  },
+                  "firstName": {
+                    "type": "string",
+                    "example": "Jane"
+                  },
+                  "lastName": {
+                    "type": "string",
+                    "example": "NewLastName"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "400": {
+            "description": "Invalid user id supplied"
+          },
+          "403": {
+            "description": "You don't have the rights to edit this user"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Delete user",
+        "description": "This can only be done by the logged in user.",
+        "operationId": "deleteUser",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "description": "The id of user that needs to be deleted",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "400": {
+            "description": "Invalid user_id supplied"
+          },
+          "403": {
+            "description": "You don't have the rights to edit this user"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      }
+    },
+    "/mentor": {
+      "post": {
+        "tags": [
+          "mentor"
+        ],
+        "summary": "Create mentor - in request state",
+        "description": "Creates new mentor entity and puts in 'in-review' state",
+        "operationId": "createMentor",
+        "requestBody": {
+          "description": "Data user inserted on registration",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Jane Doe"
+                  },
+                  "experience": {
+                    "type": "string",
+                    "example": "I'm working with 3D for 3 years already"
+                  },
+                  "contact_info": {
+                    "type": "string",
+                    "example": "janedoe in discord"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "example": 42
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "mentor"
+        ],
+        "summary": "Get mentors - filtered",
+        "description": "This endpoint is used for displaying both active and in-review mentors",
+        "operationId": "getMentors",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "description": "The type of mentor entities to fetch. **active** OR **inreview**.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "applications": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      },
+                      "example": [
+                        {
+                          "mentor_id": 1,
+                          "name": "Jane Doe",
+                          "description": "I'm working with 3D for 3 years already"
+                        },
+                        {
+                          "mentor_id": 2,
+                          "name": "Mary Roe",
+                          "description": "I love frontend"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query parameter"
+          },
+          "403": {
+            "description": "User is not allowed to view mentors list (might happen for GET mentors under review)"
+          }
+        }
+      }
+    },
+    "/mentor/{mentor_id}": {
+      "get": {
+        "tags": [
+          "mentor"
+        ],
+        "summary": "Get mentor by id",
+        "description": "",
+        "operationId": "getMentorById",
+        "parameters": [
+          {
+            "name": "mentor_id",
+            "in": "path",
+            "description": "The id of mentor that needs to be fetched. Use 42 for testing. ",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "example": 42
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "Jane Doe"
+                    },
+                    "contact": {
+                      "type": "string",
+                      "example": "janedoe in discord"
+                    },
+                    "experience": {
+                      "type": "string",
+                      "example": "I have an extended IT experience"
+                    },
+                    "about": {
+                      "type": "string",
+                      "example": "I can help with ..."
+                    },
+                    "tags": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "example": [
+                        "nodejs",
+                        "fullstack"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid mentor id supplied"
+          },
+          "404": {
+            "description": "Mentor not found"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "mentor"
+        ],
+        "summary": "Update mentor",
+        "description": "This can only be done by the logged in user with mentor role. Any changes that are performed in mentor's card come here.",
+        "operationId": "updateMentor",
+        "parameters": [
+          {
+            "name": "mentor_id",
+            "in": "path",
+            "description": "id of mentor that need to be updated",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Update an existing mentor info",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "experience": {
+                    "type": "string",
+                    "example": "I have a very extended IT experience"
+                  },
+                  "about": {
+                    "type": "string",
+                    "example": "I can pass my experience to you"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "400": {
+            "description": "Invalid mentor id supplied"
+          },
+          "403": {
+            "description": "You don't have the rights to edit this mentor"
+          },
+          "404": {
+            "description": "Mentor not found"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "mentor"
+        ],
+        "summary": "Update mentor status",
+        "description": "This can only be done by the logged in user with moderator role. This endpoint is used to change state (for now) of mentor entity",
+        "operationId": "changeMentor",
+        "parameters": [
+          {
+            "name": "mentor_id",
+            "in": "path",
+            "description": "id of mentor that need to be changed",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Update an existing mentor entity status (enum(\"active\", \\\"inactive\", \\\"blocked\"))",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "example": "active"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "400": {
+            "description": "Invalid mentor id or status supplied"
+          },
+          "403": {
+            "description": "You don't have the rights to edit this mentor"
+          },
+          "404": {
+            "description": "Mentor not found"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "mentor"
+        ],
+        "summary": "Delete mentor entity",
+        "description": "This can only be done by the logged in user with moderator or mentor role.",
+        "operationId": "deleteMentor",
+        "parameters": [
+          {
+            "name": "mentor_id",
+            "in": "path",
+            "description": "The id of mentor that needs to be deleted",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "400": {
+            "description": "Invalid mentor_id supplied"
+          },
+          "403": {
+            "description": "You don't have the rights to edit this mentor"
+          },
+          "404": {
+            "description": "Mentor not found"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "example": 10
+          },
+          "username": {
+            "type": "string",
+            "example": "theUser"
+          },
+          "firstName": {
+            "type": "string",
+            "example": "John"
+          },
+          "lastName": {
+            "type": "string",
+            "example": "James"
+          },
+          "email": {
+            "type": "string",
+            "example": "john@email.com"
+          },
+          "password": {
+            "type": "string",
+            "example": "12345"
+          },
+          "phone": {
+            "type": "string",
+            "example": "12345"
+          },
+          "userStatus": {
+            "type": "integer",
+            "description": "User Status",
+            "format": "int32",
+            "example": 1
+          }
+        },
+        "xml": {
+          "name": "user"
+        }
+      }
+    }
+  }
+}
