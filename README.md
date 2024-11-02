@@ -1,21 +1,24 @@
-## 1. Setting up Local PostgreSQL instance 
+## 1. Setting up Local PostgreSQL instance <br />
 <b>  Step 1. </b> Install PostgreSQL. Download link: https://www.postgresql.org/download/
-   
+  <br /> 
 <b>   Step 2.</b>  Access the PostgreSQL interface using the command line:
    ``` psql -U postgres ```
-   Default password is  ```admin ```
-<b>  Step 3.</b> Create a new database and a user with credentials and privileges 
-``` CREATE DATABASE mydatabase; ```
-``` CREATE USER myuser WITH PASSWORD 'mypassword'; ```
-``` GRANT ALL PRIVILEGES ON DATABASE mydatabase TO myuser; ```
-<b> Step 4.</b> Create a table (ex. "users")
-```CREATE TABLE IF NOT EXISTS users ( id SERIAL PRIMARY KEY, username VARCHAR(50) NOT NULL);```
 
-## 2.  Set up connection in the app
-### (Manual)
-<b>  Step 1. </b>To set up the connection to the database we need to user a driver, PostgreSQL Client. Install package: 
-``` npm install pg ```
-<b>  Step 2. </b>Create a database config (e.x. `db.js`)
+   Default password is  ```admin ```
+   <br />
+<b>  Step 3.</b> Create a new database and a user with credentials and privileges 
+<br />
+``` CREATE DATABASE mydatabase; ```<br />
+``` CREATE USER myuser WITH PASSWORD 'mypassword'; ```<br />
+``` GRANT ALL PRIVILEGES ON DATABASE mydatabase TO myuser; ```<br />
+<b> Step 4.</b> Create a table (ex. "users")<br />
+```CREATE TABLE IF NOT EXISTS users ( id SERIAL PRIMARY KEY, username VARCHAR(50) NOT NULL);```<br />
+
+## 2.  Set up connection in the app<br />
+### (Manual)<br />
+<b>  Step 1. </b>To set up the connection to the database we need to user a driver, PostgreSQL Client. Install package: <br />
+``` npm install pg ```<br />
+<b>  Step 2. </b>Create a database config (e.x. `db.js`)<br />
 ``` javascript
 const { Pool } = require('pg');
 require('dotenv').config();
@@ -29,8 +32,8 @@ const pool = new Pool({
 });
 
 module.exports = pool;
-```
-<b>  Step 3. </b> Add variables to `.env` file 
+``` 
+<b>  Step 3. </b> Add variables to `.env` file <br /><br />
 ``` 
 DB_USER=myuser
 DB_PASS=mypassword
@@ -38,18 +41,17 @@ DB_NAME=mydatabase
 DB_HOST=localhost
 DB_PORT=5432
 ```
-### (Prisma ORM)
-<b>  Step 1. </b> Install Prisma CLI and Prisma Client:
+### (Prisma ORM)<br />
+<b>  Step 1. </b> Install Prisma CLI and Prisma Client:<br />
 ```npm install prisma --save-dev```
 ```npm install @prisma/client```
-<b>  Step 2. </b> Initialize Prisma in your project
+<b>  Step 2. </b> Initialize Prisma in your project<br />
 ```npx prisma init```
-<b>  Step 3. </b> Update the `.env` file:
-`DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE"`
+<b>  Step 3. </b> Update the `.env` file:<br />
+`DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE"` 
+<br />
 
-
-
-GET requests line: 
+GET requests line: <br />
 ```curl -X GET http://localhost:8080/users ```
-POST requests line:
+POST requests line:<br />
 ```curl -X POST http://localhost:8080/users -H "Content-Type: application/json" -d "{\"username\": \"Muffin\"}"```
