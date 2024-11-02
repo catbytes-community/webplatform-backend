@@ -10,6 +10,15 @@ Also published on GitHub pages: https://catbytes-community.github.io/webplatform
 
 <b> Step 1. </b> Install PostgreSQL. Download link: https://www.postgresql.org/download/
 <br />
+<b> Note: if you have an error "psql command not found", then you need to specify it in the environmental PATH (bash_profile)
+On bash terminal:
+nano ~/.bash_profile
+insert this line "export PATH=/Library/PostgreSQL/17/bin:$PATH" (change 17 to your version of PostgreSQL)
+save the profile (Ctrl + O)
+exit the profile (Ctrl + X)
+</b>
+
+<br />
 <b> Step 2.</b> Access the PostgreSQL interface using the command line:<br />
 `psql -U postgres`
 
@@ -20,6 +29,7 @@ Default password is `admin `
 `CREATE DATABASE mydatabase;`<br />
 `CREATE USER myuser WITH PASSWORD 'mypassword';`<br />
 `GRANT ALL PRIVILEGES ON DATABASE mydatabase TO myuser;`<br />
+`GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO myuser;`<br />
 <b> Step 4.</b> Create a table (ex. "users")<br />
 `CREATE TABLE IF NOT EXISTS users ( id SERIAL PRIMARY KEY, username VARCHAR(50) NOT NULL);`<br />
 
