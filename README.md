@@ -45,6 +45,7 @@ DB_PORT=5432
 <b>  Step 1. </b> Install Prisma CLI and Prisma Client:<br />
 ```npm install prisma --save-dev```
 ```npm install @prisma/client```
+<br />
 <b>  Step 2. </b> Initialize Prisma in your project<br />
 ```npx prisma init```
 <br />
@@ -54,5 +55,6 @@ DB_PORT=5432
 
 GET requests line: <br />
 ```curl -X GET http://localhost:8080/users ```
+<br />
 POST requests line:<br />
 ```curl -X POST http://localhost:8080/users -H "Content-Type: application/json" -d "{\"username\": \"Muffin\"}"```
