@@ -3,7 +3,6 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const pool = require("./db");
-const PORT = 8080;
 
 //for prisma orm
 // const { PrismaClient } = require('@prisma/client');
@@ -79,6 +78,6 @@ app.post("/users", async (req, res) => {
 //     }
 // });
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+app.listen(8080, () => {
+  console.log(`Server is running`);
 });
