@@ -3,10 +3,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const pool = require("./db");
-
-//for prisma orm
-// const { PrismaClient } = require('@prisma/client');
-// const prisma = new PrismaClient();
+ 
 
 const app = express();
 
@@ -34,16 +31,16 @@ app.get("/users", async (req, res) => {
   }
 });
 
-//prisma query
-// app.get("/users", async (req, res) => {
-//     try {
-//         const users = await prisma.user.findMany();
-//         res.json(users);
-//     } catch (err) {
-//         console.error(err);
-//         res.status(500).send("Server Error");
-//     }
-// });
+app.get("/applications", async (req, res) => {
+    try {
+        const result = await pool.query("SELECT * FROM applications");
+        res.json(result.rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Server Error");
+    }
+});
+ 
 
 // POST Endpoint
 //raw query
@@ -62,21 +59,23 @@ app.post("/users", async (req, res) => {
   }
 });
 
-//prisma query
-// app.post("/users", async (req, res) => {
-//     const { username } = req.body;
-//     try {
-//         const user = await prisma.user.create({
-//             data: {
-//                 username: username,
-//             },
-//         });
-//         res.status(201).json(user);
-//     } catch (err) {
-//         console.error(err);
-//         res.status(500).send("Server Error");
-//     }
-// });
+app.post("/applications", async (req, res) => {
+    const { userId, text } = req.body;
+    const date = new Date();  
+
+    try {
+        const result = await pool.query(
+            "INSERT INTO applications (user_id, sumbission_date, text) VALUES ($1, $2, $3) RETURNING *",
+            [userId, date, text]
+        );
+        res.status(201).json(result.rows[0]);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Server Error");
+    }
+});
+
+ 
 
 app.listen(8080, () => {
   console.log(`Server is running`);
