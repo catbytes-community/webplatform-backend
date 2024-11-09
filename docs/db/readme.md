@@ -1,0 +1,2 @@
+Database diagram is created via: https://dbdiagram.io/d
+To edit the schema, please copy&paste contents of schema.dbml into the editor at dbdiagram. After necessary changes are applied, copy the new schema and update the file. Export as PDF and replace the pdf, too.
