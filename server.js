@@ -2,10 +2,7 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const routes = require("./routes");
-
- 
-
+const routes = require("./routes/routes");
 const app = express();
 
 // Middleware
@@ -14,11 +11,6 @@ app.use(cors());
 
 // Routes
 app.use(routes);
-// API routes
-app.get("/", (req, res) => {
-  res.send("Hello World");
-});
-
 
 app.listen(8080, () => {
   console.log(`Server is running`);
