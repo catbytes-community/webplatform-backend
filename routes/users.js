@@ -2,6 +2,7 @@ const express = require("express");
 const pool = require("../db");
 const router = express.Router();
 router.use(express.json());
+
 // Validating userId 
 const isValidUserId = (id) => {
     const userId = parseInt(id, 10);
@@ -52,7 +53,7 @@ router.post("/users", async (req, res) => {
     console.log(req.body); // Log the entire request body
     try {
         const existingUser = await pool.query(
-            "SELECT * FROM users WHERE name = $1 OR email = $2",
+            "SELECT email FROM users WHERE name = $1 OR email = $2",
             [name, email]
         );
 
