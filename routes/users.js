@@ -3,19 +3,8 @@ const pool = require("../db");
 const router = express.Router();
 const userService = require("../services/user_service")
 const {verifyOwnership, OWNED_ENTITIES} = require("../middleware/authorization");
+const { isValidIntegerId } = require("./helpers");
 router.use(express.json());
-
-// Validating userId 
-const isValidUserId = (id) => {
-    const userId = parseInt(id, 10);
-    return !isNaN(userId) && userId > 0;
-};
-
-// Check if has rights to edit   
-const hasEditRights = (req) => {
-    //**** NEED TO KNOW THE CONDITIONS *****/
-    return true;
-};
 
 // Get all users
 router.get("/users", async (req, res) => {
@@ -32,18 +21,23 @@ router.get("/users", async (req, res) => {
 router.get("/users/:id", async (req, res) => {
     const { id } = req.params;
 
-    if (!isValidUserId(id)) {
+    if (!isValidIntegerId(id)) {
         return res.status(400).send("Invalid user id supplied");
     }
 
     try {
         const result = await pool.query("SELECT * FROM users WHERE id = $1", [id]);
-        // todo: get user roles, too
-
         if (result.rows.length === 0) {
             return res.status(404).json({ message: "User not found." });
         }
-        res.json(result.rows[0]);
+
+        const user_info = result.rows[0];
+        const roles = await pool.query(
+            "select r.role_name, r.role_id from roles r join user_roles on r.role_id = user_roles.role_id where user_roles.user_id = $1", 
+            [id]);
+        user_info.roles = roles.rows.length > 0 ? roles.rows : [];
+        
+        res.json(user_info);
     } catch (err) {
         console.error(err);
         res.status(500).send("Server Error");
@@ -92,10 +86,6 @@ router.put("/users/:id", verifyOwnership(OWNED_ENTITIES.USER), async (req, res) 
         return res.status(400).send("Invalid user id supplied");
     }
 
-    if (!hasEditRights(req)) {
-        return res.status(403).send("You don't have the rights to edit this user");
-    }
-
     try {
         const result = await pool.query(
             "UPDATE users SET name = $1, email = $2, about = $3, languages = $4  WHERE id = $5",
@@ -114,15 +104,11 @@ router.put("/users/:id", verifyOwnership(OWNED_ENTITIES.USER), async (req, res) 
 });
 
 // Delete user by ID
-router.delete("/users/:id", async (req, res) => {
+router.delete("/users/:id", verifyOwnership(OWNED_ENTITIES.USER), async (req, res) => {
     const { id } = req.params;
 
-    if (!isValidUserId(id)) {
+    if (!isValidIntegerId(id)) {
         return res.status(400).send("Invalid user id supplied");
-    }
-
-    if (!hasEditRights(req)) {
-        return res.status(403).send("You don't have the rights to edit this user");
     }
 
     try {
