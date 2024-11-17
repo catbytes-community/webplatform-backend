@@ -1,0 +1,108 @@
+// Use DBML to define your database structure
+// Docs: https://dbml.dbdiagram.io/docs
+
+Table applications {
+  id integer [primary key]
+  name varchar
+  about text
+  email email [unique, not null]
+  created_at timestamp
+  status enum 
+  comment varchar
+  last_modified_by integer [ref: > users.id]
+  last_modified_at timestamp
+}
+
+Table users {
+  id integer [primary key]
+  name varchar
+  email email [unique, not null]
+  about text
+  languages text[]
+  created_at timestamp
+}
+
+Table roles {
+  id integer [primary key]
+  name varchar
+  privileged bool
+}
+
+Table user_roles {
+  role_id integrer [primary key]
+  user_id integer [primary key]
+}
+
+Table mentors {
+  id integer [primary key]
+  user_id integer [ref: - users.id]
+  contact varchar
+  about text
+  tags text[]
+  status enum
+  created_at timestamp
+}
+
+Table projects {
+  id integer [primary key]
+  created_by integer [ref: < users.id]
+  created_at timestamp
+  title varchar
+  description text
+  url varchar
+  tags text[]
+  status enum
+}
+
+Table users_projects {
+  user_id integer [primary key]
+  project_id integer [primary key]
+  joined_at timestamp
+}
+
+
+Table study_buddy {
+  id integer [primary key]
+  created_by integer [ref: < users.id]
+  created_at timestamp
+  title varchar
+  description text
+  url varchar
+  type enum [note: 'buddy, group']
+  tags text[]
+  status enum
+}
+
+Table users_learnings {
+  user_id integer [primary key]
+  learning_entity_id integer [primary key]
+  joined_at timestamp
+}
+
+Table tags {
+  id integer [primary key]
+  name varchar
+  type enum
+}
+
+Table tags_assigned {
+  tag_id integer [primary key]
+  assigned_id integer [primary key]
+  assigned_to enum [note: 'mentor, project, study_buddy']
+}
+
+//Ref: applications.last_modified_by > users.id // many-to-one
+Ref: users.id <> user_roles.user_id // many-to-many
+Ref: roles.id <> user_roles.role_id
+//Ref: users.id - mentors.user_id // one-to-one
+Ref: mentors.id <> tags_assigned.assigned_id
+Ref: projects.id <> tags_assigned.assigned_id
+Ref: study_buddy.id <> tags_assigned.assigned_id
+Ref: tags.id <> tags_assigned.tag_id
+//Ref: users.id > projects.created_by 
+//Ref: users.id > study_buddy.created_by 
+Ref: users.id <> users_projects.user_id
+Ref: projects.id <> users_projects.project_id
+
+Ref: users.id <> users_learnings.user_id
+Ref: study_buddy.id <> users_learnings.learning_entity_id
