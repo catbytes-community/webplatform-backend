@@ -1,7 +1,6 @@
 const express = require("express");
 const pool = require("../db");
 const { verifyRole } = require("../middleware/authorization");
-const { getRole } = require("../utils");
 const router = express.Router();
 router.use(express.json());
 

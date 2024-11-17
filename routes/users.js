@@ -1,6 +1,7 @@
 const express = require("express");
 const pool = require("../db");
 const router = express.Router();
+const userService = require("../services/user_service")
 const {verifyOwnership, OWNED_ENTITIES} = require("../middleware/authorization");
 router.use(express.json());
 
@@ -37,6 +38,7 @@ router.get("/users/:id", async (req, res) => {
 
     try {
         const result = await pool.query("SELECT * FROM users WHERE id = $1", [id]);
+        // todo: get user roles, too
 
         if (result.rows.length === 0) {
             return res.status(404).json({ message: "User not found." });
@@ -53,6 +55,8 @@ router.post("/users", async (req, res) => {
     const { name, email, about, languages} = req.body;
     console.log(req.body); // Log the entire request body
     try {
+        // todo: firebase will only know user's email, we will need to get user's application by email
+        // and populate user entity with that data here 
         const existingUser = await pool.query(
             "SELECT email FROM users WHERE name = $1 OR email = $2",
             [name, email]
@@ -67,7 +71,12 @@ router.post("/users", async (req, res) => {
             [name, email, about, languages]
         );
 
-        res.status(201).json({ id: result.rows[0].id, message: "User created successfully." });
+        let user_id = result.rows[0].id;
+        
+        // todo add transactions: if something went wrong here, the user should not be saved
+        await userService.assignRoleToUser(user_id, 'member');
+
+        res.status(201).json({ id: user_id, message: "User created successfully." });
     } catch (err) {
         console.error(err);
         res.status(500).send("Server Error");
