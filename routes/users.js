@@ -1,6 +1,7 @@
 const express = require("express");
 const pool = require("../db");
 const router = express.Router();
+const {verifyOwnership, OWNED_ENTITIES} = require("../middleware/authorization");
 router.use(express.json());
 
 // Validating userId 
@@ -74,7 +75,7 @@ router.post("/users", async (req, res) => {
 });
 
 // Update user by ID
-router.put("/users/:id", async (req, res) => {
+router.put("/users/:id", verifyOwnership(OWNED_ENTITIES.USER), async (req, res) => {
     const { id } = req.params;
     const { name, email, about, languages } = req.body;
 
