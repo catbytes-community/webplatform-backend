@@ -84,3 +84,17 @@ GET requests line: <br />
 <br />
 POST requests line:<br />
 `curl -X POST http://localhost:8080/users -H "Content-Type: application/json" -d "{\"username\": \"Muffin\"}"`
+
+### AWS EC2 Deployment
+<p>This app is deployed on the AWS EC2 Linux VM.</p><br />
+<p>To manage the VM you should sign in to AWS Console either as a root user or as an IAM user with proper access policies.</p><br />
+<p>PM2 is used on the VM in order to run the server.</p><br />
+<p>If you want to connect to the VM from your machine, please use the <webplatform-backend-key-pair.pem> key provided to you.</p><br />
+<p>If you don't have the key, request it from the project team: <strong>marina.kim@catbytes.io</strong></p><br />
+
+<p>Here is the terminal command to login to EC2:</p><br />
+`ssh -i /path/to/your-key.pem ec2-user@<EC2-PUBLIC-IP-OR-DNS>`
+<br />
+
+<p>If you have the .pem permission error, run the following command:</p><br />
+`chmod 400 /path/to/your-key.pem`
