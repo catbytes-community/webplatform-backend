@@ -6,9 +6,11 @@ const loadRolesIntoMemory = async (req, res, next) => {
     try {
         if (!rolesCache){
             const roles = await pool.query("SELECT * FROM roles");
-            console.log(roles);
             rolesCache = roles.rows.reduce((acc, role) => {
                 acc[role.role_name] = role.role_id;
+                if (!isRoleExists(role.role_name)){
+                    console.warn(`Role ${role.role_name} is in database, but is not in the ROLE_NAMES enum.`)
+                } 
                 return acc;
             }, {});
     
@@ -27,4 +29,13 @@ function getRole(role_name) {
     return rolesCache[role_name]
 }
 
-module.exports = { loadRolesIntoMemory, getRole };
+const ROLE_NAMES = {
+    mentor: 'mentor',
+    member: 'member'
+}
+
+function isRoleExists(role) {
+    return Object.values(ROLE_NAMES).includes(role);
+}
+
+module.exports = { loadRolesIntoMemory, getRole, ROLE_NAMES };

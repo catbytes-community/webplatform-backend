@@ -13,7 +13,6 @@ function verifyRole(role_name) {
             if (userRole.rows.length === 0){
                 return res.status(403).json({ message: "You're not allowed to access this resource."})
             }
-            console.log(utils.rolesCache);
             next();
         } catch (err) {
             console.error('Error verifying role:', err);

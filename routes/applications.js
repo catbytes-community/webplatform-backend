@@ -1,10 +1,11 @@
 const express = require("express");
 const pool = require("../db");
 const { verifyRole } = require("../middleware/authorization");
+const { ROLE_NAMES } = require("../utils")
 const router = express.Router();
 router.use(express.json());
 
-router.get("/applications", verifyRole('mentor'), async (req, res) => {
+router.get("/applications", verifyRole(ROLE_NAMES.mentor), async (req, res) => {
     try {
         const result = await pool.query("SELECT * FROM applications");
         res.json(result.rows);
