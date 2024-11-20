@@ -30,7 +30,10 @@ Default password is `admin `
 `CREATE USER myuser WITH PASSWORD 'mypassword';`<br />
 `GRANT ALL PRIVILEGES ON DATABASE mydatabase TO myuser;`<br />
 `GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO myuser;`<br />
-<b> Step 4.</b> Create a table (ex. "users")<br />
+<b> Step 4.</b> Use `\c mydatabase` to switch context to your database before creating tables.
+To verify what datasabe are you in right now, run
+`SELECT current_database();`<br />
+<b> Step 5.</b> Create a table (ex. "users")<br />
 `CREATE TABLE IF NOT EXISTS users ( id SERIAL PRIMARY KEY, username VARCHAR(50) NOT NULL);`<br />
 
 ## 2. Set up connection in the app<br />

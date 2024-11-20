@@ -2,16 +2,22 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const routes = require("./routes/routes");
+const utils = require('./utils');
 const app = express();
 
 // Middleware
 app.use(express.json()); // read documentation on what this does
 app.use(cors());
 
-// Routes
-app.use(routes);
+(async () => { 
+  await utils.loadRolesIntoMemory();
 
-app.listen(8080, () => {
-  console.log(`Server is running`);
-});
+  // Routes
+  const routes = require("./routes/routes");
+  app.use(routes);
+
+  app.listen(8080, () => {
+    console.log(`Server is running`);
+  });
+
+})();

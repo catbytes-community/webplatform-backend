@@ -1,19 +1,10 @@
 const express = require("express");
 const pool = require("../db");
 const router = express.Router();
+const userService = require("../services/user_service")
+const {verifyOwnership, OWNED_ENTITIES} = require("../middleware/authorization");
+const { isValidIntegerId } = require("./helpers");
 router.use(express.json());
-
-// Validating userId 
-const isValidUserId = (id) => {
-    const userId = parseInt(id, 10);
-    return !isNaN(userId) && userId > 0;
-};
-
-// Check if has rights to edit   
-const hasEditRights = (req) => {
-    //**** NEED TO KNOW THE CONDITIONS *****/
-    return true;
-};
 
 // Get all users
 router.get("/users", async (req, res) => {
@@ -30,17 +21,23 @@ router.get("/users", async (req, res) => {
 router.get("/users/:id", async (req, res) => {
     const { id } = req.params;
 
-    if (!isValidUserId(id)) {
+    if (!isValidIntegerId(id)) {
         return res.status(400).send("Invalid user id supplied");
     }
 
     try {
         const result = await pool.query("SELECT * FROM users WHERE id = $1", [id]);
-
         if (result.rows.length === 0) {
             return res.status(404).json({ message: "User not found." });
         }
-        res.json(result.rows[0]);
+
+        const userInfo = result.rows[0];
+        const roles = await pool.query(
+            "select r.role_name, r.role_id from roles r join user_roles on r.role_id = user_roles.role_id where user_roles.user_id = $1", 
+            [id]);
+        userInfo.roles = roles.rows.length > 0 ? roles.rows : [];
+        
+        res.json(userInfo);
     } catch (err) {
         console.error(err);
         res.status(500).send("Server Error");
@@ -52,6 +49,8 @@ router.post("/users", async (req, res) => {
     const { name, email, about, languages} = req.body;
     console.log(req.body); // Log the entire request body
     try {
+        // todo: firebase will only know user's email, we will need to get user's application by email
+        // and populate user entity with that data here 
         const existingUser = await pool.query(
             "SELECT email FROM users WHERE name = $1 OR email = $2",
             [name, email]
@@ -66,7 +65,12 @@ router.post("/users", async (req, res) => {
             [name, email, about, languages]
         );
 
-        res.status(201).json({ id: result.rows[0].id, message: "User created successfully." });
+        let user_id = result.rows[0].id;
+        
+        // todo add transactions: if something went wrong here, the user should not be saved
+        await userService.assignRoleToUser(user_id, 'member');
+
+        res.status(201).json({ id: user_id, message: "User created successfully." });
     } catch (err) {
         console.error(err);
         res.status(500).send("Server Error");
@@ -74,16 +78,12 @@ router.post("/users", async (req, res) => {
 });
 
 // Update user by ID
-router.put("/users/:id", async (req, res) => {
+router.put("/users/:id", verifyOwnership(OWNED_ENTITIES.USER), async (req, res) => {
     const { id } = req.params;
     const { name, email, about, languages } = req.body;
 
     if (!isValidUserId(id)) {
         return res.status(400).send("Invalid user id supplied");
-    }
-
-    if (!hasEditRights(req)) {
-        return res.status(403).send("You don't have the rights to edit this user");
     }
 
     try {
@@ -104,15 +104,11 @@ router.put("/users/:id", async (req, res) => {
 });
 
 // Delete user by ID
-router.delete("/users/:id", async (req, res) => {
+router.delete("/users/:id", verifyOwnership(OWNED_ENTITIES.USER), async (req, res) => {
     const { id } = req.params;
 
-    if (!isValidUserId(id)) {
+    if (!isValidIntegerId(id)) {
         return res.status(400).send("Invalid user id supplied");
-    }
-
-    if (!hasEditRights(req)) {
-        return res.status(403).send("You don't have the rights to edit this user");
     }
 
     try {
