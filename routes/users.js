@@ -31,13 +31,13 @@ router.get("/users/:id", async (req, res) => {
             return res.status(404).json({ message: "User not found." });
         }
 
-        const user_info = result.rows[0];
+        const userInfo = result.rows[0];
         const roles = await pool.query(
             "select r.role_name, r.role_id from roles r join user_roles on r.role_id = user_roles.role_id where user_roles.user_id = $1", 
             [id]);
-        user_info.roles = roles.rows.length > 0 ? roles.rows : [];
+        userInfo.roles = roles.rows.length > 0 ? roles.rows : [];
         
-        res.json(user_info);
+        res.json(userInfo);
     } catch (err) {
         console.error(err);
         res.status(500).send("Server Error");

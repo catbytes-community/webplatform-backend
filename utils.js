@@ -2,7 +2,7 @@ const pool = require("./db");
 
 let rolesCache = null;
 
-const loadRolesIntoMemory = async (req, res, next) => {
+async function loadRolesIntoMemory() {
     try {
         if (!rolesCache){
             const roles = await pool.query("SELECT * FROM roles");

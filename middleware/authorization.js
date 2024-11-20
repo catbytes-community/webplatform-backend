@@ -1,14 +1,14 @@
 const pool = require("../db");
 const utils = require('../utils');
 
-function verifyRole(role_name) {
+function verifyRole(roleName) {
     return async (req, res, next) => {
         try {
             // todo: get user id from request (token?)
-            const user_id = 1; // temp
-            const role_id = utils.getRole(role_name);
+            const userId = 1; // temp
+            const roleId = utils.getRole(roleName);
 
-            const userRole = await pool.query("SELECT * FROM user_roles WHERE user_id = $1 AND role_id = $2", [user_id, role_id]);
+            const userRole = await pool.query("SELECT * FROM user_roles WHERE user_id = $1 AND role_id = $2", [userId, roleId]);
 
             if (userRole.rows.length === 0){
                 return res.status(403).json({ message: "You're not allowed to access this resource."})
@@ -26,23 +26,23 @@ const OWNED_ENTITIES = {
     MENTOR: 'mentors'
 };
 
-function verifyOwnership(entity_table) {
+function verifyOwnership(entityTable) {
     return async (req, res, next) => {
         console.log("Middleware invoked for:", req.url);
         try {
-            const user_id = 1; // todo: extract from request
-            const resource_id = req.params.id;
+            const userId = 1; // todo: extract from request
+            const resourceId = req.params.id;
     
-            if (!resource_id || !user_id) {
-                return res.status(400).json({ message: `Invalid request: missing ${entity_table} ID or user information` });
+            if (!resourceId || !userId) {
+                return res.status(400).json({ message: `Invalid request: missing ${entityTable} ID or user information` });
             }
             
             let resource;
-            if (entity_table === OWNED_ENTITIES.USER) {
-                resource = user_id === resource_id;
+            if (entityTable === OWNED_ENTITIES.USER) {
+                resource = userId === resourceId;
             } else {
-                const query = `SELECT * FROM ${entity_table} WHERE id = $1 AND created_by = $2`;
-                resource = await pool.query(query, [resource_id, user_id]);
+                const query = `SELECT * FROM ${entityTable} WHERE id = $1 AND created_by = $2`;
+                resource = await pool.query(query, [resourceId, userId]);
             }
     
             if (!resource || resource.rows.length === 0){
