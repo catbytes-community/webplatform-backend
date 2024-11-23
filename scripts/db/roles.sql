@@ -5,4 +5,4 @@ CREATE TABLE IF NOT EXISTS roles (
 );
 
 -- default roles
-INSERT INTO roles (role_name, is_privileged) VALUES ('Member', false), ('Mentor', true);
+INSERT INTO roles (role_name, is_privileged) VALUES ('member', false), ('mentor', true);

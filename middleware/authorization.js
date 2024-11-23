@@ -1,4 +1,5 @@
-const pool = require("../db");
+const { getPool } = require('../db');
+const pool = getPool();
 const utils = require('../utils');
 
 function verifyRole(roleName) {
