@@ -3,9 +3,11 @@
 
 Table applications {
   id integer [primary key]
-  name varchar
-  about text
+  name varchar [not null]
+  about text [not null]
   email email [unique, not null]
+  video_link varchar
+  discord_nickname varchar [unique, not null]
   created_at timestamp
   status enum 
   comment varchar
@@ -15,9 +17,11 @@ Table applications {
 
 Table users {
   id integer [primary key]
-  name varchar
+  name varchar [not null]
   email email [unique, not null]
   about text
+  img_link varchar 
+  discord_nickname varchar [unique, not null]
   languages text[]
   created_at timestamp
 }

@@ -4,7 +4,7 @@ const pool = getPool();
 const router = express.Router();
 const userService = require("../services/user_service")
 const {verifyOwnership, OWNED_ENTITIES} = require("../middleware/authorization");
-const { isValidIntegerId, respondWithError, isUniqueConstraintViolation } = require("./helpers");
+const { isValidIntegerId, respondWithError, isUniqueConstraintViolation, isNotNullConstraintViolation } = require("./helpers");
 router.use(express.json());
 
 // Get all users
@@ -40,6 +40,8 @@ router.post("/users", async (req, res) => {
         console.error(err)
         if (isUniqueConstraintViolation(err.code)) {
             return respondWithError(res, 409, "User with this email is already registered")
+        } else if (isNotNullConstraintViolation(err.code)) {
+            return respondWithError(res, 400, err.message)
         }
         respondWithError(res);
     }

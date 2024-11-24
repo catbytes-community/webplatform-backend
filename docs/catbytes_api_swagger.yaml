@@ -54,7 +54,23 @@ paths:
                 email:
                   type: string
                   example: jane@example.com
+                video_link:
+                  type: string
+                  example: http://example.com/video/1
+                discord_nickname:
+                  type: string
+                  example: sample_username    
       responses:
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "null value in column \"discord_nickname\" of relation \"applications\" violates not-null constraint"
         '409':
           description: Application with this email already exists
           content:
@@ -75,7 +91,10 @@ paths:
                   "id": 42,
                   "name": "Jane Doe",
                   "about": "I'm passionate about C++ programming",
-                  "email": "jane@example.com"}
+                  "email": "jane@example.com",
+                  "video_link": "http://example.com/video/1",
+                  "discord_nickname": "sample_username"
+                }
     get:
       tags:
         - applications
@@ -94,7 +113,7 @@ paths:
                     type: array
                     items:
                       type: object
-                      example: [{"id":5,"name":"jane doe","about":"im cool","created_at":"2024-11-23T16:37:04.115Z","email":"jane@example.com"}, {"id":6,"name":"nina","about":"i like cats","created_at":"2024-11-20T16:37:04.115Z","email":"nina@example.com"}]
+                      example: [{"id":5,"name":"jane doe","about":"im cool", "video_link": "http://example.com/video/1", "discord_username": "sample_username","created_at":"2024-11-23T16:37:04.115Z","email":"jane@example.com"}, {"id":6,"name":"nina","about":"i like cats", "video_link": "http://example.com/video/2", "discord_username": "nina_disc","created_at":"2024-11-20T16:37:04.115Z","email":"nina@example.com"}]
         '403':
           description: User is not allowed to view applications list
           content:

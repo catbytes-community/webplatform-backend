@@ -14,4 +14,8 @@ const isUniqueConstraintViolation = (error_code) => {
     return error_code === '23505';
 }
 
-module.exports = { respondWithError, isValidIntegerId, isUniqueConstraintViolation };
+const isNotNullConstraintViolation = (error_code) => {
+    return error_code === '23502';
+}
+
+module.exports = { respondWithError, isValidIntegerId, isUniqueConstraintViolation, isNotNullConstraintViolation };
