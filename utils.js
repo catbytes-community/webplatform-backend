@@ -1,13 +1,11 @@
-const pool = require("./db");
-
 let rolesCache = null;
 
-async function loadRolesIntoMemory() {
+async function loadRolesIntoMemory(pool) {
     try {
         if (!rolesCache){
             const roles = await pool.query("SELECT * FROM roles");
             rolesCache = roles.rows.reduce((acc, role) => {
-                acc[role.role_name] = role.role_id;
+                acc[role.role_name] = role.id;
                 if (!isRoleExists(role.role_name)){
                     console.warn(`Role ${role.role_name} is in database, but is not in the ROLE_NAMES enum.`)
                 } 

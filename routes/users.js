@@ -1,5 +1,6 @@
 const express = require("express");
-const pool = require("../db");
+const { getPool } = require('../db');
+const pool = getPool();
 const router = express.Router();
 const userService = require("../services/user_service")
 const {verifyOwnership, OWNED_ENTITIES} = require("../middleware/authorization");
@@ -29,12 +30,12 @@ router.post("/users", async (req, res) => {
             [name, email, about, languages]
         );
 
-        let user_id = result.rows[0].id;
+        let userId = result.rows[0].id;
         
         // todo add transactions: if something went wrong here, the user should not be saved
-        await userService.assignRoleToUser(user_id, 'member');
+        await userService.assignRoleToUser(userId, 'member');
 
-        res.status(201).json({ id: user_id});
+        res.status(201).json({ id: userId});
     } catch (err) {
         console.error(err)
         if (isUniqueConstraintViolation(err.code)) {
@@ -60,7 +61,7 @@ router.get("/users/:id", async (req, res) => {
 
         const userInfo = result.rows[0];
         const roles = await pool.query(
-            "select r.role_name, r.role_id from roles r join user_roles on r.role_id = user_roles.role_id where user_roles.user_id = $1", 
+            "select r.role_name, r.id from roles r join user_roles on r.id = user_roles.role_id where user_roles.user_id = $1", 
             [id]);
         userInfo.roles = roles.rows.length > 0 ? roles.rows : [];
         

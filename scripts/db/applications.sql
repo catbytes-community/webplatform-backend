@@ -4,4 +4,4 @@ CREATE TABLE applications (
     email VARCHAR(255) UNIQUE NOT NULL,
     about TEXT,                                            
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP  
-);
+); 
