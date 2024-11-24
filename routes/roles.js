@@ -1,5 +1,6 @@
 const express = require("express");
-const pool = require("../db");
+const { getPool } = require('../db');
+const pool = getPool();
 const router = express.Router();
 router.use(express.json());
 

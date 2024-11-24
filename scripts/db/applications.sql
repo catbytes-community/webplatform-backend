@@ -3,4 +3,4 @@ CREATE TABLE applications (
     name VARCHAR(255),                  
     about TEXT,                                            
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP  
-);
+); 
