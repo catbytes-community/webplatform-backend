@@ -7,7 +7,8 @@ let db_username, db_host, db_name, db_password, db_port;
 let pool = null;
 
 async function initDb() {
-  if (process.env.ENVIRONMENT === "local") {
+  const isLocal = process.env.ENVIRONMENT === "local";
+  if (isLocal) {
     db_username = process.env.DB_USER;
     db_host = process.env.DB_HOST || "localhost";
     db_name = process.env.DB_NAME;
@@ -32,7 +33,7 @@ async function initDb() {
     password: db_password,
     port: db_port,
     connectionTimeoutMillis : 5000,
-    ssl: { rejectUnauthorized: false }
+    ssl: isLocal ? false : { rejectUnauthorized: false }
   });
 }
 

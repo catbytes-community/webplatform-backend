@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "CatBytes Web Platform",
-    "description": "This is CatBytes Web Platform API specification.\n\n!\nPlease note, this is an initial draft of the API, all payloads and response bodies are very likely to change.\n\nSome useful links:\n- [CatBytes backend repository](https://github.com/catbytes-community/webplatform-backend)",
+    "description": "This is CatBytes Web Platform API specification.\n\n!\nPlease note, this is an initial draft of the API, all payloads and response bodies are very likely to change.\n\nEndpoints marked with ✅ emoji are already implemented and live and  their specifications are up-to-date.\n\nSome useful links:\n- [CatBytes backend repository](https://github.com/catbytes-community/webplatform-backend)\n- [CatBytes API server](http://18.212.59.47/)",
     "version": "1.0.0"
   },
   "externalDocs": {
@@ -16,25 +16,29 @@
   ],
   "tags": [
     {
-      "name": "application",
+      "name": "applications",
       "description": "New users applications"
     },
     {
-      "name": "user",
+      "name": "roles",
+      "description": "Available roles"
+    },
+    {
+      "name": "users",
       "description": "User related operations"
     },
     {
-      "name": "mentor",
+      "name": "mentors",
       "description": "Mentor related operations"
     }
   ],
   "paths": {
-    "/application": {
+    "/applications": {
       "post": {
         "tags": [
-          "application"
+          "applications"
         ],
-        "summary": "Create new user application",
+        "summary": "✅ Create new user application",
         "description": "Send new user application's data for review.",
         "operationId": "createApplication",
         "requestBody": {
@@ -44,17 +48,25 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "firstName": {
+                  "name": {
                     "type": "string",
-                    "example": "Jane"
-                  },
-                  "lastName": {
-                    "type": "string",
-                    "example": "Doe"
+                    "example": "Jane Doe"
                   },
                   "about": {
                     "type": "string",
                     "example": "I'm passionate about C++ programming"
+                  },
+                  "email": {
+                    "type": "string",
+                    "example": "jane@example.com"
+                  },
+                  "video_link": {
+                    "type": "string",
+                    "example": "http://example.com/video/1"
+                  },
+                  "discord_nickname": {
+                    "type": "string",
+                    "example": "sample_username"
                   }
                 }
               }
@@ -62,19 +74,63 @@
           }
         },
         "responses": {
-          "200": {
-            "description": "Successful operation"
+          "201": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "id": 42,
+                    "name": "Jane Doe",
+                    "about": "I'm passionate about C++ programming",
+                    "email": "jane@example.com",
+                    "video_link": "http://example.com/video/1",
+                    "discord_nickname": "sample_username"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "null value in column \"discord_nickname\" of relation \"applications\" violates not-null constraint"
+                    }
+                  }
+                }
+              }
+            }
           },
           "409": {
-            "description": "Application already exists"
+            "description": "Application with this email already exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Application with this email already exists"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       },
       "get": {
         "tags": [
-          "application"
+          "applications"
         ],
-        "summary": "Get all (active?) applications",
+        "summary": "✅ Get all (active?) applications",
         "description": "",
         "operationId": "getApplications",
         "responses": {
@@ -88,20 +144,28 @@
                     "applications": {
                       "type": "array",
                       "items": {
-                        "type": "object"
-                      },
-                      "example": [
-                        {
-                          "application_id": 1,
-                          "name": "Jane Doe",
-                          "description": "I'm passionate about C++ programming"
-                        },
-                        {
-                          "application_id": 2,
-                          "name": "Mary Roe",
-                          "description": "I love frontend"
-                        }
-                      ]
+                        "type": "object",
+                        "example": [
+                          {
+                            "id": 5,
+                            "name": "jane doe",
+                            "about": "im cool",
+                            "video_link": "http://example.com/video/1",
+                            "discord_username": "sample_username",
+                            "created_at": "2024-11-23T16:37:04.115Z",
+                            "email": "jane@example.com"
+                          },
+                          {
+                            "id": 6,
+                            "name": "nina",
+                            "about": "i like cats",
+                            "video_link": "http://example.com/video/2",
+                            "discord_username": "nina_disc",
+                            "created_at": "2024-11-20T16:37:04.115Z",
+                            "email": "nina@example.com"
+                          }
+                        ]
+                      }
                     }
                   }
                 }
@@ -109,15 +173,28 @@
             }
           },
           "403": {
-            "description": "User is not allowed to view applications list"
+            "description": "User is not allowed to view applications list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "You're not allowed to access this resource"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
     },
-    "/application/{application_id}": {
+    "/applications/{application_id}": {
       "get": {
         "tags": [
-          "application"
+          "applications"
         ],
         "summary": "Get application by id",
         "description": "",
@@ -171,7 +248,7 @@
       },
       "post": {
         "tags": [
-          "application"
+          "applications"
         ],
         "summary": "Perform action on application",
         "description": "This endpoint is used to either approve or deny an application. (We're going to provide a (enum) list of actions available)",
@@ -223,12 +300,51 @@
         }
       }
     },
-    "/user": {
+    "/roles": {
+      "get": {
+        "tags": [
+          "roles"
+        ],
+        "summary": "✅  Get all available server roles",
+        "description": "",
+        "operationId": "getRoles",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "roles": {
+                      "type": "object",
+                      "example": [
+                        {
+                          "id": 1,
+                          "role_name": "member",
+                          "is_privileged": false
+                        },
+                        {
+                          "id": 2,
+                          "role_name": "mentor",
+                          "is_privileged": true
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users": {
       "post": {
         "tags": [
-          "user"
+          "users"
         ],
-        "summary": "Create user",
+        "summary": "✅ Create user",
         "description": "First time authenticated user creation.",
         "operationId": "createUser",
         "requestBody": {
@@ -238,17 +354,24 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "username": {
+                  "name": {
                     "type": "string",
-                    "example": "theUser"
+                    "example": "Jane Doe"
                   },
-                  "firstName": {
+                  "email": {
                     "type": "string",
-                    "example": "Jane"
+                    "example": "jane@example.com"
                   },
-                  "lastName": {
+                  "about": {
                     "type": "string",
-                    "example": "Doe"
+                    "example": "Hello i am Jane"
+                  },
+                  "languages": {
+                    "type": "object",
+                    "example": [
+                      "English",
+                      "Russian"
+                    ]
                   }
                 }
               }
@@ -256,8 +379,8 @@
           }
         },
         "responses": {
-          "200": {
-            "description": "successful operation",
+          "201": {
+            "description": "User created successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -271,6 +394,64 @@
                 }
               }
             }
+          },
+          "409": {
+            "description": "User with this email is already registered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "User with this email is already registered"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "users"
+        ],
+        "summary": "✅ Get all users - general information",
+        "operationId": "getUsers",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "users": {
+                      "type": "object",
+                      "example": [
+                        {
+                          "id": 1,
+                          "name": "Jane",
+                          "languages": [
+                            "English",
+                            "Spanish"
+                          ]
+                        },
+                        {
+                          "id": 2,
+                          "name": "Nina",
+                          "languages": [
+                            "English",
+                            "Russian"
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -278,9 +459,9 @@
     "/user/{user_id}": {
       "get": {
         "tags": [
-          "user"
+          "users"
         ],
-        "summary": "Get user by user id",
+        "summary": "✅ Get user by user id",
         "description": "",
         "operationId": "getUserById",
         "parameters": [
@@ -306,17 +487,31 @@
                       "type": "integer",
                       "example": 42
                     },
-                    "username": {
-                      "type": "string",
-                      "example": "theUser"
-                    },
-                    "firstName": {
+                    "name": {
                       "type": "string",
                       "example": "Jane"
                     },
-                    "lastName": {
+                    "email": {
                       "type": "string",
-                      "example": "Doe"
+                      "example": "jane@example.com"
+                    },
+                    "about": {
+                      "type": "string",
+                      "example": "Hi iam Jane"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "example": "2024-11-23T17:27:56.146Z"
+                    },
+                    "languages": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "example": [
+                        "English",
+                        "Spanish"
+                      ]
                     },
                     "roles": {
                       "type": "array",
@@ -333,18 +528,44 @@
             }
           },
           "400": {
-            "description": "Invalid user id supplied"
+            "description": "Invalid user id supplied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Invalid user id supplied"
+                    }
+                  }
+                }
+              }
+            }
           },
           "404": {
-            "description": "User not found"
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "User not found"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       },
       "put": {
         "tags": [
-          "user"
+          "users"
         ],
-        "summary": "Update user",
+        "summary": "✅  Update user",
         "description": "This can only be done by the logged in user. Any changes that are performed in user profile come here.",
         "operationId": "updateUser",
         "parameters": [
@@ -365,17 +586,24 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "username": {
+                  "name": {
                     "type": "string",
-                    "example": "theUser"
+                    "example": "New Name"
                   },
-                  "firstName": {
+                  "about": {
                     "type": "string",
-                    "example": "Jane"
+                    "example": "New Description"
                   },
-                  "lastName": {
-                    "type": "string",
-                    "example": "NewLastName"
+                  "languages": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "example": [
+                      "English",
+                      "Spanish",
+                      "Added Language"
+                    ]
                   }
                 }
               }
@@ -384,24 +612,112 @@
         },
         "responses": {
           "200": {
-            "description": "Successful operation"
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "example": 42
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "New Name"
+                    },
+                    "email": {
+                      "type": "string",
+                      "example": "jane@example.com"
+                    },
+                    "about": {
+                      "type": "string",
+                      "example": "New Description"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "example": "2024-11-23T17:27:56.146Z"
+                    },
+                    "languages": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "example": [
+                        "English",
+                        "Spanish",
+                        "Added Language"
+                      ]
+                    },
+                    "roles": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "example": [
+                        "mentee"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid user id supplied"
+            "description": "Invalid user id supplied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Invalid user id supplied"
+                    }
+                  }
+                }
+              }
+            }
           },
           "403": {
-            "description": "You don't have the rights to edit this user"
+            "description": "You don't have the rights to edit this user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "You're not allowed to edit this resource"
+                    }
+                  }
+                }
+              }
+            }
           },
           "404": {
-            "description": "User not found"
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "User not found"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       },
       "delete": {
         "tags": [
-          "user"
+          "users"
         ],
-        "summary": "Delete user",
+        "summary": "✅   Delete user by id",
         "description": "This can only be done by the logged in user.",
         "operationId": "deleteUser",
         "parameters": [
@@ -417,16 +733,68 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful operation"
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "example": 42
+                    }
+                  }
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid user_id supplied"
+            "description": "Invalid user_id supplied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Invalid user id supplied"
+                    }
+                  }
+                }
+              }
+            }
           },
           "403": {
-            "description": "You don't have the rights to edit this user"
+            "description": "You don't have the rights to edit this user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "You're not allowed to edit this resource"
+                    }
+                  }
+                }
+              }
+            }
           },
           "404": {
-            "description": "User not found"
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "User not found"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -434,7 +802,7 @@
     "/mentor": {
       "post": {
         "tags": [
-          "mentor"
+          "mentors"
         ],
         "summary": "Create mentor - in request state",
         "description": "Creates new mentor entity and puts in 'in-review' state",
@@ -484,7 +852,7 @@
       },
       "get": {
         "tags": [
-          "mentor"
+          "mentors"
         ],
         "summary": "Get mentors - filtered",
         "description": "This endpoint is used for displaying both active and in-review mentors",
@@ -543,7 +911,7 @@
     "/mentor/{mentor_id}": {
       "get": {
         "tags": [
-          "mentor"
+          "mentors"
         ],
         "summary": "Get mentor by id",
         "description": "",
@@ -612,7 +980,7 @@
       },
       "put": {
         "tags": [
-          "mentor"
+          "mentors"
         ],
         "summary": "Update mentor",
         "description": "This can only be done by the logged in user with mentor role. Any changes that are performed in mentor's card come here.",
@@ -665,7 +1033,7 @@
       },
       "post": {
         "tags": [
-          "mentor"
+          "mentors"
         ],
         "summary": "Update mentor status",
         "description": "This can only be done by the logged in user with moderator role. This endpoint is used to change state (for now) of mentor entity",
@@ -714,7 +1082,7 @@
       },
       "delete": {
         "tags": [
-          "mentor"
+          "mentors"
         ],
         "summary": "Delete mentor entity",
         "description": "This can only be done by the logged in user with moderator or mentor role.",
@@ -743,53 +1111,6 @@
           "404": {
             "description": "Mentor not found"
           }
-        }
-      }
-    }
-  },
-  "components": {
-    "schemas": {
-      "User": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int64",
-            "example": 10
-          },
-          "username": {
-            "type": "string",
-            "example": "theUser"
-          },
-          "firstName": {
-            "type": "string",
-            "example": "John"
-          },
-          "lastName": {
-            "type": "string",
-            "example": "James"
-          },
-          "email": {
-            "type": "string",
-            "example": "john@email.com"
-          },
-          "password": {
-            "type": "string",
-            "example": "12345"
-          },
-          "phone": {
-            "type": "string",
-            "example": "12345"
-          },
-          "userStatus": {
-            "type": "integer",
-            "description": "User Status",
-            "format": "int32",
-            "example": 1
-          }
-        },
-        "xml": {
-          "name": "user"
         }
       }
     }
