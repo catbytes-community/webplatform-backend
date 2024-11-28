@@ -19,6 +19,7 @@ async function loadSecrets(region, names, withDecryption = false) {
         }, {});
 
         console.log('Fetched secrets:', Object.keys(secrets));
+	console.log('Secrets temp:', secrets);
         return secrets;
     } catch (error) {
         console.error('Error fetching parameters:', error);

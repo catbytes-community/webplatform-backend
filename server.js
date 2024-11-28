@@ -18,7 +18,7 @@ app.use(cors());
   const routes = require("./routes/routes");
   app.use(routes);
 
-  app.listen(8080, () => {
+  app.listen(8080,'0.0.0.0', () => {
     console.log(`Server is running`);
   });
 })();

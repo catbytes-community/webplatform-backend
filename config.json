@@ -1,7 +1,7 @@
 {
     "aws": {
       "region": "us-east-1",
-      "db_endpoint": "catbytes-web-platform-db.c18sq6ogg9z7.us-east-1.rds.amazonaws.com",
+      "db_endpoint": "catbytes-web-platform-db.ct2ag4a86wsn.eu-west-2.rds.amazonaws.com",
       "db_name": "catbytes_webplatform",
       "db_port": 5432
     }
