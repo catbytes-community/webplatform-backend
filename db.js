@@ -1,14 +1,16 @@
-const { Pool } = require("pg");
+const knex = require('knex');
 const { loadSecrets } = require("./aws/ssm-helper")
 const config = require("./config.json");
 require("dotenv").config();
 
 let db_username, db_host, db_name, db_password, db_port;
-let pool = null;
+let knexInstance = null;
+
 
 async function initDb() {
   const isLocal = process.env.ENVIRONMENT === "local";
-  if (isLocal) {
+    if (isLocal) {
+
     db_username = process.env.DB_USER;
     db_host = process.env.DB_HOST || "localhost";
     db_name = process.env.DB_NAME;
@@ -24,17 +26,19 @@ async function initDb() {
     db_name = awsConfig.db_name;
     db_password = credentials['db_password'];
     db_port = awsConfig.db_port;
+
+
   }
 
-  pool = new Pool({
-    user: db_username,
-    host: db_host,
-    database: db_name,
-    password: db_password,
-    port: db_port,
-    connectionTimeoutMillis : 5000,
-    ssl: isLocal ? false : { rejectUnauthorized: false }
-  });
+    knexInstance = knex({
+        client: 'pg',
+        connection: {
+            host: db_host,
+            user: db_username,
+            password: db_password,
+            database: db_name,
+            port: db_port
+        },
+    });
 }
-
-module.exports = { initDb, getPool: () => pool };
+module.exports = { initDb, getKnex: () => knexInstance };
