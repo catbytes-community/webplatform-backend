@@ -25,7 +25,14 @@ router.post("/users", async (req, res) => {
     const { name, email, about, languages } = req.body;
     console.log(req.body); // Log the entire request body
     try {
+        // todo: firebase will only know user's email, we will need to get user's application by email
+        // and populate user entity with that data here 
         const userId = await userService.createNewUser(name, email, about, languages);
+        // todo add transactions: if something went wrong here, the user should not be saved
+
+        //muffin: i'm dying, while i was debugging assignRoleToUser it would go to the catch block
+        //and with no transactions the server instance would freeze and now i have like 30+ users with no roles in the db xD 
+        //send help, the users are orphans now
         await userService.assignRoleToUser(userId, 'member');
         res.status(201).json({ id: userId });
     } catch (err) {
