@@ -9,3 +9,10 @@ Also published on GitHub pages: https://catbytes-community.github.io/webplatform
 ### Documentation for developers
 
 Located in the `/docs/how-tos` directory. All important information on local run, deployments, etc is stored there.
+
+### How to run project locally
+
+1. Follow `/docs/how-tos/aws_local_db_connection` to install AWS CLI and configure AWS credentials, don't have to connect to AWS RDS database from local machine
+2. Follow `/docs/how-tos/setup_local_postgresql`, step "Setting up Local PostgreSQL instance"
+
+Once you are authenticated with AWS CLI and you have the local PostgreSQL setup, you should successfully run `npm start` to start the server
