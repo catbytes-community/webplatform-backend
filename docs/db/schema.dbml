@@ -24,7 +24,7 @@ Table users {
   discord_nickname varchar [unique, not null]
   languages text[]
   created_at timestamp
-}
+} // roles are created dynamically from related table
 
 Table roles {
   id integer [primary key]
@@ -42,21 +42,22 @@ Table mentors {
   user_id integer [ref: - users.id]
   contact varchar
   about text
-  tags text[]
   status enum
   created_at timestamp
-}
+} // tags are created dynamically from related table
 
 Table projects {
   id integer [primary key]
-  created_by integer [ref: < users.id]
+  created_by integer [ref: > users.id]
   created_at timestamp
   title varchar
   description text
-  url varchar
-  tags text[]
+  description_short text
   status enum
-}
+  duration varchar
+  period varchar
+  img_link varchar
+} // tags, links are created dynamically from related tables
 
 Table users_projects {
   user_id integer [primary key]
@@ -64,10 +65,30 @@ Table users_projects {
   joined_at timestamp
 }
 
+Table project_positions {
+  id integer [primary key]
+  project_id integer [ref: > projects.id]
+  title varchar
+  level varchar
+  description text
+  is_open boolean
+}
+
+Table project_applications {
+  position_id integer [primary key, ref: > project_positions.id]
+  user_id integer [primary key, ref: > users.id]
+  description text
+  file_link varchar
+  status enum 
+  comment varchar
+  last_modified_by integer [ref: > users.id]
+  last_modified_at timestamp
+}
+
 
 Table study_buddy {
   id integer [primary key]
-  created_by integer [ref: < users.id]
+  created_by integer [ref: > users.id]
   created_at timestamp
   title varchar
   description text
@@ -95,6 +116,17 @@ Table tags_assigned {
   assigned_to enum [note: 'mentor, project, study_buddy']
 }
 
+Table links {
+  id integer [primary key]
+  url varchar
+  description varchar
+  entity_type enum [note: 'project, study_buddy, resource...']
+  entity_id integer
+}
+
+
+
+
 //Ref: applications.last_modified_by > users.id // many-to-one
 Ref: users.id <> user_roles.user_id // many-to-many
 Ref: roles.id <> user_roles.role_id
@@ -110,3 +142,6 @@ Ref: projects.id <> users_projects.project_id
 
 Ref: users.id <> users_learnings.user_id
 Ref: study_buddy.id <> users_learnings.learning_entity_id
+
+// links relationships: other resources to be added
+Ref: links.entity_id > projects.id
