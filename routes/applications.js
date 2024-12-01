@@ -23,11 +23,10 @@ router.get("/applications", verifyRole(ROLE_NAMES.mentor), async (req, res) => {
 
 router.post("/applications", async (req, res) => {
   const { name, about, email, video_link, discord_nickname } = req.body;
-  const status = "pending";
   try {
     const result = await pool.query(
-      "INSERT INTO applications (name, about, email, video_link, discord_nickname, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
-      [name, about, email, video_link, discord_nickname, status]
+      "INSERT INTO applications (name, about, email, video_link, discord_nickname) VALUES ($1, $2, $3, $4, $5) RETURNING *",
+      [name, about, email, video_link, discord_nickname]
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
