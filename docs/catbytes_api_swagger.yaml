@@ -27,6 +27,8 @@ tags:
     description: Available roles
   - name: users
     description: User related operations
+  - name: projects
+    description: Projects and collaborations
   - name: mentors
     description: Mentor related operations
 
@@ -124,7 +126,6 @@ paths:
                   error:
                     type: string
                     example: "You're not allowed to access this resource"
-
   /applications/{application_id}:
     get:
       tags:
@@ -495,6 +496,326 @@ paths:
                   error:
                     type: string
                     example: "User not found"
+  
+  /projects:
+    post:
+      tags:
+        - projects
+      summary: Create project
+      description: Creates new project - available to mentors only
+      operationId: createProject
+      requestBody:
+        description: Data mentor fills in on project creation
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: Example project name
+                description:
+                  type: string
+                  example: Long detailed description of project
+                description_short:
+                  type: string
+                  example: Short project summary
+                duration:
+                  type: string
+                  example: 1 month
+                period:
+                  type: string
+                  example: December 1st - December 31st
+                img_link:
+                  type: string
+                  example: https://exampleurllink.com/image1.png
+                links:
+                  type: object
+                  example: [{'url': 'https://exampleurl.com', 'description': 'description of the link'},
+                  {'url': 'https://anotherexample.url.com', 'description': 'another url for the project'}]
+                tags:
+                  type: object
+                  example: ['javascript', 'nodejs', 'express']
+      responses:
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "null value in column \"description\" of relation \"projects\" violates not-null constraint"
+        '403':
+          description: User is not allowed to create projects
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "You're not allowed to access this resource"
+        '201':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 42
+    get:
+      tags:
+        - projects
+      summary: Get projects - general info
+      description: This endpoint is used for displaying projects (general information only)
+      operationId: getProjects
+      parameters: 
+        - name: user_id
+          in: query
+          description: To show 'my projects' you can pass user_id to filter the output. Not required.
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  applications:
+                    type: array
+                    items:
+                      type: object
+                    example: [{"id": 1, "titile": "Example project", "description_short": "A short summary of project", "status": "open", "duration": "1 month", "period": "December 1st-December 31st", "img_link": "https://example.com/image.png", "created_by": 42, "tags": ["javascript", "nodejs", "express"]},]
+        '400':
+          description: Invalid query parameter
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "The user_id passed is invalid"
+          
+  /projects/{project_id}:
+    get:
+      tags:
+        - projects
+      summary: Get projec by id - detailed information
+      description: ''
+      operationId: getProject
+      parameters:
+        - name: project_id
+          in: path
+          description: 'The id of project that needs to be fetched.'
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 42
+                  created_by:
+                    type: integer
+                    example: 1
+                  created_at:
+                    type: string
+                    format: date-time
+                    example: "2024-11-30T12:34:56Z"
+                  title:
+                    type: string
+                    example: "Project Title"
+                  description:
+                    type: string
+                    example: "A detailed description of the project."
+                  description_short:
+                    type: string
+                    example: "A short description of the project."
+                  status:
+                    type: string
+                    example: "active"
+                  duration:
+                    type: string
+                    example: "6 months"
+                  period:
+                    type: string
+                    example: "2024 Q1"
+                  img_link:
+                    type: string
+                    format: uri
+                    example: "https://example.com/images/project.jpg"
+                  links:
+                    type: object
+                    example: [{'url': 'https://exampleurl.com', 'description': 'description of the link'},
+                    {'url': 'https://anotherexample.url.com', 'description': 'another url for the project'}]
+                  tags:
+                    type: object
+                    example: ['javascript', 'nodejs', 'express']
+
+        '400':
+          description: Invalid project id supplied
+        '404':
+          description: Project not found
+    put:
+      tags:
+        - projects
+      summary: Update project
+      description: This can only be done by the user that created the project.
+      operationId: updateProject
+      parameters:
+        - name: project_id
+          in: path
+          description: id of project that need to be updated
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        description: Update an existing project info
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: "Updated Project Title"
+                description:
+                  type: string
+                  example: "An updated detailed description of the project."
+                description_short:
+                  type: string
+                  example: "An updated short description."
+                status:
+                  type: string
+                  example: "completed"
+                duration:
+                  type: string
+                  example: "3 months"
+                period:
+                  type: string
+                  example: "2024 Q2"
+                img_link:
+                  type: string
+                  format: uri
+                  example: "https://example.com/images/updated-project.jpg"
+      responses:
+        '200':
+          description: Successful operation. Returns updated project info
+        '400':
+          description: Invalid project id supplied
+        '403':
+          description: You don't have the rights to edit this project
+        '404':
+          description: Project not found
+
+    delete:
+      tags:
+        - projects
+      summary: Delete project entity
+      description: This can only be done by the logged in user that owns this project
+      operationId: deleteProject
+      parameters:
+        - name: project_id
+          in: path
+          description: The id of project that needs to be deleted
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          description: Invalid project_id supplied
+        '403':
+          description: You don't have the rights to edit this project
+        '404':
+          description: Project not found
+          
+  /projects/{project_id}/positions:
+    post:
+      tags:
+        - projects
+      summary: Create a new position for a project
+      description: Adds a new position to the specified project.
+      operationId: createProjectPosition
+
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          description: The ID of the project to add the position to.
+          schema:
+            type: integer
+            example: 42
+      requestBody:
+        description: The details of the position to create.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: "Frontend"
+                level:
+                  type: string
+                  example: "Middle"
+                description:
+                  type: string
+                  example: "Responsible for developing frontend services."
+                is_open:
+                  type: boolean
+                  example: true
+      responses:
+        '201':
+          description: Position successfully created.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 101
+                  project_id:
+                    type: integer
+                    example: 42
+                  title:
+                    type: string
+                    example: "Frontend"
+                  level:
+                    type: string
+                    example: "Middle"
+                  description:
+                    type: string
+                    example: "Responsible for developing backend services."
+                  is_open:
+                    type: boolean
+                    example: true
+        '400':
+          description: Invalid input
+        '403':
+          description: You're not allowed to edit this resource
+        '404':
+          description: Project not found.
+
+    
           
   /mentor:
     post:
@@ -560,7 +881,6 @@ paths:
           description: Invalid query parameter
         '403':
           description: User is not allowed to view mentors list (might happen for GET mentors under review)
-          
   /mentor/{mentor_id}:
     get:
       tags:
