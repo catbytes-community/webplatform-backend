@@ -1,9 +1,7 @@
 const express = require("express");
-//const { getPool } = require('../db');
-//const knex = getPool();
 const router = express.Router();
 const userService = require("../services/user_service");
-
+const rolesService = require("../services/roles_service");
 const {verifyOwnership, OWNED_ENTITIES} = require("../middleware/authorization");
 const { isValidIntegerId, respondWithError, isUniqueConstraintViolation, isNotNullConstraintViolation } = require("./helpers");
 
@@ -29,11 +27,7 @@ router.post("/users", async (req, res) => {
         // and populate user entity with that data here 
         const userId = await userService.createNewUser(name, email, about, languages);
         // todo add transactions: if something went wrong here, the user should not be saved
-
-        //muffin: i'm dying, while i was debugging assignRoleToUser it would go to the catch block
-        //and with no transactions the server instance would freeze and now i have like 30+ users with no roles in the db xD 
-        //send help, the users are orphans now
-        await userService.assignRoleToUser(userId, 'member');
+        await rolesService.assignRoleToUser(userId, 'member');
         res.status(201).json({ id: userId });
     } catch (err) {
         console.error(err);

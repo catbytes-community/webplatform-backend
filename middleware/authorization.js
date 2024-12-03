@@ -1,5 +1,4 @@
-
-const roleService = require('../services/roles_service');
+const utils = require('../utils');
 const repo = require('../repositories/authorization_repository');
 const { respondWithError } = require('../routes/helpers');
 
@@ -8,10 +7,8 @@ function verifyRole(roleName) {
         try {
             // todo: get user id from request (token?)
             const userId = 1; // temp
-            const roleId = roleService.getRole(roleName);
-
+            const roleId = utils.getRole(roleName);
             const userRole = await repo.verifyRole(userId, roleId);
-         
             if (userRole.length === 0){
                 return respondWithError(res, 403, "You're not allowed to access this resource")
             }
@@ -44,7 +41,7 @@ function verifyOwnership(entityTable) {
                 resource = userId === resourceId;
             } else {
                 const result = await repo.verifyOwnership(entityTable, resourceId, userId);
-                resource = result.rows && result.rows.length !== 0;
+                resource = result.rows && result.length !== 0;
             }
     
             if (!resource) {

@@ -4,10 +4,6 @@ async function getAllUsers() {
 	const knex = getKnex();
 	return await knex("users").select("id", "name", "languages");
 }
-async function assignRoleToUser(user_id, role_id) {
-	const knex = getKnex();
-	await knex("user_roles").insert({ role_id, user_id });
-}
 async function createNewUser(name, email, about, languages) {
 	const knex = getKnex();
 	const [user] = await knex("users").insert({ name, email, about, languages }).returning("id");
@@ -36,6 +32,4 @@ async function deleteUserById(id) {
 	const knex = getKnex();
 	return await knex("users").where("id", id).del();
 }
-module.exports = { assignRoleToUser, getAllUsers, createNewUser, getUserInfoById, getUserRolesById, updateUserById, deleteUserById };
-
- 
+module.exports = {  getAllUsers, createNewUser, getUserInfoById, getUserRolesById, updateUserById, deleteUserById };

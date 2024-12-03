@@ -1,7 +1,6 @@
 const express = require("express");
 const { respondWithError } = require("./helpers");
 const rolesService = require("../services/roles_service");
- 
 const router = express.Router();
 router.use(express.json());
 
@@ -14,5 +13,4 @@ router.get("/roles", async (req, res) => {
         respondWithError(res)
     }
 });
-
 module.exports = router;
