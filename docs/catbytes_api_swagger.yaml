@@ -814,8 +814,289 @@ paths:
           description: You're not allowed to edit this resource
         '404':
           description: Project not found.
+    get:
+      tags:
+        - projects
+      summary: Get list of positions for the project
+      description: Shows all positions for selected project
+      operationId: getProjectPositions
 
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          description: The ID of the project to show the positions for
+          schema:
+            type: integer
+            example: 42
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  positions:
+                    type: array
+                    items:
+                      type: object
+                    example: [{"id": 1, "titile": "Frontend", "level": "Middle", "is_open": true, "description": "Needs to do frontend"},
+                    {"id": 2, "titile": "Backend", "level": "Senior", "is_open": true, "description": "Needs to do backend"}]
+        '400':
+          description: Invalid input
+        '403':
+          description: You're not allowed to edit this resource
+        '404':
+          description: Project not found.
+
+  /projects/{project_id}/positions/{position_id}:
+    put:
+      tags:
+        - projects
+      summary: Edit project position information
+      description: Changes information for specific project position
+      operationId: editProjectPosition
+
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          description: The ID of the project to edit the position for.
+          schema:
+            type: integer
+            example: 42
+        - name: position_id
+          in: path
+          required: true
+          description: The ID of the position to make changes to.
+          schema:
+            type: integer
+            example: 2
+      requestBody:
+        description: The details of the position to edit.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: "Frontend"
+                level:
+                  type: string
+                  example: "Middle"
+                description:
+                  type: string
+                  example: "Responsible for developing frontend services."
+                is_open:
+                  type: boolean
+                  example: false
+      responses:
+        '200':
+          description: Position successfully updated.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 101
+                  project_id:
+                    type: integer
+                    example: 42
+                  title:
+                    type: string
+                    example: "Frontend"
+                  level:
+                    type: string
+                    example: "Middle"
+                  description:
+                    type: string
+                    example: "Responsible for developing backend services."
+                  is_open:
+                    type: boolean
+                    example: false
+        '400':
+          description: Invalid input
+        '403':
+          description: You're not allowed to edit this resource
+        '404':
+          description: Position not found.
+    delete:
+      tags:
+        - projects
+      summary: Remove a position from project
+      description: Removes selected position from selected project
+      operationId: deleteProjectPosition
+
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          description: The ID of the project to edit the positions for
+          schema:
+            type: integer
+            example: 42
+        - name: position_id
+          in: path
+          required: true
+          description: The ID of the position to delete
+          schema:
+            type: integer
+            example: 2
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 2
+        '400':
+          description: Invalid input
+        '403':
+          description: You're not allowed to edit this resource
+        '404':
+          description: Position not found.
+
+  /projects/{project_id}/applications:
+    post:
+      tags:
+        - projects
+      summary: Create a new application for a project
+      description: Adds a new application to the specified project position.
+      operationId: createProjectApplication
+
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          description: The ID of the project to add the application to.
+          schema:
+            type: integer
+            example: 42
+      requestBody:
+        description: The details of the application to create.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                description:
+                  type: string
+                  example: "I have a great experience and I will be a good fit"
+                file_link:
+                  type: string
+                  example: "https://example.link/file.pdf"
+                position_id:
+                  type: integer
+                  example: 2
+      responses:
+        '201':
+          description: Application successfully created.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 101
+        '400':
+          description: Invalid input (wrong value or the applications are closed)
+        '403':
+          description: You're not allowed to edit this resource (user is not logged in)
+        '404':
+          description: Project not found.          
     
+  /projects/applications:
+    get:
+      tags:
+        - projects
+      summary: Get list of applications for projects
+      description: Shows list of applications for projects the logged in user owns
+      operationId: getProjectsApplications
+      parameters: 
+        - name: status
+          in: query
+          description: To show only approved or only rejected applications, filter by status. Not required
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  applications:
+                    type: array
+                    items:
+                      type: object
+                    example: [{"id": 1, "user_id": 12, "user_name": "Nastya", "description": "I want to participate in the project", "status": "pending", "project_name": "Awesome project", "project_id": 42, "project_status": "planned",  "position_title": "Frontend", "position_id": 2},]
+        '400':
+          description: Invalid project id supplied
+        '404':
+          description: Project not found      
+          
+  /projects/applications/{application_id}:
+    put:
+      tags:
+        - projects
+      summary: Edit status of application
+      description: Approve or reject an application to participate in project
+      operationId: editProjectsApplication
+      parameters:
+        - name: application_id
+          in: path
+          required: true
+          description: The ID of the application to make changes to.
+          schema:
+            type: integer
+            example: 2
+      requestBody:
+        description: The details of the application to edit.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  example: "approved"
+                comment:
+                  type: string
+                  example: "Welcome to the team! :)"
+      responses:
+        '200':
+          description: Application successfully updated.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 2
+                  status:
+                    type: string
+                    example: approved
+        '400':
+          description: Invalid input
+        '403':
+          description: You're not allowed to edit this resource
+        '404':
+          description: Application not found.
           
   /mentor:
     post:
