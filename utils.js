@@ -41,6 +41,7 @@ function isRoleExists(role) {
 const STATUS_NAMES = {
   approved: "approved",
   rejected: "rejected",
+  pending: "pending",
 };
 
 module.exports = { loadRolesIntoMemory, getRole, ROLE_NAMES, STATUS_NAMES };

@@ -6,7 +6,7 @@ CREATE TABLE applications (
     email VARCHAR(255) UNIQUE NOT NULL,
     about TEXT NOT NULL,
     video_link VARCHAR(255),
-    discord_nickname VARCHAR(255) UNIQUE NOT NULL,
+    discord_nickname VARCHAR(50) UNIQUE NOT NULL,
     status application_status DEFAULT 'pending',
     comment TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
