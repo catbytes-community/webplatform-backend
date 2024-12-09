@@ -33,10 +33,11 @@ async function initDb() {
             user: db_username,
             password: db_password,
             database: db_name,
-            port: db_port
+            port: db_port,
+            connectionTimeoutMillis: 5000,
+            ssl: isLocal ? false : { rejectUnauthorized: false }
         },
-        connectionTimeoutMillis: 5000,
-        ssl: isLocal ? false : { rejectUnauthorized: false }
+       
     });
 }
 module.exports = { initDb, getKnex: () => knexInstance };
