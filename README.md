@@ -23,4 +23,4 @@ Located in the `/docs/how-tos` directory. All important information on local run
 
 Note: ENVIRONMENT should be set to local for running the project locally, otherwise you have to authenticate with AWS CLI first (ref. `/docs/how-tos/aws_local_db_connection.md`)
 
-Once you are authenticated with AWS CLI and you have the local PostgreSQL setup, you should successfully run `npm start` to start the server
+Once you are authenticated with AWS CLI or you have the local PostgreSQL setup, you should successfully run `npm start` to start the server
