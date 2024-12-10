@@ -1,8 +1,7 @@
 const express = require("express");
-const { getPool } = require("../db");
-const pool = getPool();
+const applService = require("../services/applications_service")
 const { verifyRole } = require("../middleware/authorization");
-const { ROLE_NAMES, STATUS_NAMES } = require("../utils");
+const { ROLE_NAMES, APPL_STATUSES } = require("../utils");
 const {
   respondWithError,
   isUniqueConstraintViolation,
@@ -13,8 +12,8 @@ router.use(express.json());
 
 router.get("/applications", verifyRole(ROLE_NAMES.mentor), async (req, res) => {
   try {
-    const result = await pool.query("SELECT * FROM applications");
-    res.json({ applications: result.rows });
+    const result = await applService.getAllApplications();
+    res.json({ applications: result });
   } catch (err) {
     console.error(err);
     respondWithError(res);
@@ -24,11 +23,15 @@ router.get("/applications", verifyRole(ROLE_NAMES.mentor), async (req, res) => {
 router.post("/applications", async (req, res) => {
   const { name, about, email, video_link, discord_nickname } = req.body;
   try {
-    const result = await pool.query(
-      "INSERT INTO applications (name, about, email, video_link, discord_nickname) VALUES ($1, $2, $3, $4, $5) RETURNING *",
-      [name, about, email, video_link, discord_nickname]
+    const result = await applService.createNewApplication(
+      name,
+      about,
+      email,
+      video_link,
+      discord_nickname
     );
-    res.status(201).json(result.rows[0]);
+
+    res.status(201).json(result);
   } catch (err) {
     console.error(err);
     if (isUniqueConstraintViolation(err.code)) {
@@ -51,10 +54,10 @@ router.put(
     const { id } = req.params;
     const { status, comment, user_id } = req.body; // user_id = who approved/denied
     const today = new Date();
-    if (!Object.values(STATUS_NAMES).includes(status)) {
+    if (!Object.values(APPL_STATUSES).includes(status)) {
       return respondWithError(res, 400, "Invalid status provided");
     }
-    if (status === STATUS_NAMES.rejected && !comment) {
+    if (status === APPL_STATUSES.rejected && !comment) {
       return respondWithError(
         res,
         400,
@@ -62,14 +65,14 @@ router.put(
       );
     }
     try {
-      let query =
-        "UPDATE applications SET status = $1, comment = $2, modified_by = $3, modified_at = $4 WHERE id = $5 RETURNING *";
-      let values = [status, comment, user_id, today, id];
-      const result = await pool.query(query, values);
-      if (result.rowCount === 0) {
-        return respondWithError(res, 404, "Application not found");
-      }
-      res.status(200).json(result.rows[0]);
+      const result = await applService.updateApplicationStatus(
+        id,
+        status,
+        comment,
+        user_id,
+        today
+      );
+      res.status(200).json(result);
     } catch (err) {
       console.error(err);
       respondWithError(res);
