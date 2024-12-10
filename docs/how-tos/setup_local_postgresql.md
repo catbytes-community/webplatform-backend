@@ -1,4 +1,4 @@
-## 1. Setting up Local PostgreSQL instance 
+## 1. Setting up Local PostgreSQL instance
 
 Step 1. Install PostgreSQL. Download link: https://www.postgresql.org/download/
 
@@ -11,6 +11,7 @@ exit the profile (Ctrl + X)
 </b>
 
 Step 2. Access the PostgreSQL interface using the command line:
+
 ```bash
 psql -U postgres
 ```
@@ -30,14 +31,18 @@ Step 4. Use `\c mydatabase` to switch context to your database before creating t
 To verify what datasabe are you in right now, run
 `SELECT current_database();`
 
-Step 5. Create a table (ex. "users") - please refer to `scripts/db` directory for database definitions.
-```sql
-CREATE TABLE IF NOT EXISTS users ( id SERIAL PRIMARY KEY, username VARCHAR(50) NOT NULL);
-```
+Step 5. Run SQL scripts (refer to `scripts/db`) directory for database definitions.
+Run the scripts in the following order for correct processing:
+
+1. roles
+2. user_1
+3. user_roles
+4. applications
+5. privileges
 
 ## 2. Set up connection in the app
 
-Step 1. To set up the connection to the database we need to user a driver, PostgreSQL Client. Install package: 
+Step 1. To set up the connection to the database we need to user a driver, PostgreSQL Client. Install package:
 
 ```bash
 npm install pg
@@ -60,7 +65,7 @@ const pool = new Pool({
 module.exports = pool;
 ```
 
-Step 3. Add variables to `.env` file 
+Step 3. Add variables to `.env` file
 
 ```bash
 DB_USER=myuser
