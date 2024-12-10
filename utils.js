@@ -18,19 +18,25 @@ async function loadRolesIntoMemory() {
             }, {});
             console.log('Roles loaded into memory:', rolesCache);
         }
-    } catch (error) {
-        console.error('Error loading roles:', error);
-        throw new Error('Failed to initialize roles');
-    }
+  } catch (error) {
+    console.error("Error loading roles:", error);
+    throw new Error("Failed to initialize roles");
+  }
 }
 function getRole(role_name) {
-    if (!rolesCache) {
-        throw new Error('Roles are not loaded');
-    }
-    return rolesCache[role_name]
+  if (!rolesCache) {
+    throw new Error("Roles are not loaded");
+  }
+  return rolesCache[role_name];
 }
 function isRoleExists(role) {
-    return Object.values(ROLE_NAMES).includes(role);
+  return Object.values(ROLE_NAMES).includes(role);
 }
 
-module.exports = { isRoleExists, ROLE_NAMES, loadRolesIntoMemory, getRole };
+const APPL_STATUSES = {
+  approved: "approved",
+  rejected: "rejected",
+  pending: "pending",
+};
+
+module.exports = { isRoleExists, ROLE_NAMES, loadRolesIntoMemory, getRole, APPL_STATUSES };
