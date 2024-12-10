@@ -1,6 +1,5 @@
 const express = require("express");
-const { getPool } = require('../db');
-const pool = getPool();
+const applService = require("../services/applications_service")
 const { verifyRole } = require("../middleware/authorization");
 const { ROLE_NAMES } = require("../utils")
 const { respondWithError, isUniqueConstraintViolation, isNotNullConstraintViolation } = require("./helpers")
@@ -9,8 +8,8 @@ router.use(express.json());
 
 router.get("/applications", verifyRole(ROLE_NAMES.mentor), async (req, res) => {
     try {
-        const result = await pool.query("SELECT * FROM applications");
-        res.json({ applications: result.rows});
+        const result = await applService.getAllApplications();
+        res.json({ applications: result});
     } catch (err) {
         console.error(err);
         respondWithError(res);
@@ -20,11 +19,9 @@ router.get("/applications", verifyRole(ROLE_NAMES.mentor), async (req, res) => {
 router.post("/applications", async (req, res) => {
     const { name, about, email, video_link, discord_nickname } = req.body;
     try {
-        const result = await pool.query(
-            "INSERT INTO applications (name, about, email, video_link, discord_nickname) VALUES ($1, $2, $3, $4, $5) RETURNING *",
-            [name, about, email, video_link, discord_nickname]
-        );
-        res.status(201).json(result.rows[0]);
+        const result = await applService.createNewApplication(name, about, email, video_link, discord_nickname);
+
+        res.status(201).json(result);
     } catch (err) {
         console.error(err);
         if (isUniqueConstraintViolation(err.code)) {
