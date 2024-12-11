@@ -862,6 +862,30 @@
                       "nodejs",
                       "express"
                     ]
+                  },
+                  "positions": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "title": {
+                          "type": "string",
+                          "example": "Frontend"
+                        },
+                        "level": {
+                          "type": "string",
+                          "example": "Middle"
+                        },
+                        "description": {
+                          "type": "string",
+                          "example": "Responsible for developing frontend services."
+                        },
+                        "is_open": {
+                          "type": "boolean",
+                          "example": true
+                        }
+                      }
+                    }
                   }
                 }
               }
@@ -1081,6 +1105,25 @@
                         "nodejs",
                         "express"
                       ]
+                    },
+                    "positions": {
+                      "type": "object",
+                      "example": [
+                        {
+                          "id": 1,
+                          "titile": "Frontend",
+                          "level": "Middle",
+                          "is_open": true,
+                          "description": "Needs to do frontend"
+                        },
+                        {
+                          "id": 2,
+                          "titile": "Backend",
+                          "level": "Senior",
+                          "is_open": true,
+                          "description": "Needs to do backend"
+                        }
+                      ]
                     }
                   }
                 }
@@ -1131,24 +1174,60 @@
                   },
                   "description_short": {
                     "type": "string",
-                    "example": "An updated short description."
+                    "example": "A short description of the project."
                   },
                   "status": {
                     "type": "string",
-                    "example": "completed"
+                    "example": "active"
                   },
                   "duration": {
                     "type": "string",
-                    "example": "3 months"
+                    "example": "6 months"
                   },
                   "period": {
                     "type": "string",
-                    "example": "2024 Q2"
+                    "example": "2024 Q1"
                   },
                   "img_link": {
                     "type": "string",
                     "format": "uri",
-                    "example": "https://example.com/images/updated-project.jpg"
+                    "example": "https://example.com/images/project.jpg"
+                  },
+                  "links": {
+                    "type": "object",
+                    "example": [
+                      {
+                        "url": "https://exampleurl.com",
+                        "description": "description of the link"
+                      }
+                    ]
+                  },
+                  "tags": {
+                    "type": "object",
+                    "example": [
+                      "javascript",
+                      "nodejs",
+                      "express"
+                    ]
+                  },
+                  "positions": {
+                    "type": "object",
+                    "example": [
+                      {
+                        "id": 1,
+                        "titile": "Frontend",
+                        "level": "Middle",
+                        "is_open": true,
+                        "description": "Needs to do frontend"
+                      },
+                      {
+                        "id": 2,
+                        "titile": "Backend",
+                        "level": "Senior",
+                        "is_open": true,
+                        "description": "Needs to do backend"
+                      }
+                    ]
                   }
                 }
               }
@@ -1200,334 +1279,6 @@
           },
           "404": {
             "description": "Project not found"
-          }
-        }
-      }
-    },
-    "/projects/{project_id}/positions": {
-      "post": {
-        "tags": [
-          "projects"
-        ],
-        "summary": "Create a new position for a project",
-        "description": "Adds a new position to the specified project.",
-        "operationId": "createProjectPosition",
-        "parameters": [
-          {
-            "name": "project_id",
-            "in": "path",
-            "required": true,
-            "description": "The ID of the project to add the position to.",
-            "schema": {
-              "type": "integer",
-              "example": 42
-            }
-          }
-        ],
-        "requestBody": {
-          "description": "The details of the position to create.",
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "title": {
-                    "type": "string",
-                    "example": "Frontend"
-                  },
-                  "level": {
-                    "type": "string",
-                    "example": "Middle"
-                  },
-                  "description": {
-                    "type": "string",
-                    "example": "Responsible for developing frontend services."
-                  },
-                  "is_open": {
-                    "type": "boolean",
-                    "example": true
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Position successfully created.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "integer",
-                      "example": 101
-                    },
-                    "project_id": {
-                      "type": "integer",
-                      "example": 42
-                    },
-                    "title": {
-                      "type": "string",
-                      "example": "Frontend"
-                    },
-                    "level": {
-                      "type": "string",
-                      "example": "Middle"
-                    },
-                    "description": {
-                      "type": "string",
-                      "example": "Responsible for developing backend services."
-                    },
-                    "is_open": {
-                      "type": "boolean",
-                      "example": true
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid input"
-          },
-          "403": {
-            "description": "You're not allowed to edit this resource"
-          },
-          "404": {
-            "description": "Project not found."
-          }
-        }
-      },
-      "get": {
-        "tags": [
-          "projects"
-        ],
-        "summary": "Get list of positions for the project",
-        "description": "Shows all positions for selected project",
-        "operationId": "getProjectPositions",
-        "parameters": [
-          {
-            "name": "project_id",
-            "in": "path",
-            "required": true,
-            "description": "The ID of the project to show the positions for",
-            "schema": {
-              "type": "integer",
-              "example": 42
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "positions": {
-                      "type": "array",
-                      "items": {
-                        "type": "object"
-                      },
-                      "example": [
-                        {
-                          "id": 1,
-                          "titile": "Frontend",
-                          "level": "Middle",
-                          "is_open": true,
-                          "description": "Needs to do frontend"
-                        },
-                        {
-                          "id": 2,
-                          "titile": "Backend",
-                          "level": "Senior",
-                          "is_open": true,
-                          "description": "Needs to do backend"
-                        }
-                      ]
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid input"
-          },
-          "403": {
-            "description": "You're not allowed to edit this resource"
-          },
-          "404": {
-            "description": "Project not found."
-          }
-        }
-      }
-    },
-    "/projects/{project_id}/positions/{position_id}": {
-      "put": {
-        "tags": [
-          "projects"
-        ],
-        "summary": "Edit project position information",
-        "description": "Changes information for specific project position",
-        "operationId": "editProjectPosition",
-        "parameters": [
-          {
-            "name": "project_id",
-            "in": "path",
-            "required": true,
-            "description": "The ID of the project to edit the position for.",
-            "schema": {
-              "type": "integer",
-              "example": 42
-            }
-          },
-          {
-            "name": "position_id",
-            "in": "path",
-            "required": true,
-            "description": "The ID of the position to make changes to.",
-            "schema": {
-              "type": "integer",
-              "example": 2
-            }
-          }
-        ],
-        "requestBody": {
-          "description": "The details of the position to edit.",
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "title": {
-                    "type": "string",
-                    "example": "Frontend"
-                  },
-                  "level": {
-                    "type": "string",
-                    "example": "Middle"
-                  },
-                  "description": {
-                    "type": "string",
-                    "example": "Responsible for developing frontend services."
-                  },
-                  "is_open": {
-                    "type": "boolean",
-                    "example": false
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Position successfully updated.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "integer",
-                      "example": 101
-                    },
-                    "project_id": {
-                      "type": "integer",
-                      "example": 42
-                    },
-                    "title": {
-                      "type": "string",
-                      "example": "Frontend"
-                    },
-                    "level": {
-                      "type": "string",
-                      "example": "Middle"
-                    },
-                    "description": {
-                      "type": "string",
-                      "example": "Responsible for developing backend services."
-                    },
-                    "is_open": {
-                      "type": "boolean",
-                      "example": false
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid input"
-          },
-          "403": {
-            "description": "You're not allowed to edit this resource"
-          },
-          "404": {
-            "description": "Position not found."
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "projects"
-        ],
-        "summary": "Remove a position from project",
-        "description": "Removes selected position from selected project",
-        "operationId": "deleteProjectPosition",
-        "parameters": [
-          {
-            "name": "project_id",
-            "in": "path",
-            "required": true,
-            "description": "The ID of the project to edit the positions for",
-            "schema": {
-              "type": "integer",
-              "example": 42
-            }
-          },
-          {
-            "name": "position_id",
-            "in": "path",
-            "required": true,
-            "description": "The ID of the position to delete",
-            "schema": {
-              "type": "integer",
-              "example": 2
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "integer",
-                      "example": 2
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid input"
-          },
-          "403": {
-            "description": "You're not allowed to edit this resource"
-          },
-          "404": {
-            "description": "Position not found."
           }
         }
       }

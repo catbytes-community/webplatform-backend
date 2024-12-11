@@ -75,8 +75,9 @@ Table project_positions {
 }
 
 Table project_applications {
-  position_id integer [primary key, ref: > project_positions.id]
-  user_id integer [primary key, ref: > users.id]
+  id integer [primary key] 
+  position_id integer [ref: > project_positions.id]
+  user_id integer [ref: > users.id]
   description text
   file_link varchar
   status enum 
