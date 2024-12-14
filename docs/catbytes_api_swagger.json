@@ -250,18 +250,18 @@
           }
         }
       },
-      "post": {
+      "put": {
         "tags": [
           "applications"
         ],
-        "summary": "Perform action on application",
-        "description": "This endpoint is used to either approve or deny an application. (We're going to provide a (enum) list of actions available)",
-        "operationId": "editApplication",
+        "summary": "✅  Update application for membership",
+        "description": "This endpoint is used to either approve or reject an application to join the community (membership application)",
+        "operationId": "updateApplication",
         "parameters": [
           {
             "name": "application_id",
             "in": "path",
-            "description": "",
+            "description": "is of application that needs to be updated",
             "required": true,
             "schema": {
               "type": "integer"
@@ -269,19 +269,23 @@
           }
         ],
         "requestBody": {
-          "description": "Action with comment (the comment is stored in database along with closed application, no matter what the action was)",
+          "description": "If application is rejected, comment will be required and stored in database along with applications with rejected status)",
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
                 "properties": {
-                  "action": {
+                  "status": {
                     "type": "string",
-                    "example": "deny"
+                    "example": "rejected"
                   },
                   "comment": {
                     "type": "string",
-                    "example": "seems to be phishing"
+                    "example": "it's a man!"
+                  },
+                  "user_id": {
+                    "type": "integer",
+                    "example": 1
                   }
                 }
               }
