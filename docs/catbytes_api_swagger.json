@@ -196,60 +196,6 @@
       }
     },
     "/applications/{application_id}": {
-      "get": {
-        "tags": [
-          "applications"
-        ],
-        "summary": "Get application by id",
-        "description": "",
-        "operationId": "getApplicationById",
-        "parameters": [
-          {
-            "name": "application_id",
-            "in": "path",
-            "description": "",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "integer",
-                      "example": 2
-                    },
-                    "name": {
-                      "type": "string",
-                      "example": "Mary Roe"
-                    },
-                    "description": {
-                      "type": "string",
-                      "example": "I love frontend"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid application id supplied"
-          },
-          "403": {
-            "description": "User is not allowed to view applications"
-          },
-          "404": {
-            "description": "Application not found"
-          }
-        }
-      },
       "put": {
         "tags": [
           "applications"
@@ -269,7 +215,7 @@
           }
         ],
         "requestBody": {
-          "description": "If application is rejected, comment will be required and stored in database along with applications with rejected status)",
+          "description": "If application is rejected, comment will be required and stored in database along with applications with rejected status). Application statuses is enum with options approved, rejected, pending",
           "content": {
             "application/json": {
               "schema": {
