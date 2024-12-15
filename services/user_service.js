@@ -19,6 +19,11 @@ async function updateUserById(id, name, about, languages) {
 }
 async function deleteUserById(id) {
     return await repo.deleteUserById(id);
+}  
+async function getUserByEmail(email) {
+    return await repo.getUserByEmail(email);
 }
-
-module.exports = { getAllUsers, createNewUser, getUserById, updateUserById, deleteUserById };
+async function updateUserFirebaseId(id, firebase_id) {
+    return await repo.updateUserFirebaseId(id, firebase_id);
+}
+module.exports = { getAllUsers, createNewUser, getUserById, updateUserById, deleteUserById, getUserByEmail, updateUserFirebaseId };

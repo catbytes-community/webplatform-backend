@@ -9,5 +9,8 @@ async function createNewApplication(name, about, email, video_link, discord_nick
 async function updateApplicationStatus(id, status, comment, user_id) {
     return await repo.updateApplicationStatus(id, status, comment, user_id);
 }
+async function getApplicationByEmail(email) {
+    return await repo.getApplicationByEmail(email);
+}
 
-module.exports = { getAllApplications, createNewApplication, updateApplicationStatus };
+module.exports = { getAllApplications, createNewApplication, updateApplicationStatus, getApplicationByEmail };

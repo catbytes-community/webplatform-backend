@@ -2,10 +2,55 @@ const express = require("express");
 const router = express.Router();
 const userService = require("../services/user_service");
 const rolesService = require("../services/roles_service");
+const applService = require("../services/applications_service");
+const admin = require("firebase-admin");
 const {verifyOwnership, OWNED_ENTITIES} = require("../middleware/authorization");
 const { isValidIntegerId, respondWithError, isUniqueConstraintViolation, isNotNullConstraintViolation } = require("./helpers");
 
 router.use(express.json());
+
+// POST /users/login
+router.post("/users/login", async (req, res) => {
+    const token = req.headers['token'];
+    if (!token) {
+        return respondWithError(res, 401, "No token provided");
+    }
+    try {
+        //verifying the firebase token
+        const decodedToken = await admin.auth().verifyIdToken(token);
+        const email = decodedToken.email;
+        const uid = decodedToken.uid;
+        //if email is verified
+        if (!decodedToken.email_verified) {
+            return respondWithError(res, 403, "Email not verified");
+        }       
+        // check if application exists  
+        const application = await applService.getApplicationByEmail(email);  
+        if (!application || !application.status === 'approved') {
+            return respondWithError(res, 403, "Application not approved or does not exist");
+        }
+        //checking if user exists
+        let user = await userService.getUserByEmail(email);
+        if (!user) {
+            // creating new user if it doesn't exist
+            user = await userService.createNewUser(
+                application.name,
+                email,
+                application.about,
+                application.languages
+            );
+            await rolesService.assignRoleToUser(user.id, 'member');
+            await userService.updateUserFirebaseId(user.id, uid);  
+        }
+        //set secure cookie with UID
+        res.cookie('userUID', uid, { httpOnly: true, secure: true });
+        //user info
+        res.status(200).json({ user });
+    } catch (error) {
+        console.error(error);
+        return respondWithError(res, 401, "Unauthorized");
+    }
+});
 
 // Get all users
 router.get("/users", async (req, res) => {

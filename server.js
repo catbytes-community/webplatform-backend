@@ -5,14 +5,19 @@ const cors = require("cors");
 const app = express();
 const { initDb } = require('./db');
 const utils = require('./utils');
+const admin = require("firebase-admin");
+const serviceAccount = require('./serviceAccountKey.json');
+
 // Middleware
 app.use(express.json()); // read documentation on what this does
 app.use(cors());
 
-(async () => { 
+(async () => {   
   await initDb();
   await utils.loadRolesIntoMemory();
-
+  admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+    });
   // Routes
   const routes = require("./routes/routes");
   app.use(routes);
