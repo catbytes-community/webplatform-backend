@@ -29,3 +29,5 @@ In order to deploy updated app, follow the steps below:
   <li>Run server `node server.js` to test the changes are applied</li>
   <li>PM2 start the server</li>
 </ul>
+
+Dev API address: https://devapi.catbytes.io/

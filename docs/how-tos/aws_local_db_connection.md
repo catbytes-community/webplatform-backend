@@ -29,7 +29,7 @@ After this the service will be able to load secrets from AWS SSM and access data
 ### Connecting to the database via psql
 
 ```bash
-psql -h catbytes-web-platform-db.c18sq6ogg9z7.us-east-1.rds.amazonaws.com -U <username> -d postgres -p 5432
+psql -h catbytes-web-platform-db.ct2ag4a86wsn.eu-west-2.rds.amazonaws.com -U <username> -d postgres -p 5432
 ```
 
 Change `<username>` to the database admin username provided and insert the password.
