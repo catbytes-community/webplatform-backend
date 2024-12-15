@@ -15,6 +15,8 @@ router.get("/", (req, res) => {
     res.send("Hello World");
 });
 
+// helper route to quickly trigger email sending for testing
+// todo: should be secured or removed
 router.post("/mail-test", async (req, res) => {
     const { name, email} = req.body;
     await mailerService.sendApplicationApprovedEmail(email, name);
