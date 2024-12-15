@@ -18,7 +18,7 @@ async function initDb() {
     else {
         // For remote RSD access, load secrets from AWS SSM
         const awsConfig = config.aws;
-        const credentials = await loadSecrets(awsConfig.region, ['/catbytes_webplatform/db_username', '/catbytes_webplatform/db_password'], true);
+        const credentials = await loadSecrets(awsConfig.param_store_region, ['/catbytes_webplatform/db_username', '/catbytes_webplatform/db_password'], true);
 
         db_username = credentials['db_username'];
         db_host = awsConfig.db_endpoint;

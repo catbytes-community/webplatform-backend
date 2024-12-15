@@ -4,6 +4,7 @@ const express = require("express");
 const cors = require("cors");
 const app = express();
 const { initDb } = require('./db');
+const { initMailer } = require('./services/mailer_service')
 const utils = require('./utils');
 // Middleware
 app.use(express.json()); // read documentation on what this does
@@ -11,6 +12,7 @@ app.use(cors());
 
 (async () => { 
   await initDb();
+  await initMailer();
   await utils.loadRolesIntoMemory();
 
   // Routes
