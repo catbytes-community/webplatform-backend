@@ -4,6 +4,7 @@ const express = require("express");
 const cors = require("cors");
 const app = express();
 const { initDb } = require('./db');
+const { initMailer } = require('./services/mailer_service')
 const utils = require('./utils');
 const admin = require("firebase-admin");
 const serviceAccount = require('./serviceAccountKey.json');
@@ -14,6 +15,7 @@ app.use(cors());
 
 (async () => {   
   await initDb();
+  await initMailer();
   await utils.loadRolesIntoMemory();
   admin.initializeApp({
         credential: admin.credential.cert(serviceAccount),

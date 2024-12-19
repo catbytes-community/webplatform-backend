@@ -1,5 +1,6 @@
 const { getKnex } = require("../db");
-const knex = getKnex(); async function getAllUsers() {
+const knex = getKnex();
+async function getAllUsers() {
 
 	return await knex("users").select("id", "name", "languages");
 }
