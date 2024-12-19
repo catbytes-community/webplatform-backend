@@ -7,6 +7,7 @@ const {
   isUniqueConstraintViolation,
   isNotNullConstraintViolation,
 } = require("./helpers");
+const { sendEmailOnApplicationStatusChange } = require("../services/mailer_service")
 const router = express.Router();
 router.use(express.json());
 
@@ -47,16 +48,15 @@ router.post("/applications", async (req, res) => {
   }
 });
 
-router.put(
-  "/applications/:id",
-  verifyRole(ROLE_NAMES.mentor),
-  async (req, res) => {
+router.put("/applications/:id", verifyRole(ROLE_NAMES.mentor), async (req, res) => {
     const { id } = req.params;
     const { status, comment, user_id } = req.body; // user_id = who approved/denied
     const today = new Date();
+
     if (!Object.values(APPL_STATUSES).includes(status)) {
       return respondWithError(res, 400, "Invalid status provided");
     }
+
     if (status === APPL_STATUSES.rejected && !comment) {
       return respondWithError(
         res,
@@ -65,14 +65,18 @@ router.put(
       );
     }
     try {
-      const result = await applService.updateApplicationStatus(
+      // todo add transaction
+      // todo add check if status already set up to `status` value
+      const [application] = await applService.updateApplicationStatus(
         id,
         status,
         comment,
         user_id,
         today
       );
-      res.status(200).json(result);
+
+      await sendEmailOnApplicationStatusChange(application.email, application.name, status, comment);
+      res.status(200).json(application);
     } catch (err) {
       console.error(err);
       respondWithError(res);
