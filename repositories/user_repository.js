@@ -17,12 +17,11 @@ async function getUserRolesById(id) {
 		.where("user_roles.user_id", id)
 		.select("roles.role_name", "roles.id");
 }
-async function updateUserById(id, name, about, languages) {
+async function updateUserById(id, updates) {
 	return await knex("users")
 		.where("id", id)
-		.update({name, about, languages })
+		.update(updates)
 		.returning("*");
-	
 }
 async function deleteUserById(id) {
 	return await knex("users").where("id", id).del();
@@ -32,10 +31,4 @@ async function getUserByEmail(email) {
 		.where({ email })
 		.first();
 }
-async function updateUserFirebaseId(id, firebase_id) {
-	return await knex("users")
-		.where("id", id)
-		.update({ firebase_id })
-		.returning("*");
-}
-module.exports = { getAllUsers, createNewUser, getUserInfoById, getUserRolesById, updateUserById, deleteUserById, getUserByEmail, updateUserFirebaseId };
+module.exports = { getAllUsers, createNewUser, getUserInfoById, getUserRolesById, updateUserById, deleteUserById, getUserByEmail };

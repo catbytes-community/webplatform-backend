@@ -7,7 +7,7 @@ const { initDb } = require('./db');
 const { initMailer } = require('./services/mailer_service')
 const utils = require('./utils');
 const admin = require("firebase-admin");
-const serviceAccount = require('./serviceAccountKey.json');
+//const serviceAccount = require('./serviceAccountKey.json');
 
 // Middleware
 app.use(express.json()); // read documentation on what this does
@@ -17,9 +17,10 @@ app.use(cors());
   await initDb();
   await initMailer();
   await utils.loadRolesIntoMemory();
+  serviceAccount = await utils.getServiceAccount();
   admin.initializeApp({
         credential: admin.credential.cert(serviceAccount),
-    });
+  });
   // Routes
   const routes = require("./routes/routes");
   app.use(routes);

@@ -1,12 +1,16 @@
 const repo = require('../repositories/user_repository');
+const rolesService = require('../services/roles_service');
 
 async function getAllUsers() {
 
     return await repo.getAllUsers();
 }
 
-async function createNewUser(name, email, about, languages) {
-    return await repo.createNewUser(name, email, about, languages);
+async function createNewUser(name, email, about, languages, role) {
+    var user = await repo.createNewUser(name, email, about, languages);
+    await rolesService.assignRoleToUser(user.id, role);
+    return user;
+
 }
 
 async function getUserById(id) {
@@ -18,17 +22,16 @@ async function getUserById(id) {
     return userInfo;
 }
 
-async function updateUserById(id, name, about, languages) {
-    return await repo.updateUserById(id, name, about, languages )   
+async function updateUserById(id, updates) {
+    return await repo.updateUserById(id, updates )   
 }
 
 async function deleteUserById(id) {
     return await repo.deleteUserById(id);
 }  
+
 async function getUserByEmail(email) {
     return await repo.getUserByEmail(email);
 }
-async function updateUserFirebaseId(id, firebase_id) {
-    return await repo.updateUserFirebaseId(id, firebase_id);
-}
-module.exports = { getAllUsers, createNewUser, getUserById, updateUserById, deleteUserById, getUserByEmail, updateUserFirebaseId };
+
+module.exports = { getAllUsers, createNewUser, getUserById, updateUserById, deleteUserById, getUserByEmail };

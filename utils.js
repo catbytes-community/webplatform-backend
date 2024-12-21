@@ -1,9 +1,33 @@
 let rolesCache = null;
 const repo = require('./repositories/roles_repository');
+const { loadSecrets } = require("./aws/ssm-helper")
+const config = require("./config.json");
 
 const ROLE_NAMES = {
     mentor: 'mentor',
     member: 'member'
+}
+async function getServiceAccount() {
+    let serviceAccount = null;
+    try {
+        const isLocal = process.env.ENVIRONMENT === "local";
+       
+        if (isLocal) {
+            serviceAccount = require("./serviceAccountKey.json");
+        }
+        else {
+            // For remote RSD access, load secrets from AWS SSM
+            const awsConfig = config.aws;
+            const credentials = await loadSecrets(awsConfig.param_store_region, ['/catbytes_webplatform/fb_serviceAccountKey'], true);
+            const jsonFile = credentials['fb_serviceAccountKey'];
+            serviceAccount = JSON.parse(jsonFile);
+        }
+    }
+    catch (error) {
+        console.error("Error getting service account:", error);
+        throw new Error("Failed to retrieve service account");
+    }
+    return serviceAccount;
 }
 async function loadRolesIntoMemory() {
     try {
@@ -39,4 +63,4 @@ const APPL_STATUSES = {
   pending: "pending",
 };
 
-module.exports = { isRoleExists, ROLE_NAMES, loadRolesIntoMemory, getRole, APPL_STATUSES };
+module.exports = { isRoleExists, ROLE_NAMES, loadRolesIntoMemory, getRole, APPL_STATUSES, getServiceAccount };

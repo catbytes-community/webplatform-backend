@@ -23,7 +23,7 @@ router.post("/users/login", async (req, res) => {
         //if email is verified
         if (!decodedToken.email_verified) {
             return respondWithError(res, 403, "Email not verified");
-        }       
+        }
         // check if application exists  
         const application = await applService.getApplicationByEmail(email);  
         if (!application || !application.status === 'approved') {
@@ -37,15 +37,15 @@ router.post("/users/login", async (req, res) => {
                 application.name,
                 email,
                 application.about,
-                application.languages
+                application.languages,
+                'member'
             );
-            await rolesService.assignRoleToUser(user.id, 'member');
-            await userService.updateUserFirebaseId(user.id, uid);  
+            await userService.updateUserById(user.id, {firebase_id: firebaseId});  
         }
         //set secure cookie with UID
         res.cookie('userUID', uid, { httpOnly: true, secure: true });
         //user info
-        res.status(200).json({ user });
+        res.status(200).json({ user:user });
     } catch (error) {
         console.error(error);
         return respondWithError(res, 401, "Unauthorized");
@@ -70,10 +70,8 @@ router.post("/users", async (req, res) => {
     try {
         // todo: firebase will only know user's email, we will need to get user's application by email
         // and populate user entity with that data here 
-        const userId = await userService.createNewUser(name, email, about, languages);
-        // todo add transactions: if something went wrong here, the user should not be saved
-        await rolesService.assignRoleToUser(userId, 'member');
-        res.status(201).json({ id: userId });
+        const user = await userService.createNewUser(name, email, about, languages, 'member');       
+        res.status(201).json({ id: user.id });
     } catch (err) {
         console.error(err);
         if (isUniqueConstraintViolation(err.code)) {
@@ -112,7 +110,7 @@ router.put("/users/:id", verifyOwnership(OWNED_ENTITIES.USER), async (req, res) 
         return respondWithError(res, 400, "Invalid user id supplied");
     }
     try {
-        const [updatedUser] = await userService.updateUserById(id, name, about, languages);
+        const [updatedUser] = await userService.updateUserById(id, { name: name, about: about, languages: languages });
         if (!updatedUser) {
             return respondWithError(res, 404, "User not found");
         }
