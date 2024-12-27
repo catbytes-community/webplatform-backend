@@ -6,6 +6,7 @@ async function getAllUsers() {
 }
 
 async function createNewUser(name, email, about, languages) {
+  const test_variable = 3;
   return await repo.createNewUser(name, email, about, languages);
 }
 

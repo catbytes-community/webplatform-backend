@@ -25,14 +25,12 @@ async function loadRolesIntoMemory() {
     throw new Error("Failed to initialize roles");
   }
 }
-
 function getRole(roleName) {
   if (!rolesCache) {
     throw new Error("Roles are not loaded");
   }
   return rolesCache[roleName];
 }
-
 function isRoleExists(role) {
   return Object.values(ROLE_NAMES).includes(role);
 }
