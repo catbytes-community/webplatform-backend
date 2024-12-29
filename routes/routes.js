@@ -4,6 +4,7 @@ const usersRoutes = require("./users");
 const applRoutes = require("./applications");
 const rolesRoutes = require("./roles");
 const mailerService = require("../services/mailer_service")
+
 router.use(express.json());
 
 // API routes
