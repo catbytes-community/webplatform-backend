@@ -18,9 +18,9 @@ app.use(cors());
   await initDb();
   await initMailer();
   await utils.loadRolesIntoMemory();
-  serviceAccount = await utils.getServiceAccount();
+  const serviceAccount = await utils.getServiceAccount();
   admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount),
+    credential: admin.credential.cert(serviceAccount),
   });
   // Routes
   const routes = require("./routes/routes");
