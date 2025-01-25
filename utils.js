@@ -9,16 +9,13 @@ const ROLE_NAMES = {
   member: 'member'
 };
 
-async function getServiceAccount() {
+async function getFirebaseSdkServiceAccount() {
   let serviceAccount = null;
   try {
-    const isLocal = process.env.ENVIRONMENT === "local";
-       
-    if (isLocal) {
+    if (process.env.ENVIRONMENT === "local") {
       serviceAccount = require("./serviceAccountKey.json");
     }
     else {
-      // For remote RSD access, load secrets from AWS SSM
       const awsConfig = config.aws;
       const credentials = await loadSecrets(awsConfig.param_store_region, ['/catbytes_webplatform/fb_serviceAccountKey'], true);
       const jsonFile = credentials['fb_serviceAccountKey'];
@@ -68,4 +65,4 @@ const APPL_STATUSES = {
   pending: "pending",
 };
 
-module.exports = { isRoleExists, ROLE_NAMES, loadRolesIntoMemory, getRole, APPL_STATUSES, getServiceAccount };
+module.exports = { APPL_STATUSES, ROLE_NAMES, isRoleExists, ROLE_NAMES, loadRolesIntoMemory, getRole, getFirebaseSdkServiceAccount };

@@ -16,11 +16,10 @@ router.post("/users/login", async (req, res) => {
     return respondWithError(res, 401, "No token provided");
   }
   try {
-    //verifying the firebase token
     const decodedToken = await admin.auth().verifyIdToken(token);
     const email = decodedToken.email;
-    const firebaseId = decodedToken.uid; // check if this is correct
-    //if email is verified
+    const firebaseId = decodedToken.uid;
+    
     if (!decodedToken.email_verified) {
       return respondWithError(res, 403, "Email not verified");
     }
@@ -45,7 +44,7 @@ router.post("/users/login", async (req, res) => {
     //set secure cookie with UID - check if firebaseId should be used here (aliona)
     res.cookie('userUID', firebaseId, { httpOnly: true, secure: true });
     //user info
-    res.status(200).json({ user:user });
+    res.status(200).json({ user: user });
   } catch (error) {
     console.error(error);
     return respondWithError(res, 401, "Unauthorized");
@@ -131,7 +130,7 @@ router.delete("/users/:id", verifyOwnership(OWNED_ENTITIES.USER), async (req, re
     if (result === 0) {
       return respondWithError(res, 404, "User not found.");
     }
-    res.status(200).json({ id });
+    res.status(200).json({ user_id: id });
   } catch (err) {
     console.error(err);
     respondWithError(res);
