@@ -12,4 +12,8 @@ async function updateApplicationStatus(id, status, comment, modifiedBy, modified
   return await repo.updateApplicationStatus(id, status, comment, modifiedBy, modifiedAt);
 }
 
-module.exports = { getAllApplications, createNewApplication, updateApplicationStatus };
+async function getApplicationByEmail(email) {
+  return await repo.getApplicationByEmail(email);
+}
+
+module.exports = { getAllApplications, createNewApplication, updateApplicationStatus, getApplicationByEmail };

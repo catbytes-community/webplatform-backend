@@ -19,4 +19,10 @@ async function updateApplicationStatus(id, status, comment, modifiedBy, modified
     .returning('*');
 }
 
-module.exports = { getAllApplications, createNewApplication, updateApplicationStatus };
+async function getApplicationByEmail(email) {
+  return await knex('applications')
+    .where("email", email)
+    .first();
+}
+
+module.exports = { getAllApplications, createNewApplication, updateApplicationStatus, getApplicationByEmail };

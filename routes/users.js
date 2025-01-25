@@ -2,11 +2,51 @@ const express = require("express");
 
 const router = express.Router();
 const userService = require("../services/user_service");
-const rolesService = require("../services/roles_service");
+const applService = require("../services/applications_service");
+const admin = require("firebase-admin");
 const {verifyOwnership, OWNED_ENTITIES} = require("../middleware/authorization");
 const { isValidIntegerId, respondWithError, isUniqueConstraintViolation, isNotNullConstraintViolation } = require("./helpers");
 
 router.use(express.json());
+
+// POST /users/login
+router.post("/users/login", async (req, res) => {
+  const token = req.headers['token'];
+  if (!token) {
+    return respondWithError(res, 401, "No token provided");
+  }
+  try {
+    const decodedToken = await admin.auth().verifyIdToken(token);
+    const email = decodedToken.email;
+    const firebaseId = decodedToken.uid;
+
+    if (!decodedToken.email_verified) {
+      return respondWithError(res, 403, "Email not verified");
+    }
+
+    const application = await applService.getApplicationByEmail(email);  
+    if (!application || !application.status === 'approved') {
+      return respondWithError(res, 403, "Application is not approved or does not exist");
+    }
+
+    let user = await userService.getUserByEmail(email);
+    if (!user) {
+      user = await userService.createNewMemberUser(
+        application.name,
+        email,
+        application.about,
+        application.languages
+      );
+      await userService.updateUserById(user.id, {firebase_id: firebaseId});  
+    }
+
+    res.cookie('userUID', firebaseId, { httpOnly: true, secure: true });
+    res.status(200).json({ user: user });
+  } catch (error) {
+    console.error(error);
+    return respondWithError(res, 401, "Unauthorized");
+  }
+});
 
 // Get all users
 router.get("/users", async (req, res) => {
@@ -26,10 +66,8 @@ router.post("/users", async (req, res) => {
   try {
     // todo: firebase will only know user's email, we will need to get user's application by email
     // and populate user entity with that data here 
-    const userId = await userService.createNewUser(name, email, about, languages);
-    // todo add transactions: if something went wrong here, the user should not be saved
-    await rolesService.assignRoleToUser(userId, 'member');
-    res.status(201).json({ id: userId });
+    const user = await userService.createNewMemberUser(name, email, about, languages);       
+    res.status(201).json({ id: user.id });
   } catch (err) {
     console.error(err);
     if (isUniqueConstraintViolation(err.code)) {
@@ -67,7 +105,7 @@ router.put("/users/:id", verifyOwnership(OWNED_ENTITIES.USER), async (req, res) 
     return respondWithError(res, 400, "Invalid user id supplied");
   }
   try {
-    const [updatedUser] = await userService.updateUserById(id, name, about, languages);
+    const [updatedUser] = await userService.updateUserById(id, { name: name, about: about, languages: languages });
     if (!updatedUser) {
       return respondWithError(res, 404, "User not found");
     }
@@ -89,7 +127,7 @@ router.delete("/users/:id", verifyOwnership(OWNED_ENTITIES.USER), async (req, re
     if (result === 0) {
       return respondWithError(res, 404, "User not found.");
     }
-    res.status(200).json({ id });
+    res.status(200).json({ user_id: id });
   } catch (err) {
     console.error(err);
     respondWithError(res);

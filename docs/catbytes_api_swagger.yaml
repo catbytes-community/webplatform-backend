@@ -11,7 +11,7 @@ info:
     
     Some useful links:
     - [CatBytes backend repository](https://github.com/catbytes-community/webplatform-backend)
-    - [CatBytes API server](http://18.212.59.47/)
+    - [CatBytes API server](https://devapi.catbytes.io/)
 
   version: 1.0.0
 externalDocs:
@@ -19,7 +19,7 @@ externalDocs:
   url: http://swagger.io
   
 servers:
-  - url: https://somepath.catbytes.io/api/v1
+  - url: https://devapi.catbytes.io/
 tags:
   - name: applications
     description: New users applications
@@ -248,6 +248,80 @@ paths:
                   users:
                     type: object
                     example: [{"id":1,"name":"Jane","languages":["English","Spanish"]}, {"id":2,"name":"Nina","languages":["English","Russian"]}]
+  /users/login:
+    post:
+      tags:
+        - users
+      summary: ✅ User login
+      description: Authenticates a user based on a provided Firebase token sent in the header.  
+                   On successful authentication, sets a secure 'userUID' cookie.
+      operationId: loginUser
+      parameters:
+        - name: token
+          in: header
+          description: "Firebase token"
+          required: true
+          schema:
+            type: string
+            example: "FIREBASE_TOKEN"
+      responses:
+        '200':
+          description: "Successful login"
+          headers:
+            Set-Cookie:
+              description: "Secure cookie containing 'userUID'"
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 42
+                      name:
+                        type: string
+                        example: "Jane"
+                      email:
+                        type: string
+                        example: "jane@example.com"
+                      about:
+                        type: string
+                        example: "Hi I am Jane"
+                      created_at:
+                        type: string
+                        format: date-time
+                        example: "2024-12-15T17:27:56.146Z"
+                      languages:
+                        type: array
+                        items:
+                          type: string
+                        example: ["English", "Spanish"]
+        '401':
+          description: "No token provided or invalid token."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "No token provided"
+        '403':
+          description: "Invalid application status or email verification."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Email not verified"
+                    
   /user/{user_id}:
     get:
       tags:

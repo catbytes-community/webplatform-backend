@@ -1,5 +1,5 @@
 const { getKnex } = require("../db");
- 
+
 async function getAllUsers() {
   const knex = getKnex();
   return await knex("users").select("id", "name", "languages");
@@ -16,6 +16,13 @@ async function createNewUser(name, email, about, languages) {
 async function getUserInfoById(id) {
   const knex = getKnex();
   return await knex("users").where("id", id).first();
+}
+
+async function getUserByEmail(email) {
+  const knex = getKnex();
+  return await knex("users")
+    .where({ email })
+    .first();
 }
 
 async function getUserRolesById(id) {
@@ -39,4 +46,5 @@ async function deleteUserById(id) {
   return await knex("users").where("id", id).del();
 }
 
-module.exports = {  getAllUsers, createNewUser, getUserInfoById, getUserRolesById, updateUserById, deleteUserById };
+module.exports = { getAllUsers, createNewUser, getUserInfoById, getUserRolesById, updateUserById, 
+  deleteUserById, getUserByEmail };
