@@ -65,4 +65,4 @@ const APPL_STATUSES = {
   pending: "pending",
 };
 
-module.exports = { APPL_STATUSES, ROLE_NAMES, isRoleExists, ROLE_NAMES, loadRolesIntoMemory, getRole, getFirebaseSdkServiceAccount };
+module.exports = { APPL_STATUSES, ROLE_NAMES, isRoleExists, loadRolesIntoMemory, getRole, getFirebaseSdkServiceAccount };

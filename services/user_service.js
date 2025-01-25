@@ -33,4 +33,4 @@ async function getUserByEmail(email) {
   return await repo.getUserByEmail(email);
 }
 
-module.exports = { getAllUsers, createNewUser, getUserById, updateUserById, deleteUserById, getUserByEmail };
+module.exports = { getAllUsers, createNewMemberUser, getUserById, updateUserById, deleteUserById, getUserByEmail };
