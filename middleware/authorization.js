@@ -4,24 +4,26 @@ const { respondWithError } = require('../routes/helpers');
 
 function verifyRole(roleName) {
   return async (req, res, next) => {
-      try {
-          const userId = req.userId;
-          if (!userId) {
-              return respondWithError(res, 401, "User not authenticated");
-          }
-
-          const roleId = utils.getRole(roleName);
-          const userRole = await repo.verifyRole(userId, roleId);
-          if (userRole.length === 0){
-              return respondWithError(res, 403, "You're not allowed to access this resource")
-          }
-          next();
-      } catch (err) {
-          console.error('Error verifying role:', err);
-          return respondWithError(res);
+    try {
+      const userId = req.userId;
+      if (!userId) {
+        return respondWithError(res, 401, "User not authenticated");
       }
-  }
-};
+
+      const roleId = utils.getRole(roleName);
+      const userRole = await repo.verifyRole(userId, roleId);
+      if (userRole.length === 0){
+        return respondWithError(res, 403, "You're not allowed to access this resource");
+      }
+      next();
+    } catch (err) {
+      console.error('Error verifying role:', err);
+      return respondWithError(res);
+    }
+  };
+}
+
+;
 
 const OWNED_ENTITIES = {
   USER: 'users',
@@ -29,14 +31,14 @@ const OWNED_ENTITIES = {
 };
 
 function verifyOwnership(entityTable) {
-    return async (req, res, next) => {
-        console.log("Middleware invoked for:", req.url);
-        try {
-            const resourceId = req.params.id;
-            const userId = req.userId;
-            if (!userId) {
-                return respondWithError(res, 401, "User not authenticated");
-            }
+  return async (req, res, next) => {
+    console.log("Middleware invoked for:", req.url);
+    try {
+      const resourceId = req.params.id;
+      const userId = req.userId;
+      if (!userId) {
+        return respondWithError(res, 401, "User not authenticated");
+      }
     
       if (!resourceId || !userId) {
         return respondWithError(res, 400, `Invalid request: missing ${entityTable} ID or user information`);
