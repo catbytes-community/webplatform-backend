@@ -19,19 +19,18 @@ router.post("/users/login", async (req, res) => {
     const decodedToken = await admin.auth().verifyIdToken(token);
     const email = decodedToken.email;
     const firebaseId = decodedToken.uid;
-    
+
     if (!decodedToken.email_verified) {
       return respondWithError(res, 403, "Email not verified");
     }
-    // check if application exists  
+
     const application = await applService.getApplicationByEmail(email);  
     if (!application || !application.status === 'approved') {
-      return respondWithError(res, 403, "Application not approved or does not exist");
+      return respondWithError(res, 403, "Application is not approved or does not exist");
     }
-    //checking if user exists
+
     let user = await userService.getUserByEmail(email);
     if (!user) {
-      // creating new user if it doesn't exist
       user = await userService.createNewUser(
         application.name,
         email,
@@ -41,9 +40,8 @@ router.post("/users/login", async (req, res) => {
       );
       await userService.updateUserById(user.id, {firebase_id: firebaseId});  
     }
-    //set secure cookie with UID - check if firebaseId should be used here (aliona)
+
     res.cookie('userUID', firebaseId, { httpOnly: true, secure: true });
-    //user info
     res.status(200).json({ user: user });
   } catch (error) {
     console.error(error);
