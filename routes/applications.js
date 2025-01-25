@@ -1,5 +1,5 @@
 const express = require("express");
-const applService = require("../services/applications_service")
+const applService = require("../services/applications_service");
 const { verifyRole } = require("../middleware/authorization");
 const { ROLE_NAMES, APPL_STATUSES } = require("../utils");
 const {
@@ -7,7 +7,8 @@ const {
   isUniqueConstraintViolation,
   isNotNullConstraintViolation,
 } = require("./helpers");
-const { sendEmailOnApplicationStatusChange } = require("../services/mailer_service")
+const { sendEmailOnApplicationStatusChange } = require("../services/mailer_service");
+
 const router = express.Router();
 router.use(express.json());
 
@@ -22,14 +23,14 @@ router.get("/applications", verifyRole(ROLE_NAMES.mentor), async (req, res) => {
 });
 
 router.post("/applications", async (req, res) => {
-  const { name, about, email, video_link, discord_nickname } = req.body;
+  const { name, about, email, videoLink, discordNickname } = req.body;
   try {
     const result = await applService.createNewApplication(
       name,
       about,
       email,
-      video_link,
-      discord_nickname
+      videoLink,
+      discordNickname
     );
 
     res.status(201).json(result);
@@ -49,39 +50,39 @@ router.post("/applications", async (req, res) => {
 });
 
 router.put("/applications/:id", verifyRole(ROLE_NAMES.mentor), async (req, res) => {
-    const { id } = req.params;
-    const { status, comment, user_id } = req.body; // user_id = who approved/denied
-    const today = new Date();
+  const { id } = req.params;
+  const { status, comment, userId } = req.body; // user_id = who approved/denied
+  const today = new Date();
 
-    if (!Object.values(APPL_STATUSES).includes(status)) {
-      return respondWithError(res, 400, "Invalid status provided");
-    }
-
-    if (status === APPL_STATUSES.rejected && !comment) {
-      return respondWithError(
-        res,
-        400,
-        "Comment is required for rejected applications"
-      );
-    }
-    try {
-      // todo add transaction
-      // todo add check if status already set up to `status` value
-      const [application] = await applService.updateApplicationStatus(
-        id,
-        status,
-        comment,
-        user_id,
-        today
-      );
-
-      await sendEmailOnApplicationStatusChange(application.email, application.name, status, comment);
-      res.status(200).json(application);
-    } catch (err) {
-      console.error(err);
-      respondWithError(res);
-    }
+  if (!Object.values(APPL_STATUSES).includes(status)) {
+    return respondWithError(res, 400, "Invalid status provided");
   }
+
+  if (status === APPL_STATUSES.rejected && !comment) {
+    return respondWithError(
+      res,
+      400,
+      "Comment is required for rejected applications"
+    );
+  }
+  try {
+    // todo add transaction
+    // todo add check if status already set up to `status` value
+    const [application] = await applService.updateApplicationStatus(
+      id,
+      status,
+      comment,
+      userId,
+      today
+    );
+
+    await sendEmailOnApplicationStatusChange(application.email, application.name, status, comment);
+    res.status(200).json(application);
+  } catch (err) {
+    console.error(err);
+    respondWithError(res);
+  }
+}
 );
 
 module.exports = router;

@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "CatBytes Web Platform",
-    "description": "This is CatBytes Web Platform API specification.\n\n!\nPlease note, this is an initial draft of the API, all payloads and response bodies are very likely to change.\n\nEndpoints marked with ✅ emoji are already implemented and live and  their specifications are up-to-date.\n\nSome useful links:\n- [CatBytes backend repository](https://github.com/catbytes-community/webplatform-backend)\n- [CatBytes API server](http://18.212.59.47/)",
+    "description": "This is CatBytes Web Platform API specification.\n\n!\nPlease note, this is an initial draft of the API, all payloads and response bodies are very likely to change.\n\nEndpoints marked with ✅ emoji are already implemented and live and  their specifications are up-to-date.\n\nSome useful links:\n- [CatBytes backend repository](https://github.com/catbytes-community/webplatform-backend)\n- [CatBytes API server](https://devapi.catbytes.io/)",
     "version": "1.0.0"
   },
   "externalDocs": {
@@ -11,7 +11,7 @@
   },
   "servers": [
     {
-      "url": "https://somepath.catbytes.io/api/v1"
+      "url": "https://devapi.catbytes.io/"
     }
   ],
   "tags": [
@@ -412,29 +412,35 @@
     },
     "/users/login": {
       "post": {
-        "tags": [ "users" ],
-        "summary": "User login",
-        "description": "Authenticates a user based on a provided Firebase token.",
+        "tags": [
+          "users"
+        ],
+        "summary": "✅ User login",
+        "description": "Authenticates a user based on a provided Firebase token sent in the header. On successful authentication, sets a secure 'userUID' cookie.",
         "operationId": "loginUser",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "token": {
-                    "type": "string",
-                    "example": "FIREBASE_TOKEN"
-                  }
-                }
-              }
+        "parameters": [
+          {
+            "name": "token",
+            "in": "header",
+            "description": "Firebase token",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "FIREBASE_TOKEN"
             }
           }
-        },
+        ],
         "responses": {
           "200": {
             "description": "Successful login",
+            "headers": {
+              "Set-Cookie": {
+                "description": "Secure cookie containing 'userUID'",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -457,10 +463,11 @@
                         },
                         "about": {
                           "type": "string",
-                          "example": "Hi iam Jane"
+                          "example": "Hi I am Jane"
                         },
                         "created_at": {
                           "type": "string",
+                          "format": "date-time",
                           "example": "2024-12-15T17:27:56.146Z"
                         },
                         "languages": {
@@ -472,10 +479,6 @@
                             "English",
                             "Spanish"
                           ]
-                        },
-                        "firebase_id": {
-                          "type": "string",
-                          "example": "aabbccddeeffgggkkk"
                         }
                       }
                     }
@@ -485,7 +488,7 @@
             }
           },
           "401": {
-            "description": "Unauthorized - No token provided or invalid token.",
+            "description": "No token provided or invalid token.",
             "content": {
               "application/json": {
                 "schema": {
@@ -501,7 +504,7 @@
             }
           },
           "403": {
-            "description": "Forbidden - Invalid application status or email verification",
+            "description": "Invalid application status or email verification.",
             "content": {
               "application/json": {
                 "schema": {
@@ -509,7 +512,6 @@
                   "properties": {
                     "error": {
                       "type": "string",
-                      "description": "Error message",
                       "example": "Email not verified"
                     }
                   }
