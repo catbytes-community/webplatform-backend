@@ -15,6 +15,8 @@ export default [
       globals: globals.node
      },
     rules: {
+        "no-console": ["warn"],
+        "eqeqeq": ["error", "always"],
         "prefer-const": "error",
         "no-unused-vars": "error",
         "camelcase": ["error", {"properties": "never"}],

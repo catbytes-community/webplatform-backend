@@ -58,10 +58,10 @@ async function sendApplicationRejectedEmail(email, name) {
 }
 
 async function sendEmailOnApplicationStatusChange(email, name, status, comment) {
-  if (status == APPL_STATUSES.approved) {
+  if (status === APPL_STATUSES.approved) {
     await sendApplicationApprovedEmail(email, name, comment);
   } 
-  else if (status == APPL_STATUSES.rejected) {
+  else if (status === APPL_STATUSES.rejected) {
     await sendApplicationRejectedEmail(email, name, comment);
   }
   else {
