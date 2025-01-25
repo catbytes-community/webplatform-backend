@@ -31,12 +31,11 @@ router.post("/users/login", async (req, res) => {
 
     let user = await userService.getUserByEmail(email);
     if (!user) {
-      user = await userService.createNewUser(
+      user = await userService.createNewMemberUser(
         application.name,
         email,
         application.about,
-        application.languages,
-        'member'
+        application.languages
       );
       await userService.updateUserById(user.id, {firebase_id: firebaseId});  
     }
@@ -67,7 +66,7 @@ router.post("/users", async (req, res) => {
   try {
     // todo: firebase will only know user's email, we will need to get user's application by email
     // and populate user entity with that data here 
-    const user = await userService.createNewUser(name, email, about, languages, 'member');       
+    const user = await userService.createNewMemberUser(name, email, about, languages);       
     res.status(201).json({ id: user.id });
   } catch (err) {
     console.error(err);

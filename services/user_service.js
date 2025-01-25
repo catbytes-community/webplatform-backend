@@ -6,9 +6,9 @@ async function getAllUsers() {
   return await repo.getAllUsers();
 }
 
-async function createNewUser(name, email, about, languages, role) {
+async function createNewMemberUser(name, email, about, languages) {
   var user = await repo.createNewUser(name, email, about, languages);
-  await rolesService.assignRoleToUser(user.id, role);
+  await rolesService.assignRoleToUser(user.id, 'member');
   return user;
 }
 
