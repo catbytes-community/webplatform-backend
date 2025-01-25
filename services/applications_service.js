@@ -1,15 +1,15 @@
 const repo = require('../repositories/applications_repository');
 
 async function getAllApplications() {
-    return await repo.getAllApplications();
+  return await repo.getAllApplications();
 }
 
-async function createNewApplication(name, about, email, video_link, discord_nickname) {
-    return await repo.createNewApplication(name, about, email, video_link, discord_nickname);
+async function createNewApplication(name, about, email, videoLink, discordNickname) {
+  return await repo.createNewApplication(name, about, email, videoLink, discordNickname);
 }
 
-async function updateApplicationStatus(id, status, comment, modified_by, modified_at) {
-    return await repo.updateApplicationStatus(id, status, comment, modified_by, modified_at);
+async function updateApplicationStatus(id, status, comment, modifiedBy, modifiedAt) {
+  return await repo.updateApplicationStatus(id, status, comment, modifiedBy, modifiedAt);
 }
 async function getApplicationByEmail(email) {
     return await repo.getApplicationByEmail(email);
