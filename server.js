@@ -1,5 +1,6 @@
 require("dotenv").config();
 const express = require("express");
+const cookieParser = require('cookie-parser');
 const cors = require("cors");
 const { initDb } = require('./db');
 const { initMailer } = require('./services/mailer_service');
@@ -11,6 +12,7 @@ const app = express();
 
 // Middleware
 app.use(express.json());
+app.use(cookieParser());
 app.use(cors());
 app.use(authenticate());
 

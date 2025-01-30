@@ -18,11 +18,9 @@ async function getUserInfoById(id) {
   return await knex("users").where("id", id).first();
 }
 
-async function getUserByEmail(email) {
+async function getUserByFields(fields) {
   const knex = getKnex();
-  return await knex("users")
-    .where({ email })
-    .first();
+  return await knex("users").where(fields).first();
 }
 
 async function getUserRolesById(id) {
@@ -47,4 +45,4 @@ async function deleteUserById(id) {
 }
 
 module.exports = { getAllUsers, createNewUser, getUserInfoById, getUserRolesById, updateUserById, 
-  deleteUserById, getUserByEmail };
+  deleteUserById, getUserByFields };

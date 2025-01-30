@@ -1,4 +1,4 @@
-const usersRepo = require('../repositories/user_repository');
+const userService = require('../services/user_service');
 const { respondWithError } = require('../routes/helpers');
 
 function authenticate() {
@@ -10,7 +10,7 @@ function authenticate() {
         return next();
       }
 
-      const user = await usersRepo.getUserInfoByField({ firebase_id: userFirebaseId });
+      const user = await userService.getUserByFirebaseId(userFirebaseId);
       if (!user) {
         console.warn(`Found user UID in request cookies, but no corresponding user found in database`);
         return respondWithError(res, 401, "User with provided UID not found");
