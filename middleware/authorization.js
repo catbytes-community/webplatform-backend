@@ -5,8 +5,11 @@ const { respondWithError } = require('../routes/helpers');
 function verifyRole(roleName) {
   return async (req, res, next) => {
     try {
-      // todo: get user id from request (token?)
-      const userId = 1; // temp
+      const userId = req.userId;
+      if (!userId) {
+        return respondWithError(res, 401, "User not authenticated");
+      }
+
       const roleId = utils.getRole(roleName);
       const userRole = await repo.verifyRole(userId, roleId);
       if (userRole.length === 0){
@@ -20,6 +23,8 @@ function verifyRole(roleName) {
   };
 }
 
+;
+
 const OWNED_ENTITIES = {
   USER: 'users',
   MENTOR: 'mentors'
@@ -29,8 +34,11 @@ function verifyOwnership(entityTable) {
   return async (req, res, next) => {
     console.log("Middleware invoked for:", req.url);
     try {
-      const userId = '1'; // todo: extract from request
       const resourceId = req.params.id;
+      const userId = req.userId;
+      if (!userId) {
+        return respondWithError(res, 401, "User not authenticated");
+      }
     
       if (!resourceId || !userId) {
         return respondWithError(res, 400, `Invalid request: missing ${entityTable} ID or user information`);

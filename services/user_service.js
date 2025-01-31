@@ -29,8 +29,13 @@ async function deleteUserById(id) {
   return await repo.deleteUserById(id);
 }  
 
-async function getUserByEmail(email) {
-  return await repo.getUserByEmail(email);
+async function getUserByFirebaseId(firebaseId) {
+  return await repo.getUserByFields({firebase_id: firebaseId});
 }
 
-module.exports = { getAllUsers, createNewMemberUser, getUserById, updateUserById, deleteUserById, getUserByEmail };
+async function getUserByEmail(email) {
+  return await repo.getUserByFields({email: email});
+}
+
+module.exports = { getAllUsers, createNewMemberUser, getUserById, updateUserById, deleteUserById, 
+  getUserByEmail, getUserByFirebaseId };

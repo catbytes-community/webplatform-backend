@@ -1,16 +1,20 @@
 require("dotenv").config();
 const express = require("express");
+const cookieParser = require('cookie-parser');
 const cors = require("cors");
 const { initDb } = require('./db');
 const { initMailer } = require('./services/mailer_service');
 const utils = require('./utils');
 const admin = require("firebase-admin");
+const { authenticate } = require("./middleware/authentication");
 
 const app = express();
 
 // Middleware
 app.use(express.json());
+app.use(cookieParser());
 app.use(cors());
+app.use(authenticate());
 
 (async () => {   
   await initDb();
@@ -20,6 +24,7 @@ app.use(cors());
   admin.initializeApp({
     credential: admin.credential.cert(firebaseServiceAccount),
   });
+
   // Routes
   const routes = require("./routes/routes");
   
