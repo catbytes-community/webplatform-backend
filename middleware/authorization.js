@@ -23,8 +23,6 @@ function verifyRole(roleName) {
   };
 }
 
-;
-
 const OWNED_ENTITIES = {
   USER: 'users',
   MENTOR: 'mentors'

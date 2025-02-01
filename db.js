@@ -1,6 +1,6 @@
 const knex = require('knex');
 const { loadSecrets } = require("./aws/ssm-helper");
-const config = require("./config.json");
+const config = require('config');
 
 require("dotenv").config();
 

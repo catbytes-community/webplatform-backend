@@ -1,5 +1,5 @@
 const nodemailer = require('nodemailer');
-const config = require("../config.json");
+const config = require('config');
 const { loadSecrets } = require("../aws/ssm-helper");
 const { APPL_STATUSES } = require("../utils");
 
