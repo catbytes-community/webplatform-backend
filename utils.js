@@ -1,6 +1,6 @@
 const repo = require('./repositories/roles_repository');
 const { loadSecrets } = require("./aws/ssm-helper");
-const config = require("./config.json");
+const config = require('config');
 
 let rolesCache = null;
 
