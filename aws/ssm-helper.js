@@ -6,6 +6,7 @@ async function loadSecrets(region, names, withDecryption = false) {
   });      
 
   try {
+    console.log('Fetching secrets from region:', region);
     const command = new GetParametersCommand({
       Names: names,
       WithDecryption: withDecryption,
