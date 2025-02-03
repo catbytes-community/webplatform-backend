@@ -7,19 +7,25 @@ async function getAllUsers() {
 
 async function createNewUser(name, email, about, languages) {
   const knex = getKnex();
-  return await knex("users")
+  const user = knex("users")
     .insert({ name: name, email: email, about: about, languages: languages })
     .returning("*");
+  delete user["firebase_id"];
+  return user;
 }
 
 async function getUserInfoById(id) {
   const knex = getKnex();
-  return await knex("users").where("id", id).first();
+  const user = await knex("users").where("id", id).first();
+  delete user["firebase_id"];
+  return user;
 }
 
 async function getUserByFields(fields) {
   const knex = getKnex();
-  return await knex("users").where(fields).first();
+  const user = await knex("users").where(fields).first();
+  delete user["firebase_id"];
+  return user;
 }
 
 async function getUserRolesById(id) {
@@ -32,10 +38,12 @@ async function getUserRolesById(id) {
 
 async function updateUserById(id, updates) {
   const knex = getKnex();
-  return await knex("users")
+  const [user] = await knex("users")
     .where("id", id)
     .update(updates)
     .returning("*");
+  delete user["firebase_id"];
+  return user;
 }
 
 async function deleteUserById(id) {

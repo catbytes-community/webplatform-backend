@@ -106,7 +106,7 @@ router.put("/users/:id", verifyOwnership(OWNED_ENTITIES.USER), async (req, res) 
     return respondWithError(res, 400, "Invalid user id supplied");
   }
   try {
-    const [updatedUser] = await userService.updateUserById(id, { name: name, about: about, languages: languages });
+    const updatedUser = await userService.updateUserById(id, { name: name, about: about, languages: languages });
     if (!updatedUser) {
       return respondWithError(res, 404, "User not found");
     }
