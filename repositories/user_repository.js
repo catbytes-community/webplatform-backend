@@ -7,10 +7,9 @@ async function getAllUsers() {
 
 async function createNewUser(name, email, about, languages) {
   const knex = getKnex();
-  const [user] = await knex("users")
-  	.insert({ name: name, email: email, about: about, languages: languages })
-    .returning("id");
-  return user.id;
+  return await knex("users")
+    .insert({ name: name, email: email, about: about, languages: languages })
+    .returning("*");
 }
 
 async function getUserInfoById(id) {
@@ -31,11 +30,11 @@ async function getUserRolesById(id) {
     .select("roles.role_name", "roles.id");
 }
 
-async function updateUserById(id, name, about, languages) {
+async function updateUserById(id, updates) {
   const knex = getKnex();
   return await knex("users")
     .where("id", id)
-    .update({name: name, about: about, languages: languages })
+    .update(updates)
     .returning("*");
 }
 

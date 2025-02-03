@@ -22,7 +22,7 @@ async function getUserById(id) {
 }
 
 async function updateUserById(id, updates) {
-  return await repo.updateUserById(id, updates );   
+  return await repo.updateUserById(id, updates);   
 }
 
 async function deleteUserById(id) {
