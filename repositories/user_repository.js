@@ -8,19 +8,28 @@ async function getAllUsers() {
 async function createNewUser(name, email, about, languages) {
   const knex = getKnex();
   const [user] = await knex("users")
-  	.insert({ name: name, email: email, about: about, languages: languages })
-    .returning("id");
-  return user.id;
+    .insert({ name: name, email: email, about: about, languages: languages })
+    .returning("*");
+  delete user["firebase_id"];
+  return user;
 }
 
 async function getUserInfoById(id) {
   const knex = getKnex();
-  return await knex("users").where("id", id).first();
+  const user = await knex("users").where("id", id).first();
+  if (user !== undefined){
+    delete user["firebase_id"];
+  }
+  return user;
 }
 
 async function getUserByFields(fields) {
   const knex = getKnex();
-  return await knex("users").where(fields).first();
+  const user = await knex("users").where(fields).first();
+  if (user !== undefined){
+    delete user["firebase_id"];
+  }
+  return user;
 }
 
 async function getUserRolesById(id) {
@@ -31,12 +40,16 @@ async function getUserRolesById(id) {
     .select("roles.role_name", "roles.id");
 }
 
-async function updateUserById(id, name, about, languages) {
+async function updateUserById(id, updates) {
   const knex = getKnex();
-  return await knex("users")
+  const [user] = await knex("users")
     .where("id", id)
-    .update({name: name, about: about, languages: languages })
+    .update(updates)
     .returning("*");
+  if (user !== undefined){
+    delete user["firebase_id"];
+  }
+  return user;
 }
 
 async function deleteUserById(id) {

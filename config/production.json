@@ -4,5 +4,8 @@
     "db_endpoint": "prod-catbytes-web-platform-db.ct2ag4a86wsn.eu-west-2.rds.amazonaws.com",
     "db_name": "catbytes_webplatform",
     "db_port": 5432
+  },
+  "cors": {
+    "allowedOrigins": ["https://catbytes.io/"]
   }
 }

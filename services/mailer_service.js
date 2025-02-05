@@ -58,16 +58,25 @@ async function sendApplicationRejectedEmail(email, name) {
 }
 
 async function sendEmailOnApplicationStatusChange(email, name, status, comment) {
-  if (status === APPL_STATUSES.approved) {
-    await sendApplicationApprovedEmail(email, name, comment);
-  } 
-  else if (status === APPL_STATUSES.rejected) {
-    await sendApplicationRejectedEmail(email, name, comment);
+  try {
+    if (status === APPL_STATUSES.approved) {
+      await sendApplicationApprovedEmail(email, name, comment);
+    } 
+    else if (status === APPL_STATUSES.rejected) {
+      await sendApplicationRejectedEmail(email, name, comment);
+    }
+    else {
+      console.log(`Not sending aplication status change email, because status ${status}
+              is not in email-sending allow-list.`);
+    }
   }
-  else {
-    console.log(`Not sending aplication status change email, because status ${status}
-            is not in email-sending allow-list.`);
+  catch (err) {
+    // todo: add correct error processing: if "domain does not accept mail" - log it, 
+    // put to some deadletter for future manual verification
+    // if some other error - we should retry sending email - add queue
+    console.error("Error sending email on application status change:", err.message);
   }
+  
 }
 
 module.exports = { initMailer, sendEmailOnApplicationStatusChange };

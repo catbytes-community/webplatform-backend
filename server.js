@@ -1,4 +1,5 @@
 require("dotenv").config();
+const config = require('config');
 const express = require("express");
 const cookieParser = require('cookie-parser');
 const cors = require("cors");
@@ -13,7 +14,13 @@ const app = express();
 // Middleware
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors());
+app.use(cors({
+  origin: (origin, callback) => {
+    const allowed = !origin || config.cors.allowedOrigins.includes(origin);
+    callback(allowed ? null : new Error('Not allowed by CORS'), allowed);
+  },
+  credentials: true
+}));
 app.use(authenticate());
 
 (async () => {   

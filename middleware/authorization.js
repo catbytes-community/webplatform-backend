@@ -44,7 +44,7 @@ function verifyOwnership(entityTable) {
             
       let resource;
       if (entityTable === OWNED_ENTITIES.USER) {
-        resource = userId === resourceId;
+        resource = userId.toString() === resourceId.toString();
       } else {
         const result = await repo.verifyOwnership(entityTable, resourceId, userId);
         resource = result.rows && result.length !== 0;

@@ -37,8 +37,9 @@ router.post("/users/login", async (req, res) => {
         application.about,
         application.languages
       );
-      await userService.updateUserById(user.id, {firebase_id: firebaseId});  
     }
+
+    await userService.updateUserById(user.id, {firebase_id: firebaseId});  
 
     res.cookie('userUID', firebaseId, { httpOnly: true, secure: true });
     res.status(200).json({ user: user });
@@ -105,7 +106,7 @@ router.put("/users/:id", verifyOwnership(OWNED_ENTITIES.USER), async (req, res) 
     return respondWithError(res, 400, "Invalid user id supplied");
   }
   try {
-    const [updatedUser] = await userService.updateUserById(id, { name: name, about: about, languages: languages });
+    const updatedUser = await userService.updateUserById(id, { name: name, about: about, languages: languages });
     if (!updatedUser) {
       return respondWithError(res, 404, "User not found");
     }

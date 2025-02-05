@@ -51,7 +51,7 @@ router.post("/applications", async (req, res) => {
 
 router.put("/applications/:id", verifyRole(ROLE_NAMES.mentor), async (req, res) => {
   const { id } = req.params;
-  const { status, comment, userId } = req.body; // user_id = who approved/denied
+  const { status, comment } = req.body;
   const today = new Date();
 
   if (!Object.values(APPL_STATUSES).includes(status)) {
@@ -72,7 +72,7 @@ router.put("/applications/:id", verifyRole(ROLE_NAMES.mentor), async (req, res) 
       id,
       status,
       comment,
-      userId,
+      req.userId,
       today
     );
 
