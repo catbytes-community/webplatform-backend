@@ -41,7 +41,7 @@ router.post("/users/login", async (req, res) => {
 
     await userService.updateUserById(user.id, {firebase_id: firebaseId});  
 
-    res.cookie('userUID', firebaseId, { httpOnly: true, secure: true });
+    res.cookie('userUID', firebaseId, { httpOnly: true, secure: true, sameSite: 'none' });
     res.status(200).json({ user: user });
   } catch (error) {
     console.error(error);
