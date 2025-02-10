@@ -16,7 +16,6 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
   origin: (origin, callback) => {
-    console.log('origin>> ', origin);
     if (!origin || config.cors.allowedOrigins.includes(origin)) {
       callback(null, origin);
     } else {
@@ -25,7 +24,7 @@ app.use(cors({
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'], 
+  allowedHeaders: ['Content-Type', 'Authorization', 'token'], 
 }));
 app.options('*', cors()); 
 app.use(authenticate());
