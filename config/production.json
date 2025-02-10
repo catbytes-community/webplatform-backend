@@ -6,6 +6,6 @@
     "db_port": 5432
   },
   "cors": {
-    "allowedOrigins": ["https://catbytes.io/"]
+    "allowedOrigins": ["https://catbytes.io"]
   }
 }
