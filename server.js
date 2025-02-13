@@ -16,11 +16,17 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
   origin: (origin, callback) => {
-    const allowed = !origin || config.cors.allowedOrigins.includes(origin);
-    callback(allowed ? null : new Error('Not allowed by CORS'), allowed);
+    if (!origin || config.cors.allowedOrigins.includes(origin)) {
+      callback(null, origin);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
   },
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'token'], 
 }));
+app.options('*', cors()); 
 app.use(authenticate());
 
 (async () => {   
