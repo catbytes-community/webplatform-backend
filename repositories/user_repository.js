@@ -5,10 +5,10 @@ async function getAllUsers() {
   return await knex("users").select("id", "name", "languages");
 }
 
-async function createNewUser(name, email, about, languages) {
+async function createNewUser(values) {
   const knex = getKnex();
   const [user] = await knex("users")
-    .insert({ name: name, email: email, about: about, languages: languages })
+    .insert(values)
     .returning("*");
   delete user["firebase_id"];
   return user;

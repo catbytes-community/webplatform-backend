@@ -6,8 +6,8 @@ async function getAllUsers() {
   return await repo.getAllUsers();
 }
 
-async function createNewMemberUser(name, email, about, languages) {
-  var user = await repo.createNewUser(name, email, about, languages);
+async function createNewMemberUser(name, email, about, languages, discord_nickname) {
+  var user = await repo.createNewUser({ name: name, email: email, about: about, languages: languages, discord_nickname: discord_nickname });
   await rolesService.assignRoleToUser(user.id, 'member');
   return user;
 }
