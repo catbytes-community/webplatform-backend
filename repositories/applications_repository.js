@@ -12,17 +12,18 @@ async function createNewApplication(name, about, email, videoLink, discordNickna
     .returning('*');
 }
 
-async function updateApplicationStatus(id, status, comment, modifiedBy, modifiedAt) {
-  return await knex('applications')
+async function updateApplicationById(id, status, comment, modifiedBy, modifiedAt) {
+  const [application] = await knex('applications')
     .where({ id })
     .update({ status: status, comment: comment, modified_by: modifiedBy, modified_at: modifiedAt })
     .returning('*');
+  return application;
 }
 
-async function getApplicationByEmail(email) {
+async function getApplicationByFields(fields) {
   return await knex('applications')
-    .where("email", email)
+    .where(fields)
     .first();
 }
 
-module.exports = { getAllApplications, createNewApplication, updateApplicationStatus, getApplicationByEmail };
+module.exports = { getAllApplications, createNewApplication, updateApplicationById, getApplicationByFields };

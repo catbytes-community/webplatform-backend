@@ -1,4 +1,6 @@
 const nodemailer = require('nodemailer');
+const nodemailerHbs = require('nodemailer-express-handlebars').default;
+const path = require('path');
 const config = require('config');
 const { loadSecrets } = require("../aws/ssm-helper");
 const { APPL_STATUSES } = require("../utils");
@@ -6,6 +8,7 @@ const { APPL_STATUSES } = require("../utils");
 require("dotenv").config();
 
 const mailerConfig = config.mailer;
+const webplatformUrl = config.platform_url;
 let mailTransporter = null;
 
 async function initMailer() {
@@ -27,6 +30,18 @@ async function initMailer() {
       pass: mailerPassword,
     }
   });
+ 
+  const handleBarOptions = {
+    viewEngine: {
+      extName: ".hbs",
+      partialsDir: path.resolve("./templates/email"),
+      defaultLayout: false,
+    },
+    viewPath: path.resolve("./templates/email"),
+    extName: ".hbs",
+  };
+
+  mailTransporter.use('compile', nodemailerHbs(handleBarOptions));
 }
 
 const sendMail = async (to, subject, content) => {
@@ -40,41 +55,67 @@ const sendMail = async (to, subject, content) => {
 };
 
 async function sendApplicationApprovedEmail(email, name) {
-  // todo change template to real
-  const body = `
-        <h2>Welcome to CatBytes!</h2>
-        <p>Hello, ${name}, we're happy to notify your application to CatBytes has been approved! :) </p>`;
+  const mailOptions = {
+      from: mailerConfig.user,
+      to: email,
+      subject: "Welcome to CatBytes!",
+      template: "member_application_approved_email",
+      context: {
+        name: name,
+        catbytesLink: webplatformUrl,
+      },
+      attachments: [
+        {
+          filename: "happy-cat.png",
+          path: path.resolve("./templates/email/src/happy-cat.png"),
+          cid: "happycat",
+        },
+      ],
+    };
 
-  return sendMail(email, "Welcome to CatBytes!", body);
+  return mailTransporter.sendMail(mailOptions);
 }
 
 async function sendApplicationRejectedEmail(email, name) {
-  // todo change template to real
-  const body = `
-        <h2>Uh-oh!</h2>
-        <p>Hello, ${name}, unfortunately your application to CatBytes has been rejected :( </p>`;
+  const mailOptions = {
+    from: mailerConfig.user,
+    to: email,
+    subject: "Thank you for your application to CatBytes",
+    template: "member_application_rejected_email",
+    context: {
+      name: name,
+      catbytesLink: webplatformUrl,
+    },
+    attachments: [
+      {
+        filename: "sad-cat.png",
+        path: path.resolve("./templates/email/src/sad-cat.png"),
+        cid: "sadcat",
+      },
+    ],
+  };
 
-  return sendMail(email, "Thank you for applying to CatBytes", body);
+return mailTransporter.sendMail(mailOptions);
 }
 
-async function sendEmailOnApplicationStatusChange(email, name, status, comment) {
+async function sendEmailOnApplicationStatusChange(email, name, status) {
   try {
     if (status === APPL_STATUSES.approved) {
-      await sendApplicationApprovedEmail(email, name, comment);
+      await sendApplicationApprovedEmail(email, name);
     } 
     else if (status === APPL_STATUSES.rejected) {
-      await sendApplicationRejectedEmail(email, name, comment);
+      await sendApplicationRejectedEmail(email, name);
     }
     else {
       console.log(`Not sending aplication status change email, because status ${status}
-              is not in email-sending allow-list.`);
+        is not in email-sending allow-list.`);
     }
   }
   catch (err) {
     // todo: add correct error processing: if "domain does not accept mail" - log it, 
     // put to some deadletter for future manual verification
     // if some other error - we should retry sending email - add queue
-    console.error("Error sending email on application status change:", err.message);
+    console.error(`Error sending email to ${email} on application status change:`, err.message);
   }
   
 }
