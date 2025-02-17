@@ -11,5 +11,6 @@ CREATE TABLE applications (
     comment TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     modified_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    modified_by INTEGER
+    modified_by INTEGER,
+    CONSTRAINT chk_not_empty_name CHECK (name <> '')
 );
