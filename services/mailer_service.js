@@ -44,34 +44,24 @@ async function initMailer() {
   mailTransporter.use('compile', nodemailerHbs(handleBarOptions));
 }
 
-const sendMail = async (to, subject, content) => {
-  const mailOptions = {
-    from: mailerConfig.user,
-    to,
-    subject,
-    html: content,
-  };
-  return mailTransporter.sendMail(mailOptions);
-};
-
 async function sendApplicationApprovedEmail(email, name) {
   const mailOptions = {
-      from: mailerConfig.user,
-      to: email,
-      subject: "Welcome to CatBytes!",
-      template: "member_application_approved_email",
-      context: {
-        name: name,
-        catbytesLink: webplatformUrl,
+    from: mailerConfig.user,
+    to: email,
+    subject: "Welcome to CatBytes!",
+    template: "member_application_approved_email",
+    context: {
+      name: name,
+      catbytesLink: webplatformUrl,
+    },
+    attachments: [
+      {
+        filename: "happy-cat.png",
+        path: path.resolve("./templates/email/src/happy-cat.png"),
+        cid: "happycat",
       },
-      attachments: [
-        {
-          filename: "happy-cat.png",
-          path: path.resolve("./templates/email/src/happy-cat.png"),
-          cid: "happycat",
-        },
-      ],
-    };
+    ],
+  };
 
   return mailTransporter.sendMail(mailOptions);
 }
@@ -95,7 +85,7 @@ async function sendApplicationRejectedEmail(email, name) {
     ],
   };
 
-return mailTransporter.sendMail(mailOptions);
+  return mailTransporter.sendMail(mailOptions);
 }
 
 async function sendEmailOnApplicationStatusChange(email, name, status) {
