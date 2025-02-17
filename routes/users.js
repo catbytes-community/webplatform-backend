@@ -35,7 +35,8 @@ router.post("/users/login", async (req, res) => {
         application.name,
         email,
         application.about,
-        application.languages
+        application.languages, 
+        application.discord_nickname
       );
     }
 

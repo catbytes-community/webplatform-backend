@@ -23,14 +23,14 @@ router.get("/applications", verifyRole(ROLE_NAMES.mentor), async (req, res) => {
 });
 
 router.post("/applications", async (req, res) => {
-  const { name, about, email, videoLink, discordNickname } = req.body;
+  const payload = req.body;
   try {
     const result = await applService.createNewApplication(
-      name,
-      about,
-      email,
-      videoLink,
-      discordNickname
+      payload.name,
+      payload.about,
+      payload.email,
+      payload.video_link,
+      payload.discord_nickname
     );
 
     res.status(201).json(result);
