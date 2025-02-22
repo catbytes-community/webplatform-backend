@@ -1,5 +1,4 @@
 const nodemailer = require('nodemailer');
-const nodemailerHbs = require('nodemailer-express-handlebars').default;
 const path = require('path');
 const config = require('config');
 const { loadSecrets } = require("../aws/ssm-helper");
@@ -13,6 +12,7 @@ let mailTransporter = null;
 
 async function initMailer() {
   let mailerPassword;
+  const nodemailerHbs = (await import('nodemailer-express-handlebars')).default;
 
   if (process.env.ENVIRONMENT === "local") {
     mailerPassword = process.env.MAILER_PASSWORD;
