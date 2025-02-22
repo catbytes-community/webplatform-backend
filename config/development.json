@@ -7,5 +7,6 @@
   },
   "cors": {
     "allowedOrigins": ["http://localhost:5173", "https://dev.catbytes.io"]
-  }
+  },
+  "platform_url": "https://dev.catbytes.io/"
 }
