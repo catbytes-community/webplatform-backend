@@ -2,8 +2,8 @@
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.up = function(knex) {
-  return knex.raw(`
+exports.up = async function(knex) {
+  await knex.raw(`
     CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,              
         name VARCHAR(255),                  
@@ -40,8 +40,8 @@ exports.up = function(knex) {
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.down = function(knex) {
-  return knex.raw(`
+exports.down = async function(knex) {
+  await knex.raw(`
     -- Remove inserted default roles
     DELETE FROM roles WHERE role_name IN ('Member', 'Mentor');
 
