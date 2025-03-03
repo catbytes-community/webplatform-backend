@@ -1888,7 +1888,7 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "inviteLink": {
+                    "invite_link": {
                       "type": "string",
                       "description": "The generated Discord invite link.",
                       "example": "https://discord.gg/abc123"
@@ -1899,7 +1899,7 @@
             }
           },
           "400": {
-            "description": "User already exists on the server or invite generation is on cooldown for this user",
+            "description": "User already exists on the server",
             "content": {
               "application/json": {
                 "schema": {
@@ -1926,6 +1926,23 @@
                       "type": "string",
                       "description": "Error message.",
                       "example": "User with provided UID not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Invite generation on cooldown for this user. Next link generation is possible after 7 days has passed since last one",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Error message.",
+                      "example": "Invite generation is on cooldown for this user"
                     }
                   }
                 }
