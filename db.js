@@ -7,8 +7,9 @@ require("dotenv").config();
 let databaseUsername, databaseHost, databaseName, databasePassword, databasePort;
 let knexInstance = null;
 
-async function initDb() {
+async function getDbSettings() {
   const isLocal = process.env.ENVIRONMENT === "local";
+  console.log("isLocal: ", isLocal);
   if (isLocal) {
     databaseUsername = process.env.DB_USER;
     databaseHost = process.env.DB_HOST || "localhost";
@@ -31,18 +32,31 @@ async function initDb() {
     databasePort = awsConfig.databasePort;
   }
 
+  return {
+    databaseUsername,
+    databaseHost,
+    databaseName,
+    databasePassword,
+    databasePort,
+    ssl: isLocal ? false : { rejectUnauthorized: false }
+  };
+}
+
+async function initDb() {
+  const settings = await getDbSettings();
+  
   knexInstance = knex({
     client: 'pg',
     connection: {
-      host: databaseHost,
-      user: databaseUsername,
-      password: databasePassword,
-      database: databaseName,
-      port: databasePort,
+      host: settings.databaseHost,
+      user: settings.databaseUsername,
+      password: settings.databasePassword,
+      database: settings.databaseName,
+      port: settings.databasePort,
       connectionTimeoutMillis: 5000,
-      ssl: isLocal ? false : { rejectUnauthorized: false }
+      ssl: settings.ssl
     },   
   });
 }
 
-module.exports = { initDb, getKnex: () => knexInstance };
+module.exports = { getDbSettings, initDb, getKnex: () => knexInstance };
