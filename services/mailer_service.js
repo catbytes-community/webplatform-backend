@@ -46,7 +46,7 @@ async function initMailer() {
 }
 
 async function sendApplicationApprovedEmail(email, name) {
-    //no need to put restrictions on appl approved email
+  //no need to put restrictions on appl approved email
   const inviteLink = await discordService.generateInviteLink(null);
 
   const mailOptions = {

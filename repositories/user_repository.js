@@ -16,7 +16,7 @@ async function createNewUser(values) {
 
 async function getUserInfoById(id) {
   const knex = getKnex();
-    const user = await knex("users").where("id", id).first();
+  const user = await knex("users").where("id", id).first();
   if (user !== undefined){
     delete user["firebase_id"];
   }
