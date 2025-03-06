@@ -1,5 +1,0 @@
-CREATE TABLE IF NOT EXISTS discord_links (
-    user_id INT REFERENCES users(id) ON DELETE CASCADE,
-    link TEXT NOT NULL,
-    link_sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
