@@ -19,7 +19,6 @@ router.post("/users/login", async (req, res) => {
     const decodedToken = await admin.auth().verifyIdToken(token);
     const email = decodedToken.email;
     const firebaseId = decodedToken.uid;
-    console.log(firebaseId);
 
     if (!decodedToken.email_verified) {
       return respondWithError(res, 403, "Email not verified");
