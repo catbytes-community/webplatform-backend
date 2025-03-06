@@ -9,11 +9,15 @@ async function createNewApplication(name, about, email, videoLink, discordNickna
 }
 
 async function updateApplicationStatus(id, status, comment, modifiedBy, modifiedAt) {
-  return await repo.updateApplicationStatus(id, status, comment, modifiedBy, modifiedAt);
+  return await repo.updateApplicationById(id, status, comment, modifiedBy, modifiedAt);
 }
 
 async function getApplicationByEmail(email) {
-  return await repo.getApplicationByEmail(email);
+  return await repo.getApplicationByFields({email: email});
 }
 
-module.exports = { getAllApplications, createNewApplication, updateApplicationStatus, getApplicationByEmail };
+async function getApplicationById(id) {
+  return await repo.getApplicationByFields({id: id});
+}
+
+module.exports = { getAllApplications, createNewApplication, updateApplicationStatus, getApplicationByEmail, getApplicationById };

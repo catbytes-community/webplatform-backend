@@ -7,5 +7,6 @@
   },
   "cors": {
     "allowedOrigins": ["https://catbytes.io"]
-  }
+  },
+  "platform_url": "https://catbytes.io/"
 }

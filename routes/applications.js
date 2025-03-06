@@ -66,9 +66,22 @@ router.put("/applications/:id", verifyRole(ROLE_NAMES.mentor), async (req, res) 
     );
   }
   try {
+    let application = await applService.getApplicationById(id);
+
+    if (!application) {
+      return respondWithError(res, 404, "Application not found");
+    }
+
+    if (application.status === APPL_STATUSES.rejected) {
+      return respondWithError(res, 400, "Application is already in rejected status.");
+    }
+
+    if (application.status === APPL_STATUSES.approved) {
+      res.status(200).json(application);
+    }
+    
     // todo add transaction
-    // todo add check if status already set up to `status` value
-    const [application] = await applService.updateApplicationStatus(
+    application = await applService.updateApplicationStatus(
       id,
       status,
       comment,
@@ -76,7 +89,7 @@ router.put("/applications/:id", verifyRole(ROLE_NAMES.mentor), async (req, res) 
       today
     );
 
-    await sendEmailOnApplicationStatusChange(application.email, application.name, status, comment);
+    await sendEmailOnApplicationStatusChange(application.email, application.name, status);
     res.status(200).json(application);
   } catch (err) {
     console.error(err);
