@@ -46,6 +46,9 @@ async function initMailer() {
 }
 
 async function sendApplicationApprovedEmail(email, name) {
+    //no need to put restrictions on appl approved email
+  const inviteLink = await discordService.generateInviteLink(null);
+
   const mailOptions = {
     from: mailerConfig.user,
     to: email,
@@ -54,6 +57,8 @@ async function sendApplicationApprovedEmail(email, name) {
     context: {
       name: name,
       catbytesLink: webplatformUrl,
+      inviteLink: inviteLink,
+      inviteExpirationNote: "Note: The link expires in 7 days!",
     },
     attachments: [
       {
@@ -64,13 +69,7 @@ async function sendApplicationApprovedEmail(email, name) {
     ],
   };
 
-async function sendApplicationApprovedEmail(email, name) {
-  // todo change template to real
-  const body = `
-        <h2>Welcome to CatBytes!</h2>
-        <p>Hello, ${name}, we're happy to notify your application to CatBytes has been approved! :) </p>`;
-
-  return sendMail(email, "Welcome to CatBytes!", body);
+  return mailTransporter.sendMail(mailOptions);
 }
 
 async function sendApplicationRejectedEmail(email, name) {

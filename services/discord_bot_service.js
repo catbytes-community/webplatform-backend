@@ -2,14 +2,11 @@ const { discordBot } = require('../discordBot.js');
 const userService = require('../services/user_service');
 const repo = require('../repositories/discord_bot_repository');
 
-async function generateInviteLink(options = {}) {
-  const { userId = null } = options; // defaulting to null if userid not provided 
-  //(no need to put restrictions on appl approved email)
+async function generateInviteLink(userId) {
   try {
     const guild = await getGuild(discordBot.discordClient, discordBot.guildId);
     const channel = await getChannel(guild, discordBot.channelId);
     const invite = await createInvite(channel); 
-    
     if (userId !== null) {
       const user = await getUser(userId);
       await checkRestrictionsOnGenerateLink(user, guild);

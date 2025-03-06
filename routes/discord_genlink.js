@@ -11,7 +11,7 @@ router.post('/generate-invite', authenticate(), async (req, res) => {
     if (!req.userId) {
       return res.status(401).json({ error: 'User with provided UID not found' });
     }
-    const invite = await discordService.generateInviteLink(req.userId);
+      const invite = await discordService.generateInviteLink(req.userId);
     res.json({ invite_link: invite });
   } catch (error) {
     console.error('Error generating invite:', error);
