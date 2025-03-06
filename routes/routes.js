@@ -5,6 +5,7 @@ const usersRoutes = require("./users");
 const applRoutes = require("./applications");
 const rolesRoutes = require("./roles");
 const mailerService = require("../services/mailer_service");
+const discordRoutes = require("./discord_genlink");
 
 router.use(express.json());
 
@@ -12,6 +13,7 @@ router.use(express.json());
 router.use(usersRoutes); 
 router.use(applRoutes);  
 router.use(rolesRoutes);  
+router.use(discordRoutes); 
 
 router.get("/", (req, res) => {
   res.send("API Specification in Swagger: https://catbytes-community.github.io/webplatform-backend/");
@@ -20,7 +22,7 @@ router.get("/", (req, res) => {
 // helper route to quickly trigger email sending for testing
 // todo: should be secured or removed
 router.post("/mail-test", async (req, res) => {
-  const { name, email} = req.body;
+  const { name, email } = req.body;
   await mailerService.sendApplicationApprovedEmail(email, name);
   res.json({"message": "email successfully sent"});
 });

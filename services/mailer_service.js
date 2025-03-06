@@ -2,6 +2,7 @@ const nodemailer = require('nodemailer');
 const config = require('config');
 const { loadSecrets } = require("../aws/ssm-helper");
 const { APPL_STATUSES } = require("../utils");
+const discordService = require("../services/discord_bot_service");
 
 require("dotenv").config();
 
@@ -40,11 +41,14 @@ const sendMail = async (to, subject, content) => {
 };
 
 async function sendApplicationApprovedEmail(email, name) {
+  const inviteLink = await discordService.generateInviteLink();
   // todo change template to real
   const body = `
         <h2>Welcome to CatBytes!</h2>
-        <p>Hello, ${name}, we're happy to notify your application to CatBytes has been approved! :) </p>`;
-
+        <p>Hello, ${name}, we're happy to notify your application to CatBytes has been approved! :) </p>
+        <p>You can join our server using the link below!</p>
+        <p>${inviteLink}</p> 
+        <p>Note: the link is going to expire in 7 days!</p>`;
   return sendMail(email, "Welcome to CatBytes!", body);
 }
 
@@ -79,4 +83,4 @@ async function sendEmailOnApplicationStatusChange(email, name, status, comment) 
   
 }
 
-module.exports = { initMailer, sendEmailOnApplicationStatusChange };
+module.exports = { initMailer, sendEmailOnApplicationStatusChange, sendApplicationApprovedEmail  };
