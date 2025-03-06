@@ -84,7 +84,7 @@ async function validateUserNotOnServer(guild, username) {
 
 async function createInvite(channel) {
   return await channel.createInvite({
-    maxAge: 5 * 24 * 3600,
+    maxAge: 7 * 24 * 3600,
     maxUses: 1,
     unique: true,
   });
