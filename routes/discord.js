@@ -1,15 +1,14 @@
 const express = require('express');
+const discordService = require('../services/discord_bot_service');
+const { respondWithError } = require("./helpers");
+const { verifyRole } = require("../middleware/authorization");
+const { ROLE_NAMES } = require("../utils");
 
 const router = express.Router();
 router.use(express.json());
-const discordService = require('../services/discord_bot_service');
-const { respondWithError } = require("./helpers");
 
-router.post('/generate-invite', async (req, res) => {
+router.post('/generate-invite', verifyRole(ROLE_NAMES.member), async (req, res) => {
   try {
-    if (!req.userId) {
-      return res.status(401).json({ error: 'User with provided UID not found' });
-    }
     const invite = await discordService.generateInviteLink(req.userId);
     res.json({ invite_link: invite });
   } catch (error) {

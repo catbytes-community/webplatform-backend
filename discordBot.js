@@ -16,6 +16,7 @@ async function initDiscordBot() {
       GatewayIntentBits.GuildMembers,
     ],
   });
+
   let botToken, channelId, serverId = null; 
   if (process.env.ENVIRONMENT === "local") {
     botToken = process.env.BOT_TOKEN;
@@ -27,6 +28,7 @@ async function initDiscordBot() {
     channelId = params['channel_id'];
     serverId = params['server_id'];
   }
+
   await discordClient.login(botToken);
   discordClient.once('ready', async () => {
     try {

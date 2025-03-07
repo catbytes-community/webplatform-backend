@@ -22,7 +22,8 @@ async function generateInviteLink(userId) {
 
 async function checkRestrictionsOnGenerateLink(user, guild) {
   try {
-    await validateUserNotOnServer(guild, user.discord_nickname) && await checkCooldown(user.id);
+    await validateUserNotOnServer(guild, user.discord_nickname);
+    await checkCooldown(user.id);
   }
   catch (error) {
     console.error('Failed to generate invite:', error.message);
@@ -51,9 +52,8 @@ async function checkCooldown(userId) {
   const lastInviteTime = await repo.getLastInviteTime(userId);
 
   if (lastInviteTime) {
-    const cooldownDate = new Date(lastInviteTime);
-    cooldownDate.setDate(cooldownDate.getDate() + 7); // Add 7 days to the last invite time
-
+    // Add 7 days to the last invite time
+    const cooldownDate = new Date(lastInviteTime).setDate(new Date(lastInviteTime).getDate() + 7);
     const currentDate = new Date();
     if (currentDate < cooldownDate) {
       const error = new Error('Invite generation is on cooldown for this user');
@@ -61,12 +61,10 @@ async function checkCooldown(userId) {
       throw error;
     }
   }
-
-  return true; // no cooldown or cooldown has expired
 }
 
 async function getUser(userId) {
-  const user = userService.getUserById(userId);
+  const user = await userService.getUserById(userId);
   if (!user) throw new Error('User not found');
   return user;
 }
@@ -79,7 +77,6 @@ async function validateUserNotOnServer(guild, username) {
     error.status = 400;
     throw error;
   }
-  return true;  //no user with this username on the server
 }
 
 async function createInvite(channel) {
