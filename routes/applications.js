@@ -6,6 +6,7 @@ const {
   respondWithError,
   isUniqueConstraintViolation,
   isNotNullConstraintViolation,
+  parseColumnNameFromConstraint
 } = require("./helpers");
 const { sendEmailOnApplicationStatusChange } = require("../services/mailer_service");
 
@@ -36,14 +37,16 @@ router.post("/applications", async (req, res) => {
     res.status(201).json(result);
   } catch (err) {
     console.error(err);
+    const violatedValue = parseColumnNameFromConstraint(err.constraint, 'applications');
     if (isUniqueConstraintViolation(err.code)) {
       return respondWithError(
         res,
         409,
-        "Application with this email already exists"
+        `Application with this ${violatedValue} already exists`
       );
     } else if (isNotNullConstraintViolation(err.code)) {
-      return respondWithError(res, 400, err.message);
+      return respondWithError(
+        res, 400, `Field ${violatedValue} is required`);
     }
     respondWithError(res);
   }

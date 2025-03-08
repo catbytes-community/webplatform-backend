@@ -18,4 +18,13 @@ const isNotNullConstraintViolation = (errorCode) => {
   return errorCode === '23502';
 };
 
-module.exports = { respondWithError, isValidIntegerId, isUniqueConstraintViolation, isNotNullConstraintViolation };
+function parseColumnNameFromConstraint(constraintValue, tableName) {
+  try {
+    return constraintValue.replace(`${tableName}_`, '').replace('_key', '');
+  } catch (error) {
+    return null;
+  }
+}
+
+module.exports = { respondWithError, isValidIntegerId, isUniqueConstraintViolation, isNotNullConstraintViolation, 
+  parseColumnNameFromConstraint };
