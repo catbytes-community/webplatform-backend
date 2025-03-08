@@ -1,6 +1,6 @@
 const { SSMClient, GetParametersCommand } = require('@aws-sdk/client-ssm');
 
-async function loadSecrets(region, names, withDecryption = false) {
+async function loadSecrets(region, names, withDecryption = false, parseJson = false) {
   const ssmClient = new SSMClient({
     region: region,
   });      
@@ -14,8 +14,9 @@ async function loadSecrets(region, names, withDecryption = false) {
 
     const result = await ssmClient.send(command);
 
-    const secrets = result.Parameters.reduce((acc, param) => {
-      acc[param.Name.split('/').pop()] = param.Value;
+    const secrets = result.Parameters.reduce((acc, { Name, Value }) => {
+      const key = Name.split('/').pop();
+      acc[key] = parseJson ? parseJsonValue(Value) : Value;
       return acc;
     }, {});
 
@@ -24,6 +25,14 @@ async function loadSecrets(region, names, withDecryption = false) {
   } catch (error) {
     console.error('Error fetching parameters:', error);
     throw error;
+  }
+}
+
+function parseJsonValue(value) {
+  try {
+    return JSON.parse(value);
+  } catch {
+    return value;
   }
 }
 

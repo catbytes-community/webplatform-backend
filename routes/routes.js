@@ -24,7 +24,7 @@ router.get("/", (req, res) => {
 // helper route to quickly trigger email sending for testing
 router.post("/mail-test", verifyRole(ROLE_NAMES.mentor), async (req, res) => {
   const { name, email} = req.body;
-  await mailerService.sendEmailOnApplicationStatusChange(email, name, APPL_STATUSES.rejected);
+  await mailerService.sendEmailOnApplicationStatusChange(email, name, APPL_STATUSES.approved);
   res.json({"message": "email successfully sent"});
 });
 

@@ -5,7 +5,8 @@ const userService = require("../services/user_service");
 const applService = require("../services/applications_service");
 const admin = require("firebase-admin");
 const {verifyOwnership, OWNED_ENTITIES} = require("../middleware/authorization");
-const { isValidIntegerId, respondWithError, isUniqueConstraintViolation, isNotNullConstraintViolation } = require("./helpers");
+const { isValidIntegerId, respondWithError, isUniqueConstraintViolation, 
+  isNotNullConstraintViolation, parseColumnNameFromConstraint } = require("./helpers");
 
 router.use(express.json());
 
@@ -72,10 +73,16 @@ router.post("/users", async (req, res) => {
     res.status(201).json({ id: user.id });
   } catch (err) {
     console.error(err);
+    const violatedValue = parseColumnNameFromConstraint(err.constraint, 'users');
     if (isUniqueConstraintViolation(err.code)) {
-      return respondWithError(res, 409, "User with this email is already registered");
+      return respondWithError(
+        res,
+        409,
+        `User with this ${violatedValue} is already registered`
+      );
     } else if (isNotNullConstraintViolation(err.code)) {
-      return respondWithError(res, 400, err.message);
+      return respondWithError(
+        res, 400, `Field ${violatedValue} is required`);
     }
     respondWithError(res);
   }

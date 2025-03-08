@@ -9,7 +9,6 @@ const discordBot = {
 };
 
 async function initDiscordBot() {
-
   const discordClient = new Client({
     intents: [
       GatewayIntentBits.Guilds,
@@ -17,19 +16,21 @@ async function initDiscordBot() {
     ],
   });
 
-  let botToken, channelId, serverId = null; 
+  let botToken, channelId, serverId = null;
+
   if (process.env.ENVIRONMENT === "local") {
     botToken = process.env.BOT_TOKEN;
     channelId = process.env.CHANNEL_ID;
     serverId = process.env.SERVER_ID;
   } else {
-    const params = await loadSecrets(config.aws.param_store_region, ['/catbytes_webplatform/discord_bot_params'], true);
-    botToken = params['bot_token'];
-    channelId = params['channel_id'];
-    serverId = params['server_id'];
+    const params = await loadSecrets(config.aws.param_store_region, ['/catbytes_webplatform/discord_bot_params'], true, true);
+    botToken = params['discord_bot_params']['bot_token'];
+    channelId = params['discord_bot_params']['channel_id'];
+    serverId = params['discord_bot_params']['server_id'];
   }
 
   await discordClient.login(botToken);
+  
   discordClient.once('ready', async () => {
     try {
       discordBot.discordClient = discordClient;
