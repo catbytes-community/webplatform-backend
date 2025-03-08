@@ -16,7 +16,7 @@ const isNotNullConstraintViolation = (errorCode) => {
 function parseColumnNameFromConstraint(constraintValue, tableName) {
   try {
     return constraintValue.replace(`${tableName}_`, '').replace('_key', '');
-  } catch (error) {
+  } catch {
     return null;
   }
 }
