@@ -3,6 +3,7 @@ const path = require('path');
 const config = require('config');
 const { loadSecrets } = require("../aws/ssm-helper");
 const { APPL_STATUSES } = require("../utils");
+const discordService = require("../services/discord_bot_service");
 
 require("dotenv").config();
 
@@ -45,6 +46,9 @@ async function initMailer() {
 }
 
 async function sendApplicationApprovedEmail(email, name) {
+  //no need to put restrictions on appl approved email
+  const inviteLink = await discordService.generateInviteLink(null);
+
   const mailOptions = {
     from: mailerConfig.user,
     to: email,
@@ -53,6 +57,8 @@ async function sendApplicationApprovedEmail(email, name) {
     context: {
       name: name,
       catbytesLink: webplatformUrl,
+      inviteLink: inviteLink,
+      inviteExpirationNote: "Note: The link expires in 7 days!",
     },
     attachments: [
       {
