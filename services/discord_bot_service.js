@@ -21,15 +21,8 @@ async function generateInviteLink(userId) {
 }
 
 async function checkRestrictionsOnGenerateLink(user, guild) {
-  try {
-    await validateUserNotOnServer(guild, user.discord_nickname);
-    await checkCooldown(user.id);
-  }
-  catch (error) {
-    console.error('Failed to generate invite:', error.message);
-    throw error;
-  }
- 
+  await validateUserNotOnServer(guild, user.discord_nickname);
+  await checkCooldown(user.id);
 }
 
 async function getGuild(discordClient, guildId) {
