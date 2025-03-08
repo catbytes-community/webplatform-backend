@@ -1,8 +1,3 @@
-// Route helpers
-const respondWithError = (res, status = 500, message = "Internal Server Error") => {
-  res.status(status).json({"error": message});
-};
-
 // Validating resource id 
 const isValidIntegerId = (id) => {
   const resourceId = parseInt(id, 10);
@@ -26,5 +21,25 @@ function parseColumnNameFromConstraint(constraintValue, tableName) {
   }
 }
 
+// Route helpers
+const respondWithError = (res, status = 500, message = "Internal Server Error") => {
+  res.status(status).json({"error": message});
+};
+
+function checkConstraintViolationOrRespondWith500(err, res, tableName) {
+  const violatedValue = parseColumnNameFromConstraint(err.constraint, tableName);
+  if (isUniqueConstraintViolation(err.code)) {
+    return respondWithError(
+      res,
+      409,
+      `Resource ${tableName} with this ${violatedValue} already exists`
+    );
+  } else if (isNotNullConstraintViolation(err.code)) {
+    return respondWithError(
+      res, 400, `Field ${violatedValue} is required in ${tableName}`);
+  }
+  respondWithError(res);
+}
+
 module.exports = { respondWithError, isValidIntegerId, isUniqueConstraintViolation, isNotNullConstraintViolation, 
-  parseColumnNameFromConstraint };
+  parseColumnNameFromConstraint, checkConstraintViolationOrRespondWith500 };

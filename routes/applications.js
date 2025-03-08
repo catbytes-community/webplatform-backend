@@ -4,9 +4,7 @@ const { verifyRole } = require("../middleware/authorization");
 const { ROLE_NAMES, APPL_STATUSES } = require("../utils");
 const {
   respondWithError,
-  isUniqueConstraintViolation,
-  isNotNullConstraintViolation,
-  parseColumnNameFromConstraint
+  checkConstraintViolationOrRespondWith500
 } = require("./helpers");
 const { sendEmailOnApplicationStatusChange } = require("../services/mailer_service");
 
@@ -37,18 +35,7 @@ router.post("/applications", async (req, res) => {
     res.status(201).json(result);
   } catch (err) {
     console.error(err);
-    const violatedValue = parseColumnNameFromConstraint(err.constraint, 'applications');
-    if (isUniqueConstraintViolation(err.code)) {
-      return respondWithError(
-        res,
-        409,
-        `Application with this ${violatedValue} already exists`
-      );
-    } else if (isNotNullConstraintViolation(err.code)) {
-      return respondWithError(
-        res, 400, `Field ${violatedValue} is required`);
-    }
-    respondWithError(res);
+    checkConstraintViolationOrRespondWith500(err, res, 'applications');
   }
 });
 
