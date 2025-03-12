@@ -4,7 +4,8 @@ const router = express.Router();
 const userService = require("../services/user_service");
 const applService = require("../services/applications_service");
 const admin = require("firebase-admin");
-const {verifyOwnership, OWNED_ENTITIES} = require("../middleware/authorization");
+const { ROLE_NAMES } = require("../utils");
+const {verifyOwnership, verifyRole, OWNED_ENTITIES} = require("../middleware/authorization");
 const { isValidIntegerId, respondWithError, isUniqueConstraintViolation, 
   isNotNullConstraintViolation, parseColumnNameFromConstraint } = require("./helpers");
 
@@ -52,7 +53,7 @@ router.post("/users/login", async (req, res) => {
 });
 
 // Get all users
-router.get("/users", async (req, res) => {
+router.get("/users", verifyRole(ROLE_NAMES.member), async (req, res) => {
   try {
     const users = await userService.getAllUsers();
     res.json({ users });
@@ -89,7 +90,7 @@ router.post("/users", async (req, res) => {
 });
 
 // Get user by ID
-router.get("/users/:id", async (req, res) => {
+router.get("/users/:id", verifyRole(ROLE_NAMES.member), async (req, res) => {
   const { id } = req.params;
   if (!isValidIntegerId(id)) {
     return respondWithError(res, 400, "Invalid user id supplied");
