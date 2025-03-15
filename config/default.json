@@ -1,0 +1,7 @@
+{
+  "mailer": {
+    "user": "noreply@catbytes.io",
+    "out_host": "smtp.ionos.co.uk",
+    "out_port": 587
+  }
+}

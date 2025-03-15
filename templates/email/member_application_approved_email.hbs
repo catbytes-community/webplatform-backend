@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
+    <title>Email Template</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Poppins', sans-serif;
+        background-color: #f4f4f4;
+      }
+      table {
+        border-spacing: 0;
+        width: 100%;
+      }
+      p,
+      h1,
+      h2,
+      h3 {
+        margin: 0;
+      }
+      .email-container {
+        max-width: 600px;
+        margin: 20px auto;
+        background: linear-gradient(
+          39deg,
+          #f8b5bb 0%,
+          #fef3f5 39.5%,
+          #fef3f5 67.5%,
+          #f8b5bb 100%
+        );
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        padding: 40px;
+      }
+      .title {
+        font-weight: 700;
+        font-size: 48px;
+      }
+      .subtitle {
+        font-family: 'Montserrat', serif;
+        font-weight: 500;
+        font-size: 20px;
+      }
+      .email-container img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 0 auto 20px;
+      }
+      .date {
+        font-family: 'Montserrat', serif;
+        text-align: right;
+        font-weight: 300;
+        font-size: 14px;
+        color: rgba(23, 1, 3, 0.42);
+      }
+      .greetings {
+        font-family: 'Montserrat', serif;
+        font-size: 24px;
+        color: #170103;
+        font-weight: 600;
+        margin: 50px 0 20px;
+      }
+      .mail-body-text {
+        font-family: 'Montserrat', serif;
+        line-height: 1.5;
+      }
+      .button {
+        display: inline-block;
+        background: linear-gradient(135deg, #ff377f 0%, #ffd482 100%);
+        color: #ffffff;
+        text-decoration: none;
+        border-radius: 20px;
+        padding: 12px 24px;
+        font-size: 14px;
+        font-weight: 500;
+        text-transform: uppercase;
+        box-shadow: 0 6px 7px rgba(255, 134, 141, 0.29);
+
+        margin: 30px 0;
+      }
+      .footer {
+        display: flex;
+        justify-content: space-between;
+      }
+      .footer-email {
+        font-family: 'Montserrat', serif;
+        text-align: left;
+        font-size: 10px;
+        color: #666666;
+        margin-top: 20px;
+        font-style: italic;
+        font-weight: 200;
+        line-height: 1.5;
+      }
+      .paw {
+        padding-right: 50px;
+      }
+    </style>
+  </head>
+  <body>
+    <table
+      role="presentation"
+      cellspacing="0"
+      cellpadding="0"
+      border="0"
+      class="email-container"
+    >
+      <tr>
+        <td>
+          <p class="title">Congratulations!</p>
+          <p class="subtitle">Your application to join CatBytes has been approved.</p>
+          <img src="cid:happycat" alt="Happy Cat" />
+          <div style="
+              box-shadow: 0 6px 10px 0 rgba(255, 166, 173, 0.4);
+              background: #fff;
+              padding: 20px;
+            ">
+              <p class="greetings">Dear <span>{{name}}</span>!</p>
+              <p class="mail-body-text">
+                  We hope this letter finds you well. We are pleased to inform you that
+                  your application to become a member of CatBytes Comminuty has been reviewed and approved.
+
+                  <br>
+                  <br>
+                  <b>Next steps:</b>
+                  You will receive an additional email from Firebase with a link to log into CatBytes platform. Click it to create an account!
+              </p>
+              <p class="mail-body-text">
+                  You can join our Discord server using the invite link below:
+              </p>
+              <p class="mail-body-text">
+                  <a href="{{inviteLink}}">{{inviteLink}}</a>
+              </p>
+              <p class="mail-body-text">
+                  {{inviteExpirationNote}}
+              </p>
+              <a href="{{catbytesLink}}" class="button">Start browsing!</a>
+
+              <div class="footer">
+                  <div>
+                      <p class="footer-email">
+                          If you have any questions, feel free <br />to contact us at
+                          <a href="mailto:hello@catbytes.io">hello@catbytes.io</a>
+                          <br />
+                          Best wishes, CatBytes!
+                      </p>
+                  </div>
+                  <div class="paw">
+                      <svg width="48"
+                           height="49"
+                           viewBox="0 0 48 49"
+                           fill="none"
+                           xmlns="http://www.w3.org/2000/svg"
+                           xmlns:xlink="http://www.w3.org/1999/xlink">
+                          <rect width="47.5"
+                                height="48.5"
+                                fill="url(#pattern0_2873_4822)" />
+                          <defs>
+                              <pattern id="pattern0_2873_4822"
+                                       patternContentUnits="objectBoundingBox"
+                                       width="1"
+                                       height="1">
+                                  <use xlink:href="#image0_2873_4822"
+                                       transform="scale(0.0105263 0.0103093)" />
+                              </pattern>
+                              <image id="image0_2873_4822"
+                                     width="95"
+                                     height="97"
+                                     xlink:href="data:image/png;base64,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" />
+                          </defs>
+                      </svg>
+                  </div>
+              </div>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

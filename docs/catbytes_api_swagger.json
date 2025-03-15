@@ -1,0 +1,1973 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "CatBytes Web Platform",
+    "description": "This is CatBytes Web Platform API specification.\n\n!\nPlease note, this is an initial draft of the API, all payloads and response bodies are very likely to change.\n\nEndpoints marked with ✅ emoji are already implemented and live and  their specifications are up-to-date.\n\nSome useful links:\n- [CatBytes backend repository](https://github.com/catbytes-community/webplatform-backend)\n- [CatBytes API server](https://devapi.catbytes.io/)",
+    "version": "1.0.0"
+  },
+  "externalDocs": {
+    "description": "Find out more about Swagger",
+    "url": "http://swagger.io"
+  },
+  "servers": [
+    {
+      "url": "https://devapi.catbytes.io/"
+    }
+  ],
+  "tags": [
+    {
+      "name": "applications",
+      "description": "New users applications"
+    },
+    {
+      "name": "roles",
+      "description": "Available roles"
+    },
+    {
+      "name": "users",
+      "description": "User related operations"
+    },
+    {
+      "name": "projects",
+      "description": "Projects and collaborations"
+    },
+    {
+      "name": "mentors",
+      "description": "Mentor related operations"
+    },
+    {
+      "name": "discord integration",
+      "description": "Discord related operations"
+    }
+  ],
+  "paths": {
+    "/applications": {
+      "post": {
+        "tags": [
+          "applications"
+        ],
+        "summary": "✅ Create new user application",
+        "description": "Send new user application's data for review.",
+        "operationId": "createApplication",
+        "requestBody": {
+          "description": "Data user inserted on application",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Jane Doe"
+                  },
+                  "about": {
+                    "type": "string",
+                    "example": "I'm passionate about C++ programming"
+                  },
+                  "email": {
+                    "type": "string",
+                    "example": "jane@example.com"
+                  },
+                  "video_link": {
+                    "type": "string",
+                    "example": "http://example.com/video/1"
+                  },
+                  "discord_nickname": {
+                    "type": "string",
+                    "example": "sample_username"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "id": 42,
+                    "name": "Jane Doe",
+                    "about": "I'm passionate about C++ programming",
+                    "email": "jane@example.com",
+                    "video_link": "http://example.com/video/1",
+                    "discord_nickname": "sample_username"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "null value in column \"discord_nickname\" of relation \"applications\" violates not-null constraint"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Application with this email already exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Application with this email already exists"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "applications"
+        ],
+        "summary": "✅ Get all (active?) applications",
+        "description": "",
+        "operationId": "getApplications",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "applications": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "example": [
+                          {
+                            "id": 5,
+                            "name": "jane doe",
+                            "about": "im cool",
+                            "video_link": "http://example.com/video/1",
+                            "discord_username": "sample_username",
+                            "created_at": "2024-11-23T16:37:04.115Z",
+                            "email": "jane@example.com"
+                          },
+                          {
+                            "id": 6,
+                            "name": "nina",
+                            "about": "i like cats",
+                            "video_link": "http://example.com/video/2",
+                            "discord_username": "nina_disc",
+                            "created_at": "2024-11-20T16:37:04.115Z",
+                            "email": "nina@example.com"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User is not allowed to view applications list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "You're not allowed to access this resource"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/applications/{application_id}": {
+      "put": {
+        "tags": [
+          "applications"
+        ],
+        "summary": "✅  Update application for membership",
+        "description": "This endpoint is used to either approve or reject an application to join the community (membership application)",
+        "operationId": "updateApplication",
+        "parameters": [
+          {
+            "name": "application_id",
+            "in": "path",
+            "description": "is of application that needs to be updated",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "If application is rejected, comment will be required and stored in database along with applications with rejected status). Application statuses is enum with options approved, rejected, pending",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "example": "rejected"
+                  },
+                  "comment": {
+                    "type": "string",
+                    "example": "it's a man!"
+                  },
+                  "user_id": {
+                    "type": "integer",
+                    "example": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "400": {
+            "description": "Unknown action"
+          },
+          "403": {
+            "description": "User is not allowed to edit applications"
+          },
+          "404": {
+            "description": "Application not found"
+          }
+        }
+      }
+    },
+    "/roles": {
+      "get": {
+        "tags": [
+          "roles"
+        ],
+        "summary": "✅  Get all available server roles",
+        "description": "",
+        "operationId": "getRoles",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "roles": {
+                      "type": "object",
+                      "example": [
+                        {
+                          "id": 1,
+                          "role_name": "member",
+                          "is_privileged": false
+                        },
+                        {
+                          "id": 2,
+                          "role_name": "mentor",
+                          "is_privileged": true
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users": {
+      "post": {
+        "tags": [
+          "users"
+        ],
+        "summary": "✅ Create user",
+        "description": "First time authenticated user creation.",
+        "operationId": "createUser",
+        "requestBody": {
+          "description": "Data user inserted on registration",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Jane Doe"
+                  },
+                  "email": {
+                    "type": "string",
+                    "example": "jane@example.com"
+                  },
+                  "about": {
+                    "type": "string",
+                    "example": "Hello i am Jane"
+                  },
+                  "languages": {
+                    "type": "object",
+                    "example": [
+                      "English",
+                      "Russian"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "example": 42
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "User with this email is already registered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "User with this email is already registered"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "users"
+        ],
+        "summary": "✅ Get all users - general information",
+        "operationId": "getUsers",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "users": {
+                      "type": "object",
+                      "example": [
+                        {
+                          "id": 1,
+                          "name": "Jane",
+                          "languages": [
+                            "English",
+                            "Spanish"
+                          ]
+                        },
+                        {
+                          "id": 2,
+                          "name": "Nina",
+                          "languages": [
+                            "English",
+                            "Russian"
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/login": {
+      "post": {
+        "tags": [
+          "users"
+        ],
+        "summary": "✅ User login",
+        "description": "Authenticates a user based on a provided Firebase token sent in the header. On successful authentication, sets a secure 'userUID' cookie.",
+        "operationId": "loginUser",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "header",
+            "description": "Firebase token",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "FIREBASE_TOKEN"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful login",
+            "headers": {
+              "Set-Cookie": {
+                "description": "Secure cookie containing 'userUID'",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "example": 42
+                        },
+                        "name": {
+                          "type": "string",
+                          "example": "Jane"
+                        },
+                        "email": {
+                          "type": "string",
+                          "example": "jane@example.com"
+                        },
+                        "about": {
+                          "type": "string",
+                          "example": "Hi I am Jane"
+                        },
+                        "created_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "example": "2024-12-15T17:27:56.146Z"
+                        },
+                        "languages": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "example": [
+                            "English",
+                            "Spanish"
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No token provided or invalid token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "No token provided"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Invalid application status or email verification.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Email not verified"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/{user_id}": {
+      "get": {
+        "tags": [
+          "users"
+        ],
+        "summary": "✅ Get user by user id",
+        "description": "",
+        "operationId": "getUserById",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "description": "The id of user that needs to be fetched. Use 42 for testing. ",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "example": 42
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "Jane"
+                    },
+                    "email": {
+                      "type": "string",
+                      "example": "jane@example.com"
+                    },
+                    "about": {
+                      "type": "string",
+                      "example": "Hi iam Jane"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "example": "2024-11-23T17:27:56.146Z"
+                    },
+                    "languages": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "example": [
+                        "English",
+                        "Spanish"
+                      ]
+                    },
+                    "roles": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "example": [
+                        "mentee"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid user id supplied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Invalid user id supplied"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "User not found"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "users"
+        ],
+        "summary": "✅  Update user",
+        "description": "This can only be done by the logged in user. Any changes that are performed in user profile come here.",
+        "operationId": "updateUser",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "description": "id of user that need to be updated",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Update an existent user in the store",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "New Name"
+                  },
+                  "about": {
+                    "type": "string",
+                    "example": "New Description"
+                  },
+                  "languages": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "example": [
+                      "English",
+                      "Spanish",
+                      "Added Language"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "example": 42
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "New Name"
+                    },
+                    "email": {
+                      "type": "string",
+                      "example": "jane@example.com"
+                    },
+                    "about": {
+                      "type": "string",
+                      "example": "New Description"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "example": "2024-11-23T17:27:56.146Z"
+                    },
+                    "languages": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "example": [
+                        "English",
+                        "Spanish",
+                        "Added Language"
+                      ]
+                    },
+                    "roles": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "example": [
+                        "mentee"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid user id supplied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Invalid user id supplied"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "You don't have the rights to edit this user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "You're not allowed to edit this resource"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "User not found"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "users"
+        ],
+        "summary": "✅   Delete user by id",
+        "description": "This can only be done by the logged in user.",
+        "operationId": "deleteUser",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "description": "The id of user that needs to be deleted",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "example": 42
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid user_id supplied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Invalid user id supplied"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "You don't have the rights to edit this user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "You're not allowed to edit this resource"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "User not found"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projects": {
+      "post": {
+        "tags": [
+          "projects"
+        ],
+        "summary": "Create project",
+        "description": "Creates new project - available to mentors only",
+        "operationId": "createProject",
+        "requestBody": {
+          "description": "Data mentor fills in on project creation",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "example": "Example project name"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Long detailed description of project"
+                  },
+                  "description_short": {
+                    "type": "string",
+                    "example": "Short project summary"
+                  },
+                  "duration": {
+                    "type": "string",
+                    "example": "1 month"
+                  },
+                  "period": {
+                    "type": "string",
+                    "example": "December 1st - December 31st"
+                  },
+                  "img_link": {
+                    "type": "string",
+                    "example": "https://exampleurllink.com/image1.png"
+                  },
+                  "links": {
+                    "type": "object",
+                    "example": [
+                      {
+                        "url": "https://exampleurl.com",
+                        "description": "description of the link"
+                      },
+                      {
+                        "url": "https://anotherexample.url.com",
+                        "description": "another url for the project"
+                      }
+                    ]
+                  },
+                  "tags": {
+                    "type": "object",
+                    "example": [
+                      "javascript",
+                      "nodejs",
+                      "express"
+                    ]
+                  },
+                  "positions": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "title": {
+                          "type": "string",
+                          "example": "Frontend"
+                        },
+                        "level": {
+                          "type": "string",
+                          "example": "Middle"
+                        },
+                        "description": {
+                          "type": "string",
+                          "example": "Responsible for developing frontend services."
+                        },
+                        "is_open": {
+                          "type": "boolean",
+                          "example": true
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "example": 42
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "null value in column \"description\" of relation \"projects\" violates not-null constraint"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User is not allowed to create projects",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "You're not allowed to access this resource"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "projects"
+        ],
+        "summary": "Get projects - general info",
+        "description": "This endpoint is used for displaying projects (general information only)",
+        "operationId": "getProjects",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "query",
+            "description": "To show 'my projects' you can pass user_id to filter the output. Not required.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "applications": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      },
+                      "example": [
+                        {
+                          "id": 1,
+                          "titile": "Example project",
+                          "description_short": "A short summary of project",
+                          "status": "open",
+                          "duration": "1 month",
+                          "period": "December 1st-December 31st",
+                          "img_link": "https://example.com/image.png",
+                          "created_by": 42,
+                          "tags": [
+                            "javascript",
+                            "nodejs",
+                            "express"
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query parameter",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "The user_id passed is invalid"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projects/{project_id}": {
+      "get": {
+        "tags": [
+          "projects"
+        ],
+        "summary": "Get projec by id - detailed information",
+        "description": "",
+        "operationId": "getProject",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "description": "The id of project that needs to be fetched.",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "example": 42
+                    },
+                    "created_by": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "example": "2024-11-30T12:34:56Z"
+                    },
+                    "title": {
+                      "type": "string",
+                      "example": "Project Title"
+                    },
+                    "description": {
+                      "type": "string",
+                      "example": "A detailed description of the project."
+                    },
+                    "description_short": {
+                      "type": "string",
+                      "example": "A short description of the project."
+                    },
+                    "status": {
+                      "type": "string",
+                      "example": "active"
+                    },
+                    "duration": {
+                      "type": "string",
+                      "example": "6 months"
+                    },
+                    "period": {
+                      "type": "string",
+                      "example": "2024 Q1"
+                    },
+                    "img_link": {
+                      "type": "string",
+                      "format": "uri",
+                      "example": "https://example.com/images/project.jpg"
+                    },
+                    "links": {
+                      "type": "object",
+                      "example": [
+                        {
+                          "url": "https://exampleurl.com",
+                          "description": "description of the link"
+                        },
+                        {
+                          "url": "https://anotherexample.url.com",
+                          "description": "another url for the project"
+                        }
+                      ]
+                    },
+                    "tags": {
+                      "type": "object",
+                      "example": [
+                        "javascript",
+                        "nodejs",
+                        "express"
+                      ]
+                    },
+                    "positions": {
+                      "type": "object",
+                      "example": [
+                        {
+                          "id": 1,
+                          "titile": "Frontend",
+                          "level": "Middle",
+                          "is_open": true,
+                          "description": "Needs to do frontend"
+                        },
+                        {
+                          "id": 2,
+                          "titile": "Backend",
+                          "level": "Senior",
+                          "is_open": true,
+                          "description": "Needs to do backend"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid project id supplied"
+          },
+          "404": {
+            "description": "Project not found"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "projects"
+        ],
+        "summary": "Update project",
+        "description": "This can only be done by the user that created the project.",
+        "operationId": "updateProject",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "description": "id of project that need to be updated",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Update an existing project info",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "example": "Updated Project Title"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "An updated detailed description of the project."
+                  },
+                  "description_short": {
+                    "type": "string",
+                    "example": "A short description of the project."
+                  },
+                  "status": {
+                    "type": "string",
+                    "example": "active"
+                  },
+                  "duration": {
+                    "type": "string",
+                    "example": "6 months"
+                  },
+                  "period": {
+                    "type": "string",
+                    "example": "2024 Q1"
+                  },
+                  "img_link": {
+                    "type": "string",
+                    "format": "uri",
+                    "example": "https://example.com/images/project.jpg"
+                  },
+                  "links": {
+                    "type": "object",
+                    "example": [
+                      {
+                        "url": "https://exampleurl.com",
+                        "description": "description of the link"
+                      }
+                    ]
+                  },
+                  "tags": {
+                    "type": "object",
+                    "example": [
+                      "javascript",
+                      "nodejs",
+                      "express"
+                    ]
+                  },
+                  "positions": {
+                    "type": "object",
+                    "example": [
+                      {
+                        "id": 1,
+                        "titile": "Frontend",
+                        "level": "Middle",
+                        "is_open": true,
+                        "description": "Needs to do frontend"
+                      },
+                      {
+                        "id": 2,
+                        "titile": "Backend",
+                        "level": "Senior",
+                        "is_open": true,
+                        "description": "Needs to do backend"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation. Returns updated project info"
+          },
+          "400": {
+            "description": "Invalid project id supplied"
+          },
+          "403": {
+            "description": "You don't have the rights to edit this project"
+          },
+          "404": {
+            "description": "Project not found"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "projects"
+        ],
+        "summary": "Delete project entity",
+        "description": "This can only be done by the logged in user that owns this project",
+        "operationId": "deleteProject",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "description": "The id of project that needs to be deleted",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "400": {
+            "description": "Invalid project_id supplied"
+          },
+          "403": {
+            "description": "You don't have the rights to edit this project"
+          },
+          "404": {
+            "description": "Project not found"
+          }
+        }
+      }
+    },
+    "/projects/{project_id}/applications": {
+      "post": {
+        "tags": [
+          "projects"
+        ],
+        "summary": "Create a new application for a project",
+        "description": "Adds a new application to the specified project position.",
+        "operationId": "createProjectApplication",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the project to add the application to.",
+            "schema": {
+              "type": "integer",
+              "example": 42
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "The details of the application to create.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "description": {
+                    "type": "string",
+                    "example": "I have a great experience and I will be a good fit"
+                  },
+                  "file_link": {
+                    "type": "string",
+                    "example": "https://example.link/file.pdf"
+                  },
+                  "position_id": {
+                    "type": "integer",
+                    "example": 2
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Application successfully created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "example": 101
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input (wrong value or the applications are closed)"
+          },
+          "403": {
+            "description": "You're not allowed to edit this resource (user is not logged in)"
+          },
+          "404": {
+            "description": "Project not found."
+          }
+        }
+      }
+    },
+    "/projects/applications": {
+      "get": {
+        "tags": [
+          "projects"
+        ],
+        "summary": "Get list of applications for projects",
+        "description": "Shows list of applications for projects the logged in user owns",
+        "operationId": "getProjectsApplications",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "description": "To show only approved or only rejected applications, filter by status. Not required",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "applications": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      },
+                      "example": [
+                        {
+                          "id": 1,
+                          "user_id": 12,
+                          "user_name": "Nastya",
+                          "description": "I want to participate in the project",
+                          "status": "pending",
+                          "project_name": "Awesome project",
+                          "project_id": 42,
+                          "project_status": "planned",
+                          "position_title": "Frontend",
+                          "position_id": 2
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid project id supplied"
+          },
+          "404": {
+            "description": "Project not found"
+          }
+        }
+      }
+    },
+    "/projects/applications/{application_id}": {
+      "put": {
+        "tags": [
+          "projects"
+        ],
+        "summary": "Edit status of application",
+        "description": "Approve or reject an application to participate in project",
+        "operationId": "editProjectsApplication",
+        "parameters": [
+          {
+            "name": "application_id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the application to make changes to.",
+            "schema": {
+              "type": "integer",
+              "example": 2
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "The details of the application to edit.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "example": "approved"
+                  },
+                  "comment": {
+                    "type": "string",
+                    "example": "Welcome to the team! :)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Application successfully updated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "example": 2
+                    },
+                    "status": {
+                      "type": "string",
+                      "example": "approved"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "403": {
+            "description": "You're not allowed to edit this resource"
+          },
+          "404": {
+            "description": "Application not found."
+          }
+        }
+      }
+    },
+    "/mentor": {
+      "post": {
+        "tags": [
+          "mentors"
+        ],
+        "summary": "Create mentor - in request state",
+        "description": "Creates new mentor entity and puts in 'in-review' state",
+        "operationId": "createMentor",
+        "requestBody": {
+          "description": "Data user inserted on registration",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Jane Doe"
+                  },
+                  "experience": {
+                    "type": "string",
+                    "example": "I'm working with 3D for 3 years already"
+                  },
+                  "contact_info": {
+                    "type": "string",
+                    "example": "janedoe in discord"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "example": 42
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "mentors"
+        ],
+        "summary": "Get mentors - filtered",
+        "description": "This endpoint is used for displaying both active and in-review mentors",
+        "operationId": "getMentors",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "description": "The type of mentor entities to fetch. **active** OR **inreview**.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "applications": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      },
+                      "example": [
+                        {
+                          "mentor_id": 1,
+                          "name": "Jane Doe",
+                          "description": "I'm working with 3D for 3 years already"
+                        },
+                        {
+                          "mentor_id": 2,
+                          "name": "Mary Roe",
+                          "description": "I love frontend"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query parameter"
+          },
+          "403": {
+            "description": "User is not allowed to view mentors list (might happen for GET mentors under review)"
+          }
+        }
+      }
+    },
+    "/mentor/{mentor_id}": {
+      "get": {
+        "tags": [
+          "mentors"
+        ],
+        "summary": "Get mentor by id",
+        "description": "",
+        "operationId": "getMentorById",
+        "parameters": [
+          {
+            "name": "mentor_id",
+            "in": "path",
+            "description": "The id of mentor that needs to be fetched. Use 42 for testing. ",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "example": 42
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "Jane Doe"
+                    },
+                    "contact": {
+                      "type": "string",
+                      "example": "janedoe in discord"
+                    },
+                    "experience": {
+                      "type": "string",
+                      "example": "I have an extended IT experience"
+                    },
+                    "about": {
+                      "type": "string",
+                      "example": "I can help with ..."
+                    },
+                    "tags": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "example": [
+                        "nodejs",
+                        "fullstack"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid mentor id supplied"
+          },
+          "404": {
+            "description": "Mentor not found"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "mentors"
+        ],
+        "summary": "Update mentor",
+        "description": "This can only be done by the logged in user with mentor role. Any changes that are performed in mentor's card come here.",
+        "operationId": "updateMentor",
+        "parameters": [
+          {
+            "name": "mentor_id",
+            "in": "path",
+            "description": "id of mentor that need to be updated",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Update an existing mentor info",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "experience": {
+                    "type": "string",
+                    "example": "I have a very extended IT experience"
+                  },
+                  "about": {
+                    "type": "string",
+                    "example": "I can pass my experience to you"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "400": {
+            "description": "Invalid mentor id supplied"
+          },
+          "403": {
+            "description": "You don't have the rights to edit this mentor"
+          },
+          "404": {
+            "description": "Mentor not found"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "mentors"
+        ],
+        "summary": "Update mentor status",
+        "description": "This can only be done by the logged in user with moderator role. This endpoint is used to change state (for now) of mentor entity",
+        "operationId": "changeMentor",
+        "parameters": [
+          {
+            "name": "mentor_id",
+            "in": "path",
+            "description": "id of mentor that need to be changed",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Update an existing mentor entity status (enum(\"active\", \\\"inactive\", \\\"blocked\"))",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "example": "active"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "400": {
+            "description": "Invalid mentor id or status supplied"
+          },
+          "403": {
+            "description": "You don't have the rights to edit this mentor"
+          },
+          "404": {
+            "description": "Mentor not found"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "mentors"
+        ],
+        "summary": "Delete mentor entity",
+        "description": "This can only be done by the logged in user with moderator or mentor role.",
+        "operationId": "deleteMentor",
+        "parameters": [
+          {
+            "name": "mentor_id",
+            "in": "path",
+            "description": "The id of mentor that needs to be deleted",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "400": {
+            "description": "Invalid mentor_id supplied"
+          },
+          "403": {
+            "description": "You don't have the rights to edit this mentor"
+          },
+          "404": {
+            "description": "Mentor not found"
+          }
+        }
+      }
+    },
+    "/generate-invite": {
+      "post": {
+        "tags": [
+          "discord integration"
+        ],
+        "summary": "Generate a Discord invite link",
+        "description": "Generates a unique invite link for a user to join the Discord server. Validates if the user already exists on the server and checks if 7 days have passed since the last invite. Requires authentication via a `userUID` cookie.",
+        "responses": {
+          "200": {
+            "description": "Invite link generated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "invite_link": {
+                      "type": "string",
+                      "description": "The generated Discord invite link.",
+                      "example": "https://discord.gg/abc123"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "User already exists on the server",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Error message.",
+                      "example": "This user already exists on the server"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Error message.",
+                      "example": "User with provided UID not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Invite generation on cooldown for this user. Next link generation is possible after 7 days has passed since last one",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Error message.",
+                      "example": "Invite generation is on cooldown for this user"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Error message.",
+                      "example": "Failed to generate invite"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
