@@ -28,12 +28,12 @@
       "description": "User related operations"
     },
     {
-      "name": "projects",
-      "description": "Projects and collaborations"
-    },
-    {
       "name": "mentors",
       "description": "Mentor related operations"
+    },
+    {
+      "name": "projects",
+      "description": "Projects and collaborations"
     },
     {
       "name": "discord integration",
@@ -1558,41 +1558,28 @@
         }
       }
     },
-    "/mentor": {
+    "/mentors": {
       "post": {
         "tags": [
           "mentors"
         ],
-        "summary": "Create mentor - in request state",
-        "description": "Creates new mentor entity and puts in 'in-review' state",
+        "summary": "Create a new mentor application",
+        "description": "Creates a new mentor entity in 'pending' status. Available to all logged-in users. If user already has a mentor profile, creation is not allowed.\n",
         "operationId": "createMentor",
         "requestBody": {
-          "description": "Data user inserted on registration",
+          "required": true,
+          "description": "Data provided by the user during application",
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "type": "string",
-                    "example": "Jane Doe"
-                  },
-                  "experience": {
-                    "type": "string",
-                    "example": "I'm working with 3D for 3 years already"
-                  },
-                  "contact_info": {
-                    "type": "string",
-                    "example": "janedoe in discord"
-                  }
-                }
+                "$ref": "#/components/schemas/MentorCreateRequest"
               }
             }
           }
         },
         "responses": {
-          "200": {
-            "description": "Successful operation",
+          "201": {
+            "description": "Mentor application created",
             "content": {
               "application/json": {
                 "schema": {
@@ -1606,6 +1593,12 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "User already has a mentor profile"
+          },
+          "403": {
+            "description": "User is not authenticated"
           }
         }
       },
@@ -1613,74 +1606,57 @@
         "tags": [
           "mentors"
         ],
-        "summary": "Get mentors - filtered",
-        "description": "This endpoint is used for displaying both active and in-review mentors",
+        "summary": "Get mentor list",
+        "description": "Returns a list of mentor applications. When filtering by 'pending' or 'rejected', or not filtering at all, user must have elevated (admin) role. Returns user_id and some aggregated data from user profile\n",
         "operationId": "getMentors",
         "parameters": [
           {
-            "name": "type",
+            "name": "status",
             "in": "query",
-            "description": "The type of mentor entities to fetch. **active** OR **inreview**.",
-            "required": true,
+            "description": "Status of mentors to retrieve (e.g. active, pending, rejected)",
+            "required": false,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "enum": [
+                "active",
+                "pending",
+                "rejected",
+                "inactive"
+              ]
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "successful operation",
+            "description": "List of mentors",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "applications": {
-                      "type": "array",
-                      "items": {
-                        "type": "object"
-                      },
-                      "example": [
-                        {
-                          "mentor_id": 1,
-                          "name": "Jane Doe",
-                          "description": "I'm working with 3D for 3 years already"
-                        },
-                        {
-                          "mentor_id": 2,
-                          "name": "Mary Roe",
-                          "description": "I love frontend"
-                        }
-                      ]
-                    }
-                  }
+                  "$ref": "#/components/schemas/MentorListResponse"
                 }
               }
             }
           },
-          "400": {
-            "description": "Invalid query parameter"
-          },
           "403": {
-            "description": "User is not allowed to view mentors list (might happen for GET mentors under review)"
+            "description": "User is not allowed to view this list"
           }
         }
       }
     },
-    "/mentor/{mentor_id}": {
+    "/mentors/{mentor_id}": {
       "get": {
         "tags": [
           "mentors"
         ],
-        "summary": "Get mentor by id",
-        "description": "",
+        "summary": "Get mentor by ID",
+        "description": "Returns full mentor data if user is logged in. Pending/rejected mentors require admin role.\n",
         "operationId": "getMentorById",
         "parameters": [
           {
             "name": "mentor_id",
             "in": "path",
-            "description": "The id of mentor that needs to be fetched. Use 42 for testing. ",
             "required": true,
+            "description": "ID of the mentor to retrieve",
             "schema": {
               "type": "integer"
             }
@@ -1688,49 +1664,17 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful operation",
+            "description": "Mentor details",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "integer",
-                      "example": 42
-                    },
-                    "name": {
-                      "type": "string",
-                      "example": "Jane Doe"
-                    },
-                    "contact": {
-                      "type": "string",
-                      "example": "janedoe in discord"
-                    },
-                    "experience": {
-                      "type": "string",
-                      "example": "I have an extended IT experience"
-                    },
-                    "about": {
-                      "type": "string",
-                      "example": "I can help with ..."
-                    },
-                    "tags": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      },
-                      "example": [
-                        "nodejs",
-                        "fullstack"
-                      ]
-                    }
-                  }
+                  "$ref": "#/components/schemas/MentorDetails"
                 }
               }
             }
           },
-          "400": {
-            "description": "Invalid mentor id supplied"
+          "403": {
+            "description": "Access denied"
           },
           "404": {
             "description": "Mentor not found"
@@ -1741,14 +1685,13 @@
         "tags": [
           "mentors"
         ],
-        "summary": "Update mentor",
-        "description": "This can only be done by the logged in user with mentor role. Any changes that are performed in mentor's card come here.",
+        "summary": "Update mentor profile",
+        "description": "Only the user who owns this mentor card can update it. Only selected fields can be changed.\n",
         "operationId": "updateMentor",
         "parameters": [
           {
             "name": "mentor_id",
             "in": "path",
-            "description": "id of mentor that need to be updated",
             "required": true,
             "schema": {
               "type": "integer"
@@ -1756,52 +1699,38 @@
           }
         ],
         "requestBody": {
-          "description": "Update an existing mentor info",
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "experience": {
-                    "type": "string",
-                    "example": "I have a very extended IT experience"
-                  },
-                  "about": {
-                    "type": "string",
-                    "example": "I can pass my experience to you"
-                  }
-                }
+                "$ref": "#/components/schemas/MentorUpdateRequest"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Successful operation"
-          },
-          "400": {
-            "description": "Invalid mentor id supplied"
+            "description": "Mentor profile updated"
           },
           "403": {
-            "description": "You don't have the rights to edit this mentor"
+            "description": "Not authorized"
           },
           "404": {
             "description": "Mentor not found"
           }
         }
       },
-      "post": {
+      "patch": {
         "tags": [
           "mentors"
         ],
         "summary": "Update mentor status",
-        "description": "This can only be done by the logged in user with moderator role. This endpoint is used to change state (for now) of mentor entity",
-        "operationId": "changeMentor",
+        "description": "Only users with admin or mentor role can change mentor status.\n",
+        "operationId": "patchMentorStatus",
         "parameters": [
           {
             "name": "mentor_id",
             "in": "path",
-            "description": "id of mentor that need to be changed",
             "required": true,
             "schema": {
               "type": "integer"
@@ -1809,7 +1738,7 @@
           }
         ],
         "requestBody": {
-          "description": "Update an existing mentor entity status (enum(\"active\", \\\"inactive\", \\\"blocked\"))",
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -1817,7 +1746,11 @@
                 "properties": {
                   "status": {
                     "type": "string",
-                    "example": "active"
+                    "enum": [
+                      "active",
+                      "rejected",
+                      "inactive"
+                    ]
                   }
                 }
               }
@@ -1826,13 +1759,10 @@
         },
         "responses": {
           "200": {
-            "description": "Successful operation"
-          },
-          "400": {
-            "description": "Invalid mentor id or status supplied"
+            "description": "Status updated"
           },
           "403": {
-            "description": "You don't have the rights to edit this mentor"
+            "description": "Not authorized"
           },
           "404": {
             "description": "Mentor not found"
@@ -1843,14 +1773,13 @@
         "tags": [
           "mentors"
         ],
-        "summary": "Delete mentor entity",
-        "description": "This can only be done by the logged in user with moderator or mentor role.",
+        "summary": "Delete mentor profile",
+        "description": "Only the owner can delete their mentor card. Deletes the entity and removes mentor role from user.\n",
         "operationId": "deleteMentor",
         "parameters": [
           {
             "name": "mentor_id",
             "in": "path",
-            "description": "The id of mentor that needs to be deleted",
             "required": true,
             "schema": {
               "type": "integer"
@@ -1859,13 +1788,10 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful operation"
-          },
-          "400": {
-            "description": "Invalid mentor_id supplied"
+            "description": "Mentor deleted"
           },
           "403": {
-            "description": "You don't have the rights to edit this mentor"
+            "description": "Not authorized"
           },
           "404": {
             "description": "Mentor not found"
@@ -1967,6 +1893,102 @@
             }
           }
         }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "MentorCreateRequest": {
+        "type": "object",
+        "properties": {
+          "contact": {
+            "type": "string"
+          },
+          "about": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "MentorUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "contact": {
+            "type": "string"
+          },
+          "about": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "MentorListResponse": {
+        "type": "object",
+        "properties": {
+          "mentors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MentorSummary"
+            }
+          }
+        }
+      },
+      "MentorSummary": {
+        "type": "object",
+        "properties": {
+          "mentor_id": {
+            "type": "integer"
+          },
+          "user_id": {
+            "type": "integer"
+          },
+          "about": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "name": {
+            "type": "string"
+          },
+          "img_link": {
+            "type": "string"
+          }
+        }
+      },
+      "MentorDetails": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MentorSummary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "contact": {
+                "type": "string"
+              },
+              "discord_nickname": {
+                "type": "string"
+              }
+            }
+          }
+        ]
       }
     }
   }
