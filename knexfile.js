@@ -32,7 +32,7 @@ module.exports = {
     console.log(`\n⚠️  !!!! IMPORTANT !!!! ⚠️
       Before proceeding with migrations, verify your changes in migration files
       and apply them on the local database first.
-      Check if the output above says "isLocal: true".
+      Check if the output above says "Environment: local".
       If you are sure, you can proceed with migrations on remote database. 
       Please acknowledge this message by typing "ack" and pressing Enter. `);
 
