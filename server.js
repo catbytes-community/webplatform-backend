@@ -9,6 +9,7 @@ const { initDiscordBot } = require('./discordBot.js');
 const utils = require('./utils');
 const admin = require("firebase-admin");
 const { authenticate } = require("./middleware/authentication");
+const logger = require('./logger')(__filename);
 
 const app = express();
 
@@ -46,6 +47,6 @@ app.use(authenticate());
   app.use(routes);
 
   app.listen(8080,'0.0.0.0', () => {
-    console.log(`Server is running`);
+    logger.info('Server is running');
   });
 })();
