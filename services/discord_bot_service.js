@@ -15,9 +15,9 @@ async function generateInviteLink(userId) {
     }
     return invite.url;
   }
-  catch (error) {
-    logger.error({ error }, 'Failed to generate discord invite');
-    throw error; 
+  catch (err) {
+    logger.error(err, 'Failed to generate discord invite');
+    throw err; 
   }
 }
 

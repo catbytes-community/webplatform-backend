@@ -12,10 +12,10 @@ router.post('/generate-invite', verifyRole(ROLE_NAMES.member), async (req, res) 
   try {
     const invite = await discordService.generateInviteLink(req.userId);
     res.json({ invite_link: invite });
-  } catch (error) {
-    logger.error('Error generating invite:', error);
-    const status = error.status || 500;
-    respondWithError(res, status, error.message);
+  } catch (err) {
+    logger.error(err, 'Error generating invite');
+    const status = err.status || 500;
+    respondWithError(res, status, err.message);
   } 
 });
 

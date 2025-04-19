@@ -23,8 +23,8 @@ async function getFirebaseSdkServiceAccount() {
       serviceAccount = JSON.parse(jsonFile);
     }
   }
-  catch (error) {
-    logger.error({ error }, "Error getting service account");
+  catch (err) {
+    logger.error(err, "Error getting service account");
     throw new Error("Failed to retrieve service account");
   }
   return serviceAccount;
@@ -41,10 +41,10 @@ async function loadRolesIntoMemory() {
         }
         return acc;
       }, {});
-      logger.info({ rolesCache }, 'Roles loaded into memory');
+      logger.info(rolesCache, 'Roles loaded into memory');
     }
-  } catch (error) {
-    logger.error({ error }, "Error loading roles");
+  } catch (err) {
+    logger.error(err, "Error loading roles");
     throw new Error("Failed to initialize roles");
   }
 }
