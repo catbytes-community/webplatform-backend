@@ -41,7 +41,7 @@ async function loadRolesIntoMemory() {
         }
         return acc;
       }, {});
-      logger.info(rolesCache, 'Roles loaded into memory');
+      logger.debug(rolesCache, 'Roles loaded into memory');
     }
   } catch (err) {
     logger.error(err, "Error loading roles");

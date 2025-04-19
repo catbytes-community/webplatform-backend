@@ -21,6 +21,9 @@ const baseLogger = pino({
     : undefined // raw json for prod/Loki
 });
 
-module.exports = function getLogger(callerFilename) {
+function getLogger(callerFilename) {
   return baseLogger.child({ module: path.basename(callerFilename) });
-};
+}
+
+module.exports = getLogger;
+module.exports.baseLogger = baseLogger;

@@ -9,11 +9,16 @@ const { initDiscordBot } = require('./discordBot.js');
 const utils = require('./utils');
 const admin = require("firebase-admin");
 const { authenticate } = require("./middleware/authentication");
-const logger = require('./logger')(__filename);
+const pinoHttp = require('pino-http');
+const { baseLogger } = require('./logger');
 
 const app = express();
 
 // Middleware
+if (process.env.LOGGING_HTTP_REQUESTS === 'true') {
+  app.use(pinoHttp({ logger: baseLogger }));
+}
+
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
@@ -32,6 +37,8 @@ app.options('*', cors());
 app.use(authenticate());
 
 (async () => {   
+  const logger = require('./logger')(__filename);
+  
   await initDb();
   await initMailer();
   await initDiscordBot();
