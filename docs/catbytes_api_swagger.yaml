@@ -1259,6 +1259,110 @@ paths:
                     type: string
                     description: Error message.
                     example: Failed to generate invite
+  /auth/discord:
+    get:
+      tags:
+        - discord integration
+      summary: Initiate Discord OAuth2 flow
+      description: >-
+        Redirects to Discord's OAuth2 authorization page to start the
+        authentication process.
+      responses:
+        '302':
+          description: Redirect to Discord's authorization page
+          headers:
+            Location:
+              schema:
+                type: string
+                example: >-
+                  https://discord.com/api/oauth2/authorize?client_id=12345&redirect_uri=https%3A%2F%2Fdevapi.catbytes.io%2Fauth%2Fdiscord%2Fcallback&response_type=code&scope=identify%20email
+  /auth/discord/callback:
+    get:
+      tags:
+        - discord integration
+      summary: Handle Discord OAuth2 callback
+      description: >-
+        Handles the callback from Discord after user authorization, exchanges
+        code for tokens, and authenticates the user.
+      parameters:
+        - name: code
+          in: query
+          description: Authorization code returned from Discord
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful login
+          headers:
+            Set-Cookie:
+              description: Secure cookie containing 'userUID'
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 42
+                      name:
+                        type: string
+                        example: Jane
+                      email:
+                        type: string
+                        example: jane@example.com
+                      about:
+                        type: string
+                        example: Hi I am Jane
+                      created_at:
+                        type: string
+                        format: date-time
+                        example: '2024-12-15T17:27:56.146Z'
+                      languages:
+                        type: array
+                        items:
+                          type: string
+                        example:
+                          - English
+                          - Spanish
+        '400':
+          description: No authorization code provided
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message.
+                    example: No code provided
+        '404':
+          description: User with this email not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message.
+                    example: User not found
+        '500':
+          description: Authentication failed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message.
+                    example: Authentication failed                    
 
 components:
   schemas:
