@@ -59,16 +59,17 @@ router.get('/auth/discord/callback', async (req, res) => {
       
     const discordUser = userResponse.data;   
     
-    console.log(discordUser);
     const user = await userService.getUserByEmail(discordUser.email);
+    if (!user) {
+      return respondWithError(res, 404, 'User not found');
+    }
 
-    console.log(user);
     res.cookie('userUID', user.firebaseId, { httpOnly: true, secure: true, sameSite: 'none' });
     res.status(200).json({ user: user });
       
   } catch (error) {
     console.error('Error:', error);
-    res.status(500).send('Authentication failed');
+    respondWithError(res, 500, 'Authentication failed');
   }
 });
 

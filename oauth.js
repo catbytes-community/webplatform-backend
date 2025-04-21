@@ -16,16 +16,14 @@ async function initOAuth() {
     discordRedirectUrl = process.env.DISCORD_REDIRECT_URI;
   } else {
     const params = await loadSecrets(config.aws.param_store_region, ['/catbytes_webplatform/oauth_creds'], true, true);
-    console.log(params);
     discordClientId = params['oauth_creds']['discord']['clientID'];
     discordClientSecret = params['oauth_creds']['discord']['clientSecret'];
-    discordRedirectUrl = params['oauth_creds']['discord']['redirectURIs'][0];
+    discordRedirectUrl = params['oauth_creds']['discord']['redirectURIs'][1];
   }
 
   discordAuth.discordClientId = discordClientId;
   discordAuth.discordClientSecret = discordClientSecret;
   discordAuth.discordRedirectUrl = discordRedirectUrl;
-  console.log(discordAuth);
 }
 
 module.exports = { discordAuth, initOAuth };
