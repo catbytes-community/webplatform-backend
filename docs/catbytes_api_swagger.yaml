@@ -284,13 +284,18 @@ paths:
       description: Authenticates a user based on a provided Firebase token sent in the header. On successful authentication, sets a secure 'userUID' cookie.
       operationId: loginUser
       parameters:
-        - name: token
+        - name: firebase_token
           in: header
-          description: Firebase token
-          required: true
+          description: Firebase ID token used for Firebase authentication
           schema:
             type: string
-            example: FIREBASE_TOKEN
+          required: false
+        - name: discord_code
+          in: header
+          description: Authorization code returned by Discord OAuth2 flow
+          schema:
+            type: string
+          required: false
       responses:
         '200':
           description: Successful login
@@ -1037,15 +1042,13 @@ paths:
           description: You're not allowed to edit this resource
         '404':
           description: Application not found.
-          
   /mentors:
     post:
       tags:
         - mentors
       summary: Create a new mentor application
-      description: >
-        Creates a new mentor entity in 'pending' status. Available to all logged-in users.
-        If user already has a mentor profile, creation is not allowed.
+      description: |
+        Creates a new mentor entity in 'pending' status. Available to all logged-in users. If user already has a mentor profile, creation is not allowed.
       operationId: createMentor
       requestBody:
         required: true
@@ -1073,9 +1076,8 @@ paths:
       tags:
         - mentors
       summary: Get mentor list
-      description: >
-        Returns a list of mentor applications. When filtering by 'pending' or 'rejected', or not filtering at all,
-        user must have elevated (admin) role. Returns user_id and some aggregated data from user profile
+      description: |
+        Returns a list of mentor applications. When filtering by 'pending' or 'rejected', or not filtering at all, user must have elevated (admin) role. Returns user_id and some aggregated data from user profile
       operationId: getMentors
       parameters:
         - name: status
@@ -1084,7 +1086,11 @@ paths:
           required: false
           schema:
             type: string
-            enum: [active, pending, rejected, inactive]
+            enum:
+              - active
+              - pending
+              - rejected
+              - inactive
       responses:
         '200':
           description: List of mentors
@@ -1099,7 +1105,7 @@ paths:
       tags:
         - mentors
       summary: Get mentor by ID
-      description: >
+      description: |
         Returns full mentor data if user is logged in. Pending/rejected mentors require admin role.
       operationId: getMentorById
       parameters:
@@ -1124,7 +1130,7 @@ paths:
       tags:
         - mentors
       summary: Update mentor profile
-      description: >
+      description: |
         Only the user who owns this mentor card can update it. Only selected fields can be changed.
       operationId: updateMentor
       parameters:
@@ -1150,7 +1156,7 @@ paths:
       tags:
         - mentors
       summary: Update mentor status
-      description: >
+      description: |
         Only users with admin or mentor role can change mentor status.
       operationId: patchMentorStatus
       parameters:
@@ -1168,7 +1174,10 @@ paths:
               properties:
                 status:
                   type: string
-                  enum: [active, rejected, inactive]
+                  enum:
+                    - active
+                    - rejected
+                    - inactive
       responses:
         '200':
           description: Status updated
@@ -1180,7 +1189,7 @@ paths:
       tags:
         - mentors
       summary: Delete mentor profile
-      description: >
+      description: |
         Only the owner can delete their mentor card. Deletes the entity and removes mentor role from user.
       operationId: deleteMentor
       parameters:
@@ -1196,7 +1205,6 @@ paths:
           description: Not authorized
         '404':
           description: Mentor not found
-          
   /generate-invite:
     post:
       tags:
@@ -1263,10 +1271,8 @@ paths:
     get:
       tags:
         - discord integration
-      summary: Initiate Discord OAuth2 flow
-      description: >-
-        Redirects to Discord's OAuth2 authorization page to start the
-        authentication process.
+      summary: ✅ Initiate Discord OAuth2 flow
+      description: Redirects to Discord's OAuth2 authorization page to start the authentication process.
       responses:
         '302':
           description: Redirect to Discord's authorization page
@@ -1274,96 +1280,7 @@ paths:
             Location:
               schema:
                 type: string
-                example: >-
-                  https://discord.com/api/oauth2/authorize?client_id=12345&redirect_uri=https%3A%2F%2Fdevapi.catbytes.io%2Fauth%2Fdiscord%2Fcallback&response_type=code&scope=identify%20email
-  /auth/discord/callback:
-    get:
-      tags:
-        - discord integration
-      summary: Handle Discord OAuth2 callback
-      description: >-
-        Handles the callback from Discord after user authorization, exchanges
-        code for tokens, and authenticates the user.
-      parameters:
-        - name: code
-          in: query
-          description: Authorization code returned from Discord
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Successful login
-          headers:
-            Set-Cookie:
-              description: Secure cookie containing 'userUID'
-              schema:
-                type: string
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  user:
-                    type: object
-                    properties:
-                      id:
-                        type: integer
-                        example: 42
-                      name:
-                        type: string
-                        example: Jane
-                      email:
-                        type: string
-                        example: jane@example.com
-                      about:
-                        type: string
-                        example: Hi I am Jane
-                      created_at:
-                        type: string
-                        format: date-time
-                        example: '2024-12-15T17:27:56.146Z'
-                      languages:
-                        type: array
-                        items:
-                          type: string
-                        example:
-                          - English
-                          - Spanish
-        '400':
-          description: No authorization code provided
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    description: Error message.
-                    example: No code provided
-        '404':
-          description: User with this email not found
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    description: Error message.
-                    example: User not found
-        '500':
-          description: Authentication failed
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    description: Error message.
-                    example: Authentication failed                    
-
+                example: https://discord.com/api/oauth2/authorize?client_id=12345&redirect_uri=https%3A%2F%2Fdevapi.catbytes.io%2Fauth%2Fdiscord%2Fcallback&response_type=code&scope=identify%20email
 components:
   schemas:
     MentorCreateRequest:
@@ -1388,7 +1305,6 @@ components:
           type: array
           items:
             type: string
-
     MentorListResponse:
       type: object
       properties:
@@ -1396,7 +1312,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/MentorSummary'
-                 
     MentorSummary:
       type: object
       properties:
@@ -1412,11 +1327,10 @@ components:
           type: array
           items:
             type: string
-        name: # these are aggregated from users table
+        name:
           type: string
-        img_link: # these are aggregated from users table
+        img_link:
           type: string
-            
     MentorDetails:
       allOf:
         - $ref: '#/components/schemas/MentorSummary'
@@ -1424,5 +1338,5 @@ components:
           properties:
             contact:
               type: string
-            discord_nickname: # this is aggregated from user
+            discord_nickname:
               type: string

@@ -8,5 +8,6 @@
   "cors": {
     "allowedOrigins": ["https://catbytes.io"]
   },
-  "platform_url": "https://catbytes.io/"
+  "platform_url": "https://catbytes.io/",
+  "discord_redirect_url":"https://catbytes.io/auth/discord/callback"
 }
