@@ -1,4 +1,3 @@
-require("dotenv").config();
 const config = require('config');
 const express = require("express");
 const cookieParser = require('cookie-parser');
@@ -11,6 +10,8 @@ const admin = require("firebase-admin");
 const { authenticate } = require("./middleware/authentication");
 const pinoHttp = require('pino-http');
 const { baseLogger } = require('./logger');
+
+require('dotenv').config({ path: '.env.local' });
 
 const app = express();
 

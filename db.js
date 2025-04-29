@@ -2,7 +2,7 @@ const knex = require('knex');
 const { loadSecrets } = require("./aws/ssm-helper");
 const config = require('config');
 
-require("dotenv").config();
+require('dotenv').config({ path: '.env.local' });
 
 let databaseUsername, databaseHost, databaseName, databasePassword, databasePort;
 let knexInstance = null;

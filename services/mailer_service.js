@@ -6,7 +6,7 @@ const { APPL_STATUSES } = require("../utils");
 const discordService = require("../services/discord_bot_service");
 const logger = require('../logger')(__filename);
 
-require("dotenv").config();
+require('dotenv').config({ path: '.env.local' });
 
 const mailerConfig = config.mailer;
 const webplatformUrl = config.platform_url;
