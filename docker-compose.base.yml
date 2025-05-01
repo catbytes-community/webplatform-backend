@@ -11,15 +11,6 @@ services:
     volumes:
       - ~/.aws:/root/.aws:ro
   
-  loki:
-    image: grafana/loki:latest
-    container_name: loki
-    ports:
-      - "3100:3100"
-    volumes:
-      - ./loki-config.yml:/etc/loki/config.yml
-    command: -config.file=/etc/loki/config.yml
-  
   alloy:
     image: grafana/alloy:latest
     container_name: alloy
