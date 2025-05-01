@@ -18,7 +18,7 @@ async function initOAuth() {
     const params = await loadSecrets(config.aws.param_store_region, ['/catbytes_webplatform/oauth_creds'], true, true);
     discordClientId = params['oauth_creds']['discord']['clientID'];
     discordClientSecret = params['oauth_creds']['discord']['clientSecret'];
-    discordRedirectUrl = config.discord_redirect_url;
+    discordRedirectUrl = `${config.platform_url}auth/discord/callback`;
   }
 
   discordAuth.discordClientId = discordClientId;

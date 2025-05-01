@@ -34,14 +34,12 @@ async function handleFirebaseAuth(firebaseToken) {
 
     await userService.updateUserById(user.id, { firebase_id: firebaseId });
 
-    return { user };
+    return user;
   } catch (error) {
     console.error("Firebase Token Verification Failed:", error.message);
     throw { status: 401, message: 'Unauthorized' };
   }
-}
-
-;
+};
 
 async function handleDiscordAuth(code){
   try {
@@ -76,9 +74,7 @@ async function handleDiscordAuth(code){
     return { user };
   } catch (error) {
     console.error("Discord Authentication Failed:", error.message);
-    throw { status: 500, message: 'Authentication failed' };
+    throw { status: 401, message: 'Unauthorized' };
   }
-}
-
-;
+};
 module.exports = { handleFirebaseAuth, handleDiscordAuth};

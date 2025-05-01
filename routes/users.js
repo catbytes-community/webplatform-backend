@@ -14,25 +14,26 @@ router.use(express.json());
 router.post("/users/login", async (req, res) => {
   const firebaseToken = req.headers['firebase_token'] || null;
   const discordCode = req.headers['discord_code'] || null;
-  if (!firebaseToken && !discordCode) {
-    return respondWithError(res, 401, 'No token provided or invalid token');
-  }
 
   try {
-    let result;
+    let user;
 
     if (firebaseToken) {
-      result = await authService.handleFirebaseAuth(firebaseToken);
+      user = await authService.handleFirebaseAuth(firebaseToken);
     } else if (discordCode) {
-      result = await authService.handleDiscordAuth(discordCode);
+      user = await authService.handleDiscordAuth(discordCode);
     }
+    else return respondWithError(res, 401, 'No token provided or invalid token');
 
-    res.cookie('userUID', result.user.firebaseId, { httpOnly: true, secure: true, sameSite: 'none' });
-    res.status(200).json({ user: result.user });
+    res.cookie('userUID', user.firebaseId, { httpOnly: true, secure: true, sameSite: 'none' });
+    res.status(200).json({ user: user });
 
   } catch (error) {
     console.error("Authentication Error:", error.message);
-    return respondWithError(res, error.status || 500, error.message);
+    if (error.status) {
+      return respondWithError(res, error.status, error.message);
+    }
+    return respondWithError(res, 500, "Authentication failed");
   }
 });
 
