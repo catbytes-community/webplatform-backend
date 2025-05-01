@@ -5,6 +5,7 @@ const cors = require("cors");
 const { initDb } = require('./db');
 const { initMailer } = require('./services/mailer_service');
 const { initDiscordBot } = require('./discordBot.js');
+const { initOAuth } = require('./oauth.js');
 const utils = require('./utils');
 const admin = require("firebase-admin");
 const { authenticate } = require("./middleware/authentication");
@@ -43,6 +44,7 @@ app.use(authenticate());
   await initDb();
   await initMailer();
   await initDiscordBot();
+  await initOAuth();
   await utils.loadRolesIntoMemory();
   const firebaseServiceAccount = await utils.getFirebaseSdkServiceAccount();
   admin.initializeApp({
