@@ -2,8 +2,7 @@ const express = require("express");
 
 const router = express.Router();
 const userService = require("../services/user_service");
-const applService = require("../services/applications_service");
-const admin = require("firebase-admin");
+const authService = require("../services/auth_service");
 const { ROLE_NAMES } = require("../utils");
 const {verifyOwnership, verifyRole, OWNED_ENTITIES} = require("../middleware/authorization");
 const { isValidIntegerId, respondWithError, isUniqueConstraintViolation, 
@@ -13,42 +12,28 @@ router.use(express.json());
 
 // POST /users/login
 router.post("/users/login", async (req, res) => {
-  const token = req.headers['token'];
-  if (!token) {
-    return respondWithError(res, 401, "No token provided");
-  }
+  const firebaseToken = req.headers['firebase_token'] || null;
+  const discordCode = req.headers['discord_code'] || null;
+
   try {
-    const decodedToken = await admin.auth().verifyIdToken(token);
-    const email = decodedToken.email;
-    const firebaseId = decodedToken.uid;
+    let user;
 
-    if (!decodedToken.email_verified) {
-      return respondWithError(res, 403, "Email not verified");
+    if (firebaseToken) {
+      user = await authService.handleFirebaseAuth(firebaseToken);
+    } else if (discordCode) {
+      user = await authService.handleDiscordAuth(discordCode);
     }
+    else return respondWithError(res, 401, 'No token provided or invalid token');
 
-    const application = await applService.getApplicationByEmail(email);  
-    if (!application || !application.status === 'approved') {
-      return respondWithError(res, 403, "Application is not approved or does not exist");
-    }
-
-    let user = await userService.getUserByEmail(email);
-    if (!user) {
-      user = await userService.createNewMemberUser(
-        application.name,
-        email,
-        application.about,
-        application.languages, 
-        application.discord_nickname
-      );
-    }
-
-    await userService.updateUserById(user.id, {firebase_id: firebaseId});  
-
-    res.cookie('userUID', firebaseId, { httpOnly: true, secure: true, sameSite: 'none' });
+    res.cookie('userUID', user.firebaseId, { httpOnly: true, secure: true, sameSite: 'none' });
     res.status(200).json({ user: user });
+
   } catch (error) {
-    console.error(error);
-    return respondWithError(res, 401, "Unauthorized");
+    console.error("Authentication Error:", error.message);
+    if (error.status) {
+      return respondWithError(res, error.status, error.message);
+    }
+    return respondWithError(res, 500, "Authentication failed");
   }
 });
 

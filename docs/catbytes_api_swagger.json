@@ -424,14 +424,22 @@
         "operationId": "loginUser",
         "parameters": [
           {
-            "name": "token",
+            "name": "firebase_token",
             "in": "header",
-            "description": "Firebase token",
-            "required": true,
+            "description": "Firebase ID token used for Firebase authentication",
             "schema": {
-              "type": "string",
-              "example": "FIREBASE_TOKEN"
-            }
+              "type": "string"
+            },
+            "required": false
+          },
+          {
+            "name": "discord_code",
+            "in": "header",
+            "description": "Authorization code returned by Discord OAuth2 flow",
+            "schema": {
+              "type": "string"
+            },
+            "required": false
           }
         ],
         "responses": {
@@ -1888,6 +1896,28 @@
                       "example": "Failed to generate invite"
                     }
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+     "/auth/discord": {
+      "get": {
+        "tags": [
+          "discord integration"
+        ],
+        "summary": "✅ Initiate Discord OAuth2 flow",
+        "description": "Redirects to Discord's OAuth2 authorization page to start the authentication process.",
+        "responses": {
+          "302": {
+            "description": "Redirect to Discord's authorization page",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string",
+                  "example": "https://discord.com/api/oauth2/authorize?client_id=12345&redirect_uri=https%3A%2F%2Fdevapi.catbytes.io%2Fauth%2Fdiscord%2Fcallback&response_type=code&scope=identify%20email"
                 }
               }
             }
