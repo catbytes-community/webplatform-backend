@@ -2,12 +2,18 @@ version: '2'
 
 services:
   app:
+    extends:
+      file: docker-compose.base.yml
+      service: app
     command: npx nodemon --exec npm start
     environment:
       NODE_ENV: production
       LOGGING_HTTP_REQUESTS: true
 
   alloy:
+    extends:
+      file: docker-compose.base.yml
+      service: alloy
     environment:
       GRAFANA_LOKI_URL: https://logs-prod-035.grafana.net/loki/api/v1/push
       GRAFANA_LOKI_USERNAME: 1191028
