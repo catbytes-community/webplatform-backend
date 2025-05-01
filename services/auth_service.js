@@ -39,7 +39,9 @@ async function handleFirebaseAuth(firebaseToken) {
     console.error("Firebase Token Verification Failed:", error.message);
     throw { status: 401, message: 'Unauthorized' };
   }
-};
+}
+
+;
 
 async function handleDiscordAuth(code){
   try {
@@ -76,5 +78,7 @@ async function handleDiscordAuth(code){
     console.error("Discord Authentication Failed:", error.message);
     throw { status: 401, message: 'Unauthorized' };
   }
-};
+}
+
+;
 module.exports = { handleFirebaseAuth, handleDiscordAuth};
