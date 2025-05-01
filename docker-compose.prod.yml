@@ -1,11 +1,13 @@
 version: '2'
+
 services:
   app:
-    build: .
+    command: npx nodemon --exec npm start
     environment:
       NODE_ENV: production
       LOGGING_HTTP_REQUESTS: true
-    command: npx nodemon --exec npm start
-    ports:
-      - '3000:3000'
-    network_mode: "host"
+
+  alloy:
+    environment:
+      GRAFANA_LOKI_URL: https://logs-prod-035.grafana.net/loki/api/v1/push
+      GRAFANA_LOKI_USERNAME: 1191028
