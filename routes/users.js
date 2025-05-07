@@ -7,6 +7,7 @@ const { ROLE_NAMES } = require("../utils");
 const {verifyOwnership, verifyRole, OWNED_ENTITIES} = require("../middleware/authorization");
 const { isValidIntegerId, respondWithError, isUniqueConstraintViolation, 
   isNotNullConstraintViolation, parseColumnNameFromConstraint } = require("./helpers");
+const logger = require('../logger')(__filename);
 
 router.use(express.json());
 
@@ -29,7 +30,7 @@ router.post("/users/login", async (req, res) => {
     res.status(200).json({ user: user });
 
   } catch (error) {
-    console.error("Authentication Error:", error.message);
+    logger.error("Authentication Error:", error.message);
     if (error.status) {
       return respondWithError(res, error.status, error.message);
     }
@@ -43,7 +44,7 @@ router.get("/users", verifyRole(ROLE_NAMES.member), async (req, res) => {
     const users = await userService.getAllUsers();
     res.json({ users });
   } catch (err) {
-    console.error(err);
+    logger.error(err);
     respondWithError(res);
   }
 });
@@ -51,14 +52,14 @@ router.get("/users", verifyRole(ROLE_NAMES.member), async (req, res) => {
 // Create a new user
 router.post("/users", async (req, res) => {
   const { name, email, about, languages } = req.body;
-  console.log(req.body); // Log the entire request body
+  // console.log(req.body); // Log the entire request body
   try {
     // todo: firebase will only know user's email, we will need to get user's application by email
     // and populate user entity with that data here 
     const user = await userService.createNewMemberUser(name, email, about, languages);       
     res.status(201).json({ id: user.id });
   } catch (err) {
-    console.error(err);
+    logger.error(err);
     const violatedValue = parseColumnNameFromConstraint(err.constraint, 'users');
     if (isUniqueConstraintViolation(err.code)) {
       return respondWithError(
@@ -87,7 +88,7 @@ router.get("/users/:id", verifyRole(ROLE_NAMES.member), async (req, res) => {
     }
     res.json(userInfo);
   } catch (err) {
-    console.error(err);
+    logger.error(err);
     respondWithError(res);
   }
 });
@@ -106,7 +107,7 @@ router.put("/users/:id", verifyOwnership(OWNED_ENTITIES.USER), async (req, res) 
     }
     res.status(200).json(updatedUser);
   } catch (err) {
-    console.error(err);
+    logger.error(err);
     respondWithError(res);
   }
 });
@@ -124,7 +125,7 @@ router.delete("/users/:id", verifyOwnership(OWNED_ENTITIES.USER), async (req, re
     }
     res.status(200).json({ user_id: id });
   } catch (err) {
-    console.error(err);
+    logger.error(err);
     respondWithError(res);
   }
 });

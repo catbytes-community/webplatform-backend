@@ -1,4 +1,5 @@
 const { SSMClient, GetParametersCommand } = require('@aws-sdk/client-ssm');
+const logger = require('../logger')(__filename);
 
 async function loadSecrets(region, names, withDecryption = false, parseJson = false) {
   const ssmClient = new SSMClient({
@@ -6,7 +7,7 @@ async function loadSecrets(region, names, withDecryption = false, parseJson = fa
   });      
 
   try {
-    console.log('Fetching secrets from region:', region);
+    logger.debug(`Fetching secrets from region: ${region}`);
     const command = new GetParametersCommand({
       Names: names,
       WithDecryption: withDecryption,
@@ -20,11 +21,11 @@ async function loadSecrets(region, names, withDecryption = false, parseJson = fa
       return acc;
     }, {});
 
-    console.log('Fetched secrets:', Object.keys(secrets));
+    logger.debug(Object.keys(secrets), 'Fetched secrets');
     return secrets;
-  } catch (error) {
-    console.error('Error fetching parameters:', error);
-    throw error;
+  } catch (err) {
+    logger.error(err, 'Error fetching parameters');
+    throw err;
   }
 }
 

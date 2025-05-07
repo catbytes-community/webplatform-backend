@@ -4,8 +4,9 @@ const config = require('config');
 const { loadSecrets } = require("../aws/ssm-helper");
 const { APPL_STATUSES } = require("../utils");
 const discordService = require("../services/discord_bot_service");
+const logger = require('../logger')(__filename);
 
-require("dotenv").config();
+require('dotenv').config({ path: '.env.local' });
 
 const mailerConfig = config.mailer;
 const webplatformUrl = config.platform_url;
@@ -103,7 +104,7 @@ async function sendEmailOnApplicationStatusChange(email, name, status) {
       await sendApplicationRejectedEmail(email, name);
     }
     else {
-      console.log(`Not sending aplication status change email, because status ${status}
+      logger.warn(`Not sending aplication status change email, because status ${status}
         is not in email-sending allow-list.`);
     }
   }
@@ -111,9 +112,8 @@ async function sendEmailOnApplicationStatusChange(email, name, status) {
     // todo: add correct error processing: if "domain does not accept mail" - log it, 
     // put to some deadletter for future manual verification
     // if some other error - we should retry sending email - add queue
-    console.error(`Error sending email to ${email} on application status change:`, err.message);
+    logger.error(`Error sending email to ${email} on application status change: ${err.message}`);
   }
-  
 }
 
 module.exports = { initMailer, sendEmailOnApplicationStatusChange };

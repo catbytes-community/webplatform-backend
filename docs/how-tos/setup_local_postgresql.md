@@ -52,7 +52,7 @@ Step 2. Create a database config (e.x. `db.js`)
 
 ```javascript
 const { Pool } = require("pg");
-require("dotenv").config();
+require('dotenv').config({ path: '.env.local' });
 
 const pool = new Pool({
   user: process.env.DB_USER,

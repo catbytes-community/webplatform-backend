@@ -1,6 +1,7 @@
 const { Client, GatewayIntentBits } = require('discord.js');
 const { loadSecrets } = require("./aws/ssm-helper");
 const config = require('config');
+const logger = require('./logger')(__filename);
 
 const discordBot = {
   discordClient: null,
@@ -36,8 +37,8 @@ async function initDiscordBot() {
       discordBot.discordClient = discordClient;
       discordBot.guildId = serverId;
       discordBot.channelId = channelId;
-    } catch (error) {
-      console.error("Error initializing Discord bot:", error);
+    } catch (err) {
+      logger.error(err, 'Error initializing Discord bot');
     }
   });
 }

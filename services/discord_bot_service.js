@@ -1,6 +1,7 @@
 const { discordBot } = require('../discordBot.js');
 const userService = require('../services/user_service');
 const repo = require('../repositories/discord_bot_repository');
+const logger = require('../logger')(__filename);
 
 async function generateInviteLink(userId) {
   try {
@@ -14,9 +15,9 @@ async function generateInviteLink(userId) {
     }
     return invite.url;
   }
-  catch (error) {
-    console.error('Failed to generate invite:', error.message);
-    throw error; 
+  catch (err) {
+    logger.error(err, 'Failed to generate discord invite');
+    throw err; 
   }
 }
 

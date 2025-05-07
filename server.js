@@ -1,4 +1,3 @@
-require("dotenv").config();
 const config = require('config');
 const express = require("express");
 const cookieParser = require('cookie-parser');
@@ -10,10 +9,18 @@ const { initOAuth } = require('./oauth.js');
 const utils = require('./utils');
 const admin = require("firebase-admin");
 const { authenticate } = require("./middleware/authentication");
+const pinoHttp = require('pino-http');
+const { baseLogger } = require('./logger');
+
+require('dotenv').config({ path: '.env.local' });
 
 const app = express();
 
 // Middleware
+if (process.env.LOGGING_HTTP_REQUESTS === 'true') {
+  app.use(pinoHttp({ logger: baseLogger }));
+}
+
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
@@ -32,6 +39,8 @@ app.options('*', cors());
 app.use(authenticate());
 
 (async () => {   
+  const logger = require('./logger')(__filename);
+  
   await initDb();
   await initMailer();
   await initDiscordBot();
@@ -48,6 +57,6 @@ app.use(authenticate());
   app.use(routes);
 
   app.listen(8080,'0.0.0.0', () => {
-    console.log(`Server is running`);
+    logger.info('Server is running');
   });
 })();

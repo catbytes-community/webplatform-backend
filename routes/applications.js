@@ -7,6 +7,7 @@ const {
   checkConstraintViolationOrRespondWith500
 } = require("./helpers");
 const { sendEmailOnApplicationStatusChange } = require("../services/mailer_service");
+const logger = require('../logger')(__filename);
 
 const router = express.Router();
 router.use(express.json());
@@ -16,7 +17,7 @@ router.get("/applications", verifyRole(ROLE_NAMES.mentor), async (req, res) => {
     const result = await applService.getAllApplications();
     res.json({ applications: result });
   } catch (err) {
-    console.error(err);
+    logger.error(err);
     respondWithError(res);
   }
 });
@@ -34,7 +35,7 @@ router.post("/applications", async (req, res) => {
 
     res.status(201).json(result);
   } catch (err) {
-    console.error(err);
+    logger.error(err);
     checkConstraintViolationOrRespondWith500(err, res, 'applications');
   }
 });
@@ -82,7 +83,7 @@ router.put("/applications/:id", verifyRole(ROLE_NAMES.mentor), async (req, res) 
     await sendEmailOnApplicationStatusChange(application.email, application.name, status);
     res.status(200).json(application);
   } catch (err) {
-    console.error(err);
+    logger.error(err);
     respondWithError(res);
   }
 }

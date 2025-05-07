@@ -1,6 +1,7 @@
 const utils = require('../utils');
 const repo = require('../repositories/authorization_repository');
 const { respondWithError } = require('../routes/helpers');
+const logger = require('../logger')(__filename);
 
 function verifyRole(roleName) {
   return async (req, res, next) => {
@@ -17,7 +18,7 @@ function verifyRole(roleName) {
       }
       next();
     } catch (err) {
-      console.error('Error verifying role:', err);
+      logger.error(err, 'Error verifying role');
       return respondWithError(res);
     }
   };
@@ -30,7 +31,7 @@ const OWNED_ENTITIES = {
 
 function verifyOwnership(entityTable) {
   return async (req, res, next) => {
-    console.log("Middleware invoked for:", req.url);
+    logger.debug(`Middleware invoked for: ${req.url}`);
     try {
       const resourceId = req.params.id;
       const userId = req.userId;
@@ -56,7 +57,7 @@ function verifyOwnership(entityTable) {
     
       next();
     } catch (err) {
-      console.error('Error verifying ownership:', err);
+      logger.error(err, 'Error verifying ownership');
       return respondWithError(res);
     }
   };
