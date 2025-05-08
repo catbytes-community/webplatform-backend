@@ -6,6 +6,17 @@ Located in the `/docs` directory. `*.json` file is used for rendering, `*.yaml` 
 
 Also published on GitHub pages: https://catbytes-community.github.io/webplatform-backend/
 
+### Monitoring
+Service logs are sent to Grafana. Main dashboard: https://catbytes.grafana.net/goto/S3QCkuxHR?orgId=1
+Here are also some predefined queries to search in logs:
+
+| Environment    | Url |
+| -------- | ------- |
+| DEV  | https://catbytes.grafana.net/goto/dkl-MubNg?orgId=1   |
+| PROD | https://catbytes.grafana.net/goto/cvZfGXbNR?orgId=1     |
+
+Insert value you're looking for in the 'Line contains' box.
+
 ### Documentation for developers
 
 Located in the `/docs/how-tos` directory. All important information on local run, deployments, etc is stored there.
