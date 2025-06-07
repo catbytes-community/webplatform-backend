@@ -22,7 +22,12 @@ const baseLogger = pino({
         messageFormat: '[{module}] {msg}'
       }
     }
-    : undefined // raw json for prod/Loki
+    : undefined, // raw json for prod/Loki
+  formatters: {
+    level: (label) => {
+      return { level: label.toLowerCase() };
+    },
+  }
 });
 
 function getLogger(callerFilename) {
