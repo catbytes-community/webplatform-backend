@@ -8,7 +8,7 @@ const {verifyOwnership, verifyRole, OWNED_ENTITIES} = require("../middleware/aut
 const { isValidIntegerId, respondWithError, isUniqueConstraintViolation, 
   isNotNullConstraintViolation, parseColumnNameFromConstraint } = require("./helpers");
 
-  const logger = require('../logger')(__filename);
+const logger = require('../logger')(__filename);
 
 router.use(express.json());
 
