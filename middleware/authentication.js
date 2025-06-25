@@ -5,7 +5,6 @@ const logger = require('../logger')(__filename);
 function authenticate() {
   return async (req, res, next) => {
     try {
-      logger.warn(`Authenticating request: ${req.path}`);
       const userFirebaseId = req.cookies?.userUID;
       if (!userFirebaseId) {
         logger.warn(`No user UID found in request cookies at ${req.path}`);
