@@ -3,8 +3,10 @@ const axios = require('axios');
 const querystring = require('querystring');
 const userService = require('../services/user_service');
 const applService = require("../services/applications_service");
- 
+
 const {discordAuth} = require ("../oauth.js"); 
+
+const logger = require('../logger')(__filename);
 
 async function handleFirebaseAuth(firebaseToken) {
   try {
@@ -36,7 +38,7 @@ async function handleFirebaseAuth(firebaseToken) {
 
     return user;
   } catch (error) {
-    console.error("Firebase Token Verification Failed:", error.message);
+    logger.error({ error: error.message }, "Firebase Token Verification Failed");
     throw { status: 401, message: 'Unauthorized' };
   }
 }
@@ -75,7 +77,7 @@ async function handleDiscordAuth(code){
 
     return { user };
   } catch (error) {
-    console.error("Discord Authentication Failed:", error.message);
+    logger.error({ error: error.message }, "Discord Authentication Failed", );
     throw { status: 401, message: 'Unauthorized' };
   }
 }

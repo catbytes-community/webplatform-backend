@@ -284,13 +284,13 @@ paths:
       description: Authenticates a user based on a provided Firebase token sent in the header. On successful authentication, sets a secure 'userUID' cookie.
       operationId: loginUser
       parameters:
-        - name: firebase_token
+        - name: X-Firebase-Token
           in: header
           description: Firebase ID token used for Firebase authentication
           schema:
             type: string
           required: false
-        - name: discord_code
+        - name: X-Discord-Code
           in: header
           description: Authorization code returned by Discord OAuth2 flow
           schema:
@@ -1209,7 +1209,7 @@ paths:
     post:
       tags:
         - discord integration
-      summary: Generate a Discord invite link
+      summary: ✅ Generate a Discord invite link
       description: Generates a unique invite link for a user to join the Discord server. Validates if the user already exists on the server and checks if 7 days have passed since the last invite. Requires authentication via a `userUID` cookie.
       responses:
         '200':
