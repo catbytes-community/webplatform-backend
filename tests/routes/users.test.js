@@ -1,7 +1,16 @@
 const request = require('supertest');
 const authService = require('../../services/auth_service');
+const userService = require('../../services/user_service');
+// const { verifyOwnership, verifyRole } = require("../middleware/authorization");
 
 jest.mock('../../services/auth_service');
+jest.mock('../../services/user_service');
+jest.mock('../../middleware/authorization', () => ({
+  //verifyOwnership: () => (req, res, next) => next(),
+  verifyRole: () => (req, res, next) => next(),
+}));
+jest.spyOn()
+
 
 const app = require('../../appForTests');
 const mockedUser = { firebaseId: '12345', email: 'test@example.com' };
@@ -76,5 +85,30 @@ describe('POST /users/login', () => {
 
     expect(res.statusCode).toBe(401);
     expect(res.body.error).toBe('Invalid Discord code');
+  });
+});
+
+describe('GET /users', () => {
+  it('Return all users success', async () => {
+    const mockedUsers = [{ id: 1, name: 'Test User' }];
+    userService.getAllUsers.mockResolvedValue(mockedUsers);
+
+    const res = await request(app)
+      .get('/users');
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.users.lenght).toBeGreaterThan(0);
+    expect(res.body.users[0]['id']).toBe(1);
+  });
+
+  it('should handle errors when getting all users', async () => {
+    jest.spyOn(authService, 'getAllUsers').mockRejectedValue(new Error('Database error'));
+
+    const res = await request(app)
+      .get('/users')
+      .set('Authorization', 'Bearer valid-token');
+
+    expect(res.statusCode).toBe(500);
+    expect(res.body.error).toBeDefined();
   });
 });
