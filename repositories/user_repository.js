@@ -14,10 +14,10 @@ async function createNewUser(values) {
   return user;
 }
 
-async function getUserInfoById(id) {
+async function getUserInfoById(id, safeOutput = true) {
   const knex = getKnex();
   const user = await knex("users").where("id", id).first();
-  if (user !== undefined){
+  if (user !== undefined && safeOutput){
     delete user["firebase_id"];
   }
   return user;
@@ -26,7 +26,7 @@ async function getUserInfoById(id) {
 async function getUserByFields(fields) {
   const knex = getKnex();
   const user = await knex("users").where(fields).first();
-  if (user !== undefined){
+  if (user !== undefined) {
     delete user["firebase_id"];
   }
   return user;

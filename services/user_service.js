@@ -38,5 +38,10 @@ async function getUserByEmail(email) {
   return await repo.getUserByFields({email: email});
 }
 
+async function getUserFirebaseId(id) {
+  const user = await repo.getUserInfoById(id, false);
+  return user?.firebase_id;
+}
+
 module.exports = { getAllUsers, createNewMemberUser, getUserById, updateUserById, deleteUserById, 
-  getUserByEmail, getUserByFirebaseId };
+  getUserByEmail, getUserByFirebaseId, getUserFirebaseId };
