@@ -18,17 +18,17 @@ router.post("/users/login", async (req, res) => {
   const discordCode = req.get('X-Discord-Code') || null;
 
   try {
-    let user;
+    let authResult;
 
     if (firebaseToken) {
-      user = await authService.handleFirebaseAuth(firebaseToken);
+      authResult = await authService.handleFirebaseAuth(firebaseToken);
     } else if (discordCode) {
-      user = await authService.handleDiscordAuth(discordCode);
+      authResult = await authService.handleDiscordAuth(discordCode);
     }
     else return respondWithError(res, 401, 'No token provided or invalid token');
 
-    res.cookie('userUID', user.firebaseId, { httpOnly: true, secure: true, sameSite: 'none' });
-    res.status(200).json({ user: user });
+    res.cookie('userUID', authResult.firebaseId, { httpOnly: true, secure: true, sameSite: 'none' });
+    res.status(200).json({ user: authResult.user });
 
   } catch (error) {
     if (error.status) {
