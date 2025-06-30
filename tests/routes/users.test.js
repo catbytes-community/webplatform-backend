@@ -1,16 +1,16 @@
 const request = require('supertest');
 const authService = require('../../services/auth_service');
 const userService = require('../../services/user_service');
-// const { verifyOwnership, verifyRole } = require("../middleware/authorization");
 
 jest.mock('../../services/auth_service');
 jest.mock('../../services/user_service');
-jest.mock('../../middleware/authorization', () => ({
-  //verifyOwnership: () => (req, res, next) => next(),
-  verifyRole: () => (req, res, next) => next(),
-}));
-jest.spyOn()
-
+jest.mock('../../middleware/authorization', () => {
+  const actual = jest.requireActual('../../middleware/authorization');
+  return {
+    ...actual,
+    verifyRole: jest.fn(() => (req, res, next) => next()),
+  };
+});
 
 const app = require('../../appForTests');
 const mockedUser = { firebaseId: '12345', email: 'test@example.com' };
@@ -19,6 +19,7 @@ function checkSuccessResponse(res, user) {
   expect(res.statusCode).toBe(200);
   expect(res.body.user).toEqual(user);
   expect(res.headers['set-cookie']).toBeDefined();
+  expect(res.headers['set-cookie'][0]).toMatch(user.firebaseId);
 };
 
 describe('POST /users/login', () => {
@@ -97,18 +98,39 @@ describe('GET /users', () => {
       .get('/users');
 
     expect(res.statusCode).toBe(200);
-    expect(res.body.users.lenght).toBeGreaterThan(0);
+    expect(res.body.users.length).toBeGreaterThan(0);
     expect(res.body.users[0]['id']).toBe(1);
   });
 
-  it('should handle errors when getting all users', async () => {
-    jest.spyOn(authService, 'getAllUsers').mockRejectedValue(new Error('Database error'));
+  it('Unexpected error during users retrieval', async () => {
+    userService.getAllUsers.mockRejectedValue(new Error('Database error'));
 
     const res = await request(app)
-      .get('/users')
-      .set('Authorization', 'Bearer valid-token');
+      .get('/users');
 
     expect(res.statusCode).toBe(500);
     expect(res.body.error).toBeDefined();
+  });
+});
+
+describe('GET /users/:id', () => {
+  it('Get user by ID success', async () => {
+    userService.getUserById.mockResolvedValue(mockedUser);
+
+    const res = await request(app)
+      .get('/users/1');
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual(mockedUser);
+  });
+
+  it('Get user by ID not found', async () => {
+    userService.getUserById.mockResolvedValue(null);
+
+    const res = await request(app)
+      .get('/users/999');
+
+    expect(res.statusCode).toBe(404);
+    expect(res.body.error).toBe('User not found');
   });
 });
