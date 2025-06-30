@@ -29,7 +29,7 @@ describe('POST /users/login', () => {
   });
       
   it('Firebase token auth success', async () => {
-    authService.handleFirebaseAuth.mockResolvedValue(mockedUser);
+    authService.handleFirebaseAuth.mockResolvedValue({ user: mockedUser, firebaseId: mockedUser.firebaseId });
     const res = await request(app)
       .post('/users/login')
       .set('X-Firebase-Token', 'valid-firebase-token');
@@ -39,7 +39,7 @@ describe('POST /users/login', () => {
   });
 
   it('Discord code auth success', async () => {
-    authService.handleDiscordAuth.mockResolvedValue(mockedUser);
+    authService.handleDiscordAuth.mockResolvedValue({ user: mockedUser, firebaseId: mockedUser.firebaseId });
     const res = await request(app)
       .post('/users/login')
       .set('X-Discord-Code', 'valid-discord-code');
