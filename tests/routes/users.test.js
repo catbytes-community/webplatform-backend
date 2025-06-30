@@ -13,6 +13,7 @@ jest.mock('../../middleware/authorization', () => {
 });
 
 const app = require('../../appForTests');
+
 const mockedUser = { firebaseId: '12345', email: 'test@example.com' };
 
 function checkSuccessResponse(res, user) {
@@ -20,7 +21,7 @@ function checkSuccessResponse(res, user) {
   expect(res.body.user).toEqual(user);
   expect(res.headers['set-cookie']).toBeDefined();
   expect(res.headers['set-cookie'][0]).toMatch(user.firebaseId);
-};
+}
 
 describe('POST /users/login', () => {
   afterEach(() => {

@@ -21,6 +21,7 @@ const app = require('./app');
 
   // Routes
   const routes = require("./routes/routes");
+  
   app.use(routes);
 
   app.listen(8080,'0.0.0.0', () => {

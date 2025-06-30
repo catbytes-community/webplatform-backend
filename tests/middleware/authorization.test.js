@@ -6,7 +6,7 @@ jest.mock('../../routes/helpers', () => ({
   respondWithError: jest.fn((res, statusCode, message) => (res.statusCode = statusCode, res.body = { error: message }, res)),
 }));
 
-jest.spyOn(utils, 'getRole').mockImplementation((roleName) => ("rolename"));
+jest.spyOn(utils, 'getRole').mockImplementation(() => ("rolename"));
 
 describe('VerifyRole', () => {
   it('Returns 401 on missing userId', async () => {
@@ -108,7 +108,8 @@ describe('VerifyOwnership', () => {
     const res = {};
     const next = jest.fn();
 
-    jest.spyOn(require('../../repositories/authorization_repository'), 'verifyOwnership').mockResolvedValue({ rows: [{ id: 2 }] });
+    jest.spyOn(require('../../repositories/authorization_repository'), 'verifyOwnership')
+      .mockResolvedValue({ rows: [{ id: 2 }] });
 
     await verifyOwnership(OWNED_ENTITIES.MENTOR)(req, res, next);
 
