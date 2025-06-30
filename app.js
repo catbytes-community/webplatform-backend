@@ -27,7 +27,7 @@ app.use(cors({
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'token'], 
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Firebase-Token', 'X-Discord-Code'], 
 }));
 app.options('*', cors()); 
 app.use(authenticate());
