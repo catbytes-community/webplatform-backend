@@ -7,30 +7,30 @@ const { ROLE_NAMES } = require("../utils");
 const {verifyOwnership, verifyRole, OWNED_ENTITIES} = require("../middleware/authorization");
 const { isValidIntegerId, respondWithError, isUniqueConstraintViolation, 
   isNotNullConstraintViolation, parseColumnNameFromConstraint } = require("./helpers");
+
 const logger = require('../logger')(__filename);
 
 router.use(express.json());
 
 // POST /users/login
 router.post("/users/login", async (req, res) => {
-  const firebaseToken = req.headers['firebase_token'] || null;
-  const discordCode = req.headers['discord_code'] || null;
+  const firebaseToken = req.get('X-Firebase-Token') || null;
+  const discordCode = req.get('X-Discord-Code') || null;
 
   try {
-    let user;
+    let authResult;
 
     if (firebaseToken) {
-      user = await authService.handleFirebaseAuth(firebaseToken);
+      authResult = await authService.handleFirebaseAuth(firebaseToken);
     } else if (discordCode) {
-      user = await authService.handleDiscordAuth(discordCode);
+      authResult = await authService.handleDiscordAuth(discordCode);
     }
     else return respondWithError(res, 401, 'No token provided or invalid token');
 
-    res.cookie('userUID', user.firebaseId, { httpOnly: true, secure: true, sameSite: 'none' });
-    res.status(200).json({ user: user });
+    res.cookie('userUID', authResult.firebaseId, { httpOnly: true, secure: true, sameSite: 'none' });
+    res.status(200).json({ user: authResult.user });
 
   } catch (error) {
-    logger.error("Authentication Error:", error.message);
     if (error.status) {
       return respondWithError(res, error.status, error.message);
     }
