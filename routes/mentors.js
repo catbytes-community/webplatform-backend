@@ -54,7 +54,6 @@ router.post("/mentors", verifyRole(ROLE_NAMES.member), async (req, res) => {
       contact: req.body.contact || null,
     };
     const newMentor = await mentorService.createMentor(req.userId, mentorData);
-    logger.debug(newMentor);
     res.status(201).json(newMentor.id);
   } catch (err) {
     logger.error(err);
