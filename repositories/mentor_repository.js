@@ -5,7 +5,7 @@ const { ROLE_NAMES } = require("../utils");
 
 async function getMentors(userId, status){
   const knex = getKnex();
-  const allowedStatuses = await getEligibleMentorStatuses(userId)
+  const allowedStatuses = await getEligibleMentorStatuses(userId);
   const query = knex("mentors")
     .join("users", "mentors.user_id", "users.id")
     .select(
@@ -18,25 +18,25 @@ async function getMentors(userId, status){
       "users.img as img_link",
       "users.discord_nickname"
     );
-   if (status) {
-      if (!allowedStatuses.includes(status)) {
-        throw new Error('Requested status not permitted');
-      }
-      query.where("mentors.status", status);
-    } else {
-      query.whereIn("mentors.status", allowedStatuses);
+  if (status) {
+    if (!allowedStatuses.includes(status)) {
+      throw new Error('Requested status not permitted');
     }
-   return await query;
+    query.where("mentors.status", status);
+  } else {
+    query.whereIn("mentors.status", allowedStatuses);
+  }
+  return await query;
 }
 
 async function mentorAlreadyExists(userId)
 {
   const knex = getKnex(); 
   const mentor = await knex("mentors")
-   .where("user_id", userId)
-   .first();
+    .where("user_id", userId)
+    .first();
 
-   return !!mentor;
+  return !!mentor;
 }
 
 async function getMentorById(userId, mentorId){
