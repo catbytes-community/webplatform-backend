@@ -5,12 +5,9 @@ const { ROLE_NAMES } = require("../utils");
 
 async function getMentors(userId, status){
   const knex = getKnex();
-  const userRoles = userRepo.getUserRolesById(userId);
-  const isAdmin = userRoles.includes(ROLE_NAMES.admin);
-  const allowedStatuses = getEligibleMentorStatuses(isAdmin).where(status);
-  return await knex("mentors")
+  const allowedStatuses = await getEligibleMentorStatuses(userId)
+  const query = knex("mentors")
     .join("users", "mentors.user_id", "users.id")
-    .whereIn("mentors.status", allowedStatuses)
     .select(
       "mentors.id as mentor_id",
       "mentors.user_id",
@@ -21,19 +18,33 @@ async function getMentors(userId, status){
       "users.img as img_link",
       "users.discord_nickname"
     );
- 
+   if (status) {
+      if (!allowedStatuses.includes(status)) {
+        throw new Error('Requested status not permitted');
+      }
+      query.where("mentors.status", status);
+    } else {
+      query.whereIn("mentors.status", allowedStatuses);
+    }
+   return await query;
+}
+
+async function mentorAlreadyExists(userId)
+{
+  const knex = getKnex(); 
+  const mentor = await knex("mentors")
+   .where("user_id", userId)
+   .first();
+
+   return !!mentor;
 }
 
 async function getMentorById(userId, mentorId){
   const knex = getKnex();
+  userId = 1;
   try
   {
- 
-    const userRoles = userRepo.getUserRolesById(userId);
- 
-    const isAdmin = userRoles.some(role => role.role_name === ROLE_NAMES.admin);
-    const allowedStatuses = getEligibleMentorStatuses(isAdmin);
-   
+    const allowedStatuses = await getEligibleMentorStatuses(userId);
     const mentor = await knex("mentors")
       .join("users", "mentors.user_id", "users.id")
       .where("mentors.id", mentorId)
@@ -54,21 +65,24 @@ async function getMentorById(userId, mentorId){
     }
     return mentor;
   } catch (err) {
-    logger.error(`Failed to get mentorship card ${mentorId} for user ${userId}:`, err);
+    logger.error(`Failed to get mentorship card for mentor ${mentorId}:`, err);
     throw err;
   }
 }
 
-async function getEligibleMentorStatuses(isAdmin)
+async function getEligibleMentorStatuses(userId)
 {
+
+  const userRoles = userId ? await userRepo.getUserRolesById(userId): [];
+  const rolesArray = Array.isArray(userRoles) ? userRoles : [];
+  const isAdmin = rolesArray.some(role => role.role_name === ROLE_NAMES.admin);
   if (isAdmin) return ['active', 'inactive', 'rejected', 'pending'];
   else return ['active', 'inactive'];
 }
 
 async function createMentor(mentorData) {
   const knex = getKnex();
-  logger.debug(mentorData);
-  const [mentor] = await knex("mentors")
+  return await knex("mentors")
     .insert({
       user_id: mentorData.user_id,
       about: mentorData.about,
@@ -76,10 +90,6 @@ async function createMentor(mentorData) {
       status: 'pending'
     })
     .returning("*");
-
-  logger.debug(mentor);
-  return getMentorById(mentor.id);
-
 }
 
 async function getMentorsEmails() {
@@ -90,4 +100,4 @@ async function getMentorsEmails() {
     .pluck("users.email");
 }
 
-module.exports = { getMentors, getMentorById, createMentor, getMentorsEmails};
+module.exports = { getMentors, getMentorById, createMentor, getMentorsEmails, mentorAlreadyExists};

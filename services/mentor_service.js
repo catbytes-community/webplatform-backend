@@ -12,10 +12,11 @@ async function getMentorById(userId, mentorId){
 }
 
 async function createMentor(userId, mentorData) {
+    try{
   // check if user already has a mentor profile
-  const existingMentor = await repo.getMentorById(userId);
+  const existingMentor = await repo.mentorAlreadyExists(userId);
   if (existingMentor) {
-    logger.warn('User already has a mentor profile');
+     throw new Error('User already has a mentor profile');
   }
 
   // create mentor with pending status
@@ -25,7 +26,7 @@ async function createMentor(userId, mentorData) {
     about: mentorData.about,
     contact: mentorData.contact,
   };
-  const createdMentor = await repo.createMentor(mentor);
+  const [createdMentor] = await repo.createMentor(mentor);
   // get active mentor emails
   const activeMentorEmails = await repo.getMentorsEmails();
   // send email notification to all mentors
@@ -36,6 +37,12 @@ async function createMentor(userId, mentorData) {
   }
 
   return createdMentor;
+}
+catch(err)
+{
+  logger.error('Failed to create mentor:', err);
+    throw err;  
+}
 }
 
 module.exports = { getMentors, getMentorById, createMentor };
