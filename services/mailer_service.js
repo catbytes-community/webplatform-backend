@@ -116,4 +116,30 @@ async function sendEmailOnApplicationStatusChange(email, name, status) {
   }
 }
 
-module.exports = { initMailer, sendEmailOnApplicationStatusChange };
+async function notifyMentorsAboutNewApplication(mentorApplication, mentorEmails) {
+  try {
+    if (!mentorEmails || !mentorEmails.length) {
+      logger.warn("No mentor emails provided to notify about new application");
+      return;
+    }
+
+    const mailOptions = {
+      from: mailerConfig.user,
+      bcc: mentorEmails, 
+      subject: "New Mentor Application Submitted",
+      template: "new_mentor_application_email",
+      context: {
+        applicantName: mentorApplication.name,
+        applicantAbout: mentorApplication.about,
+        reviewLink: `${webplatformUrl}/applications`,
+        catbytesLink: webplatformUrl,
+      } 
+    };
+    return mailTransporter.sendMail(mailOptions);
+  } catch (err) {
+    logger.error(`Error notifying mentors about new application: ${err.message}`);
+    throw err;
+  }
+}
+
+module.exports = { initMailer, sendEmailOnApplicationStatusChange, notifyMentorsAboutNewApplication };

@@ -10,6 +10,9 @@ function verifyRole(roleName) {
       if (!userId) {
         return respondWithError(res, 401, "User not authenticated");
       }
+      // Check if user is admin first
+      const isAdmin = await repo.userIsAdmin(userId);
+      if (isAdmin) return next();
 
       const roleId = utils.getRole(roleName);
       const userRole = await repo.verifyRole(userId, roleId);

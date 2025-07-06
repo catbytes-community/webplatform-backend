@@ -10,4 +10,14 @@ async function verifyOwnership(entityTable, resourceId, userId) {
   return await knex(entityTable).where("id", resourceId).andWhere("created_by", userId).select("*");
 }
 
-module.exports = { verifyRole, verifyOwnership };
+async function userIsAdmin(userId) {
+  const knex = getKnex();
+  const adminRole = await knex("roles")
+    .where("role_name", "admin")
+    .first();   
+  if (!adminRole) return false;
+  
+  return verifyRole(userId, adminRole.id);
+}
+
+module.exports = { verifyRole, verifyOwnership, userIsAdmin };
