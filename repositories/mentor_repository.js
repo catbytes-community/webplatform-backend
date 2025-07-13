@@ -53,12 +53,13 @@ async function createMentor(mentorData) {
   };
 }
 
-async function getMentorsEmails() {
+async function getAdminEmails() {
   const knex = getKnex();
-  return await knex("mentors")
-    .join("users", "mentors.user_id", "users.id")
-    .where("mentors.status", "active")
+  return await knex("user_roles")
+    .join("roles", "user_roles.role_id", "roles.id")
+    .join("users", "user_roles.user_id", "users.id")
+    .where("roles.role_name", "admin")
     .pluck("users.email");
 }
 
-module.exports = { getMentors, getMentorById, createMentor, getMentorsEmails, mentorAlreadyExists};
+module.exports = { getMentors, getMentorById, createMentor, getAdminEmails, mentorAlreadyExists};

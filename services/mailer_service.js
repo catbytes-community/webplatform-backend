@@ -116,15 +116,15 @@ async function sendEmailOnApplicationStatusChange(email, name, status) {
   }
 }
 
-async function notifyMentorsAboutNewApplication(mentorApplication, mentorEmails) {
-  if (!mentorEmails || !mentorEmails.length) {
+async function notifyMentorsAboutNewApplication(mentorApplication, adminEmails) {
+  if (!adminEmails || !adminEmails.length) {
     logger.warn("No mentor emails provided to notify about new application");
     return;
   }
 
   const mailOptions = {
     from: mailerConfig.user,
-    bcc: mentorEmails, 
+    bcc: adminEmails, 
     subject: "New Mentor Application Submitted",
     template: "new_mentor_application_email",
     context: {

@@ -1,5 +1,6 @@
 const utils = require('../utils');
 const repo = require('../repositories/authorization_repository');
+const userRepo = require('../repositories/user_repository');
 const { respondWithError } = require('../routes/helpers');
 const logger = require('../logger')(__filename);
 
@@ -10,16 +11,11 @@ function verifyRole(roleName) {
       if (!userId) {
         return respondWithError(res, 401, "User not authenticated");
       }
-      // Check if user is admin first
-      const isAdmin = await repo.userIsAdmin(userId);
-      if (isAdmin === true) 
-      {
-        logger.info(`Admin with userID = ${userId} accessing ${req.path}`);
-        return next();
-      }
-      const roleId = utils.getRole(roleName);
-      const userRole = await repo.verifyRole(userId, roleId);
-      if (userRole.length === 0){
+      const userRoles = await userRepo.getUserRolesById(userId);
+      const rolesArray = Array.isArray(userRoles) ? userRoles : [];
+      const result = rolesArray.some(role => role.role_name === roleName || utils.ROLE_NAMES.admin);
+      req.userRoles = rolesArray;      
+      if (!result){
         return respondWithError(res, 403, "You're not allowed to access this resource");
       }
       next();

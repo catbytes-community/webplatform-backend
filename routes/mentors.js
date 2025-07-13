@@ -14,7 +14,7 @@ router.get("/mentors", async (req, res) => {
   try {
     const { status } = req.query;
     const userId = req.userId;
-    const includeAdditionalFields = !!userId;
+    const includeAdditionalFields = !!userId;   
     const mentors = await mentorService.getMentors(userId, status, includeAdditionalFields);
     res.json({ mentors });
   } catch (err) {
@@ -34,16 +34,13 @@ router.get("/mentors/:id", verifyRole(ROLE_NAMES.member), async (req, res) => {
   if (!isValidIntegerId(id)) {
     return respondWithError(res, 400, "Invalid user id supplied");
   }
-  try {
-    const mentorInfo = await mentorService.getMentorById(req.userId, id);
+  try{
+    const mentorInfo = await mentorService.getMentorById(req.userRoles, id);
     if (!mentorInfo) {
       return respondWithError(res, 404, "Mentor not found");
     }  
     res.json(mentorInfo);
   } catch (err) {
-    if (err.message.includes('access denied')) {
-      return respondWithError(res, 404, "Access denied");
-    }
     logger.error(err);
     respondWithError(res);
   }

@@ -20,15 +20,17 @@ const privateFields = [
 const allFields = [...baseFields, ...privateFields];
 
 async function getMentors(userId, status, includeAdditionalFields){
-  const allowedStatuses = await getEligibleMentorStatuses(userId); 
+  const userRoles = await userRepo.getUserRolesById(userId);
+  const rolesArray = Array.isArray(userRoles) ? userRoles : [];
+  const allowedStatuses = await getEligibleMentorStatuses(rolesArray); 
   const selectedFields = includeAdditionalFields 
     ? allFields
     : baseFields;
   return await repo.getMentors(allowedStatuses, status, selectedFields);
 }
 
-async function getMentorById(userId, mentorId){
-  const allowedStatuses = await getEligibleMentorStatuses(userId);   
+async function getMentorById(userRoles, mentorId){
+  const allowedStatuses = await getEligibleMentorStatuses(userRoles);   
   return await repo.getMentorById(allowedStatuses, allFields, mentorId);
 }
 
@@ -48,17 +50,15 @@ async function createMentor(userId, mentorData) {
   };
   const createdMentor = await repo.createMentor(mentor);
   // get active mentor emails
-  const activeMentorEmails = await repo.getMentorsEmails();
-  // send email notification to all mentors
-  await mailerService.notifyMentorsAboutNewApplication(createdMentor, activeMentorEmails);
+  const adminEmails = await repo.getAdminEmails();
+  // send email notification to all admins
+  await mailerService.notifyMentorsAboutNewApplication(createdMentor, adminEmails);
   return createdMentor;
 }
 
-async function getEligibleMentorStatuses(userId)
+async function getEligibleMentorStatuses(userRoles)
 {
-  const userRoles = userId ? await userRepo.getUserRolesById(userId): [];
-  const rolesArray = Array.isArray(userRoles) ? userRoles : [];
-  const isAdmin = rolesArray.some(role => role.role_name === ROLE_NAMES.admin);
+  const isAdmin = userRoles.some(role => role.role_name === ROLE_NAMES.admin);
   if (isAdmin) {
     return ['active', 'inactive', 'rejected', 'pending'];
   } else {
