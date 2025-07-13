@@ -16,8 +16,8 @@ async function userIsAdmin(userId) {
     .where("role_name", "admin")
     .first();   
   if (!adminRole) return false;
-  
-  return verifyRole(userId, adminRole.id);
+  const result =  await verifyRole(userId, adminRole.id);
+  return result.length !== 0;
 }
 
 module.exports = { verifyRole, verifyOwnership, userIsAdmin };

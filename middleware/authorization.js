@@ -12,8 +12,11 @@ function verifyRole(roleName) {
       }
       // Check if user is admin first
       const isAdmin = await repo.userIsAdmin(userId);
-      if (isAdmin) return next();
-
+      if (isAdmin === true) 
+      {
+        logger.info(`Admin with userID = ${userId} accessing ${req.path}`);
+        return next();
+      }
       const roleId = utils.getRole(roleName);
       const userRole = await repo.verifyRole(userId, roleId);
       if (userRole.length === 0){

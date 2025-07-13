@@ -13,15 +13,17 @@ router.use(express.json());
 router.get("/mentors", async (req, res) => {
   try {
     const { status } = req.query;
-    const mentors = await mentorService.getMentors(req.userId, status);
+    const userId = req.userId;
+    const includeAdditionalFields = !!userId;
+    const mentors = await mentorService.getMentors(userId, status, includeAdditionalFields);
     res.json({ mentors });
   } catch (err) {
     if (err.message.includes('not permitted')) {
       logger.warn(`Unauthorized mentor list request: ${err.message}`);
-      return respondWithError(res, 403, "You don't have permission to view these mentors");
+      return respondWithError(res, 403, err.message);
     }
     logger.error(err);
-    respondWithError(res, 500, "Failed to retrieve mentors");
+    respondWithError(res);
   }
 });
 
@@ -39,11 +41,11 @@ router.get("/mentors/:id", verifyRole(ROLE_NAMES.member), async (req, res) => {
     }  
     res.json(mentorInfo);
   } catch (err) {
-    if (err.message.includes('not found') || err.message.includes('access denied')) {
-      return respondWithError(res, 404, "Mentor not found or access denied");
+    if (err.message.includes('access denied')) {
+      return respondWithError(res, 404, "Access denied");
     }
     logger.error(err);
-    respondWithError(res, 500, "Failed to retrieve mentor details");
+    respondWithError(res);
   }
 });
 // Create new mentor application
@@ -56,11 +58,7 @@ router.post("/mentors", verifyRole(ROLE_NAMES.member), async (req, res) => {
     const newMentor = await mentorService.createMentor(req.userId, mentorData);
     res.status(201).json(newMentor.id);
   } catch (err) {
-    logger.error(err);
-    if (err.message === 'User already has a mentor profile') {
-      return respondWithError(res, 400, err.message);
-    }
-    respondWithError(res);
+    return respondWithError(res, err.status, err.message);
   }
 });
 
