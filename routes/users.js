@@ -130,4 +130,13 @@ router.delete("/users/:id", verifyOwnership(OWNED_ENTITIES.USER), async (req, re
   }
 });
 
+router.post("/users/logout", (req, res) => {
+  res.clearCookie("userUID", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+  });
+  res.status(200).json({ message: "Logged out successfully" });
+});
+
 module.exports = router;
