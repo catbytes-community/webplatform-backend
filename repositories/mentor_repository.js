@@ -1,32 +1,24 @@
 const { getKnex } = require("../db");
 
-async function getMentors(allowedStatuses, status, selectedFields){
+async function getMentors(allowedStatuses, status, selectedFields) {
   const knex = getKnex();
   const query = knex("mentors")
     .join("users", "mentors.user_id", "users.id")
     .select(selectedFields);
-  if (status) 
-  {
-    query.where("mentors.status", status);
-  }
-  else
-  {
-    query.whereIn("mentors.status", allowedStatuses);
-  }
-  return await query;
+
+  const filter = status ? [status] : allowedStatuses;
+  return await query.whereIn("mentors.status", filter);
 }
 
-async function mentorAlreadyExists(userId)
-{
-  const knex = getKnex(); 
-  const mentor = await knex("mentors")
-    .where("user_id", userId)
+async function getMentorByUserId(userId) {
+  const knex = getKnex();
+  return await knex("mentors")
+    .join("users", "mentors.user_id", "users.id")
+    .where("users.id", userId)
     .first();
-
-  return !!mentor;
 }
 
-async function getMentorById(allowedStatuses, selectedFields, mentorId){
+async function getMentorById(allowedStatuses, selectedFields, mentorId) {
   const knex = getKnex();
   return await knex("mentors")
     .join("users", "mentors.user_id", "users.id")
@@ -35,13 +27,12 @@ async function getMentorById(allowedStatuses, selectedFields, mentorId){
     .select(selectedFields).first();
 }
 
-
 async function createMentor(mentorData) {
   const knex = getKnex();
   const [mentor] = await knex("mentors")
     .insert(mentorData)
     .returning("*");
-    
+
   //get user name
   const user = await knex("users")
     .select("name")
@@ -62,4 +53,4 @@ async function getAdminEmails() {
     .pluck("users.email");
 }
 
-module.exports = { getMentors, getMentorById, createMentor, getAdminEmails, mentorAlreadyExists};
+module.exports = { getMentors, getMentorById, createMentor, getAdminEmails, getMentorByUserId };

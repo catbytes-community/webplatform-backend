@@ -19,24 +19,25 @@ const privateFields = [
 
 const allFields = [...baseFields, ...privateFields];
 
-async function getMentors(userId, status, includeAdditionalFields){
-  const userRoles = await userRepo.getUserRolesById(userId);
-  const rolesArray = Array.isArray(userRoles) ? userRoles : [];
-  const allowedStatuses = await getEligibleMentorStatuses(rolesArray); 
-  const selectedFields = includeAdditionalFields 
+async function getMentors(userId, status, includeAdditionalFields) {
+  const userRoles = userId
+    ? await userRepo.getUserRolesById(userId)
+    : [];
+  const allowedStatuses = await getEligibleMentorStatuses(userRoles);
+  const selectedFields = includeAdditionalFields
     ? allFields
     : baseFields;
   return await repo.getMentors(allowedStatuses, status, selectedFields);
 }
 
-async function getMentorById(userRoles, mentorId){
-  const allowedStatuses = await getEligibleMentorStatuses(userRoles);   
+async function getMentorById(userRoles, mentorId) {
+  const allowedStatuses = await getEligibleMentorStatuses(userRoles);
   return await repo.getMentorById(allowedStatuses, allFields, mentorId);
 }
 
 async function createMentor(userId, mentorData) {
   // check if user already has a mentor profile
-  const existingMentor = await repo.mentorAlreadyExists(userId);
+  const existingMentor = await repo.getMentorByUserId(userId);
   if (existingMentor) {
     throw { status: 400, message: 'User already has a mentor profile' };
   }
@@ -52,12 +53,11 @@ async function createMentor(userId, mentorData) {
   // get active mentor emails
   const adminEmails = await repo.getAdminEmails();
   // send email notification to all admins
-  await mailerService.notifyMentorsAboutNewApplication(createdMentor, adminEmails);
+  await mailerService.notifyAdminsAboutNewApplication(createdMentor, adminEmails);
   return createdMentor;
 }
 
-async function getEligibleMentorStatuses(userRoles)
-{
+async function getEligibleMentorStatuses(userRoles) {
   const isAdmin = userRoles.some(role => role.role_name === ROLE_NAMES.admin);
   if (isAdmin) {
     return ['active', 'inactive', 'rejected', 'pending'];

@@ -3,19 +3,18 @@ const express = require("express");
 const router = express.Router();
 const mentorService = require("../services/mentor_service");
 const { ROLE_NAMES } = require("../utils");
-const {verifyRole} = require("../middleware/authorization");
+const { verifyRole } = require("../middleware/authorization");
 const { isValidIntegerId, respondWithError } = require("./helpers");
 const logger = require('../logger')(__filename);
 
 router.use(express.json());
- 
+
 // Get all mentors
 router.get("/mentors", async (req, res) => {
   try {
     const { status } = req.query;
     const userId = req.userId;
-    const includeAdditionalFields = !!userId;   
-    const mentors = await mentorService.getMentors(userId, status, includeAdditionalFields);
+    const mentors = await mentorService.getMentors(userId, status, !!userId);
     res.json({ mentors });
   } catch (err) {
     if (err.message.includes('not permitted')) {
@@ -34,11 +33,11 @@ router.get("/mentors/:id", verifyRole(ROLE_NAMES.member), async (req, res) => {
   if (!isValidIntegerId(id)) {
     return respondWithError(res, 400, "Invalid user id supplied");
   }
-  try{
+  try {
     const mentorInfo = await mentorService.getMentorById(req.userRoles, id);
     if (!mentorInfo) {
       return respondWithError(res, 404, "Mentor not found");
-    }  
+    }
     res.json(mentorInfo);
   } catch (err) {
     logger.error(err);
@@ -54,7 +53,7 @@ router.post("/mentors", verifyRole(ROLE_NAMES.member), async (req, res) => {
     };
     const newMentor = await mentorService.createMentor(req.userId, mentorData);
     res.status(201).json(newMentor.id);
-  } catch (err) {
+  } catch(err) {
     return respondWithError(res, err.status, err.message);
   }
 });

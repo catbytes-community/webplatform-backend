@@ -12,11 +12,13 @@ function verifyRole(roleName) {
         return respondWithError(res, 401, "User not authenticated");
       }
       const userRoles = await userRepo.getUserRolesById(userId);
-      const rolesArray = Array.isArray(userRoles) ? userRoles : [];
-      const result = rolesArray.some(role => role.role_name === roleName || utils.ROLE_NAMES.admin);
-      req.userRoles = rolesArray;      
-      if (!result){
+      const result = userRoles.some(role => role.role_name === roleName || utils.ROLE_NAMES.admin);
+      req.userRoles = userRoles;
+      if (!result) {
         return respondWithError(res, 403, "You're not allowed to access this resource");
+      }
+      if (userRoles.some(role => role.role_name === utils.ROLE_NAMES.admin)) {
+        logger.info(`Admin with userId=${userId} accessed ${req.path}`);
       }
       next();
     } catch (err) {
@@ -40,11 +42,11 @@ function verifyOwnership(entityTable) {
       if (!userId) {
         return respondWithError(res, 401, "User not authenticated");
       }
-    
+
       if (!resourceId || !userId) {
         return respondWithError(res, 400, `Invalid request: missing ${entityTable} ID or user information`);
       }
-            
+
       let resource;
       if (entityTable === OWNED_ENTITIES.USER) {
         resource = userId.toString() === resourceId.toString();
@@ -52,11 +54,11 @@ function verifyOwnership(entityTable) {
         const result = await repo.verifyOwnership(entityTable, resourceId, userId);
         resource = result.rows && result.length !== 0;
       }
-    
+
       if (!resource) {
         return respondWithError(res, 403, "You're not allowed to edit this resource");
       }
-    
+
       next();
     } catch (err) {
       logger.error(err, 'Error verifying ownership');

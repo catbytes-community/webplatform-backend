@@ -32,7 +32,7 @@ async function initMailer() {
       pass: mailerPassword,
     }
   });
- 
+
   const handleBarOptions = {
     viewEngine: {
       extName: ".hbs",
@@ -99,7 +99,7 @@ async function sendEmailOnApplicationStatusChange(email, name, status) {
   try {
     if (status === APPL_STATUSES.approved) {
       await sendApplicationApprovedEmail(email, name);
-    } 
+    }
     else if (status === APPL_STATUSES.rejected) {
       await sendApplicationRejectedEmail(email, name);
     }
@@ -116,25 +116,29 @@ async function sendEmailOnApplicationStatusChange(email, name, status) {
   }
 }
 
-async function notifyMentorsAboutNewApplication(mentorApplication, adminEmails) {
+async function notifyAdminsAboutNewApplication(mentorApplication, adminEmails) {
   if (!adminEmails || !adminEmails.length) {
     logger.warn("No mentor emails provided to notify about new application");
     return;
   }
-
-  const mailOptions = {
-    from: mailerConfig.user,
-    bcc: adminEmails, 
-    subject: "New Mentor Application Submitted",
-    template: "new_mentor_application_email",
-    context: {
-      applicantName: mentorApplication.name,
-      applicantAbout: mentorApplication.about,
-      reviewLink: `${webplatformUrl}/applications`,
-      catbytesLink: webplatformUrl,
-    } 
-  };
-  return mailTransporter.sendMail(mailOptions);
+  try {
+    const mailOptions = {
+      from: mailerConfig.user,
+      bcc: adminEmails,
+      subject: "New Mentor Application Submitted",
+      template: "new_mentor_application_email",
+      context: {
+        applicantName: mentorApplication.name,
+        applicantAbout: mentorApplication.about,
+        reviewLink: `${webplatformUrl}/applications`,
+        catbytesLink: webplatformUrl,
+      }
+    };
+    return mailTransporter.sendMail(mailOptions);
+  }
+  catch (err) {
+    logger.error(`Error notifying admins about new application: ${err.message}`);
+  }
 }
 
-module.exports = { initMailer, sendEmailOnApplicationStatusChange, notifyMentorsAboutNewApplication };
+module.exports = { initMailer, sendEmailOnApplicationStatusChange, notifyAdminsAboutNewApplication };
