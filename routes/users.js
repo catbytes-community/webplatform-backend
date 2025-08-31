@@ -16,7 +16,7 @@ router.use(express.json());
 router.post("/users/login", async (req, res) => {
   const firebaseToken = req.get('X-Firebase-Token') || null;
   const discordCode = req.get('X-Discord-Code') || null;
-
+  
   try {
     let authResult;
 
@@ -128,6 +128,15 @@ router.delete("/users/:id", verifyOwnership(OWNED_ENTITIES.USER), async (req, re
     logger.error(err);
     respondWithError(res);
   }
+});
+
+router.post("/users/logout", (req, res) => {
+  res.clearCookie("userUID", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+  });
+  res.status(200).json({ message: "Logged out successfully" });
 });
 
 module.exports = router;

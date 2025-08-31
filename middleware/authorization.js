@@ -33,7 +33,7 @@ function verifyOwnership(entityTable) {
   return async (req, res, next) => {
     logger.debug(`Middleware invoked for: ${req.url}`);
     try {
-      const resourceId = req.params.id;
+      const resourceId = req.params?.id;
       const userId = req.userId;
       if (!userId) {
         return respondWithError(res, 401, "User not authenticated");

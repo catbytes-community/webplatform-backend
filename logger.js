@@ -7,10 +7,15 @@ require('dotenv').config({ path: '.env.local' });
 // Otherwise, use JSON and formatiing for deployed service - e.g. Grafana Loki
 const isGrafanaLogging = process.env.LOGGER_ENV !== "local";
 
+// When running tests, NODE_ENV is automatically set to 'test' by Jest.
+const isTestEnvironment = process.env.NODE_ENV === 'test';
+
+const defaultLoggingLevel = isGrafanaLogging ? 'info' : 'debug';
+
 const baseLogger = pino({
-  level: isGrafanaLogging
-    ? 'info' 
-    : 'debug',
+  level: isTestEnvironment
+    ? 'silent' // no logging in tests
+    : defaultLoggingLevel,
   transport: !isGrafanaLogging
     ? 
     {
