@@ -16,7 +16,7 @@ router.use(express.json());
 router.post("/users/login", async (req, res) => {
   const firebaseToken = req.get('X-Firebase-Token') || null;
   const discordCode = req.get('X-Discord-Code') || null;
-
+  
   try {
     let authResult;
 

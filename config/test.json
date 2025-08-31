@@ -1,0 +1,3 @@
+{
+    "dummy_key": "this is a default empty file for config loading using const config = require('config'); in test environment (when running unit tests). this is intended to be empty."
+}
