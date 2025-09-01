@@ -1,7 +1,12 @@
 include .env.local
 export
 
+# To make sure these targets are not confused with files of the same name
+.PHONY: help lint test clean deploy-dev deploy-prod stop-dev stop-prod \
+        connect-dev connect-prod create-migration apply-migrations rollback-migration
+
 WARN_COLOR := $(shell tput setaf 208)
+GREEN_COLOR := $(shell tput setaf 2)
 RESET_COLOR := $(shell tput sgr0)
 
 # Development
@@ -33,6 +38,9 @@ create-migration:
 apply-migrations:
 	knex migrate:latest
 
+rollback-migration:
+	knex migrate:rollback
+
 
 # EC2 deployment
 stop-dev:
@@ -55,3 +63,29 @@ deploy-dev:
 
 deploy-prod:
 	@$(MAKE) deploy-env env=prod
+
+help:
+	@echo ""
+	@echo "🛠  $(GREEN_COLOR)Makefile Help$(RESET_COLOR)"
+	@echo ""
+	@echo "🔧 Development:"
+	@echo "  $(GREEN_COLOR)lint$(RESET_COLOR)              Run eslint to check code quality"
+	@echo "  $(GREEN_COLOR)test$(RESET_COLOR)              Run unit tests with npm"
+
+	@echo ""
+	@echo "🌐 EC2 Instances:"
+	@echo "  $(GREEN_COLOR)connect-dev$(RESET_COLOR)       SSH into the dev EC2 instance"
+	@echo "  $(GREEN_COLOR)connect-prod$(RESET_COLOR)      SSH into the prod EC2 instance"
+
+	@echo ""
+	@echo "🛢  Database Migrations (Knex):"
+	@echo "  $(GREEN_COLOR)create-migration$(RESET_COLOR)  Create a new migration (usage: make create-migration name=xyz)"
+	@echo "  $(GREEN_COLOR)apply-migrations$(RESET_COLOR)  Apply the latest migrations"
+	@echo "  $(GREEN_COLOR)rollback-migration$(RESET_COLOR)Rollback the last migration"
+
+	@echo ""
+	@echo "🚀 Deployment:"
+	@echo "  $(GREEN_COLOR)deploy-dev$(RESET_COLOR)        Deploy the dev environment"
+	@echo "  $(GREEN_COLOR)deploy-prod$(RESET_COLOR)       Deploy the prod environment"
+	@echo "  $(GREEN_COLOR)stop-dev$(RESET_COLOR)          Stop the dev Docker Compose"
+	@echo "  $(GREEN_COLOR)stop-prod$(RESET_COLOR)         Stop the prod Docker Compose"
