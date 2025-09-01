@@ -37,3 +37,9 @@ make connect-dev
 ```
 This will execute the `connect-dev` command and connect you to the dev EC2 instance.
 Make sure you have all required environment variables set.
+
+Run 
+```bash
+make help
+```
+to list all available Makefile commands.
