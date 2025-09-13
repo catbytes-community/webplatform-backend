@@ -1,5 +1,6 @@
 const request = require('supertest');
 const mentorService = require('../../services/mentor_service');
+const { ConflictError, DataRequiresElevatedRoleError } = require('../../errors');
 
 const defautlUserId = 42;
 const defaultUserRoles = [{ role_name: 'member', role_id: 1 }];
@@ -53,6 +54,27 @@ describe('POST /mentors', () => {
   });
 
   // todo: add tests for conflict and 500
+  it('Create mentor application - user already has mentor entity', async () => {
+    mentorService.createMentor.mockRejectedValue(new ConflictError('User already has a mentor application'));
+    
+    const res = await request(app)
+      .post('/mentors')
+      .send({ contact: 'sample@test.com', about: 'I am a mentor'});
+
+    expect(res.statusCode).toBe(409);
+    expect(res.body.error).toBe('User already has a mentor application')
+  });
+
+  it('Create mentor application - unexpected error', async () => {
+    mentorService.createMentor.mockRejectedValue(new Error());
+    
+    const res = await request(app)
+      .post('/mentors')
+      .send({ contact: 'sample@test.com', about: 'I am a mentor'});
+    
+    expect(res.statusCode).toBe(500);
+    expect(res.body.error).toBe('Internal Server Error');
+  });
 });
 
 describe('GET /mentors', () => {
@@ -83,7 +105,30 @@ describe('GET /mentors', () => {
     expect(res.body.mentors.length).toBeGreaterThan(0);
   });
 
-  // todo: add tests for 403 and 500
+  it('Get pending mentors - unauthorized', async () => {
+    mentorService.getMentors
+      .mockRejectedValue(new DataRequiresElevatedRoleError('Pending mentors are only available to admins'));
+    const res = await request(app)
+      .get('/mentors')
+      .query({ status: 'pending' })
+      .set('userId', defautlUserId); // simulate authenticated user
+    
+    expect(mentorService.getMentors).toHaveBeenCalledWith(defautlUserId, 'pending', true);
+
+    expect(res.statusCode).toBe(403);
+    expect(res.body.error).toBe("You're not allowed to see mentors with this status.");
+  });
+
+  it('Get mentors - unexpected error', async () => {
+    mentorService.getMentors.mockRejectedValue(new Error());
+    
+    const res = await request(app)
+      .get('/mentors')
+      .set('userId', defautlUserId); // simulate authenticated user
+    
+    expect(res.statusCode).toBe(500);
+    expect(res.body.error).toBe('Internal Server Error');
+  });
 });
 
 describe('GET /mentors/:id', () => {
