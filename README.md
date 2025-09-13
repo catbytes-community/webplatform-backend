@@ -6,17 +6,6 @@ Located in the `/docs` directory. `*.json` file is used for rendering, `*.yaml` 
 
 Also published on GitHub pages: https://catbytes-community.github.io/webplatform-backend/
 
-### Monitoring
-Service logs are sent to Grafana. Main dashboard: https://catbytes.grafana.net/goto/S3QCkuxHR?orgId=1
-Here are also some predefined queries to search in logs:
-
-| Environment    | Url |
-| -------- | ------- |
-| DEV  | https://catbytes.grafana.net/goto/dkl-MubNg?orgId=1   |
-| PROD | https://catbytes.grafana.net/goto/cvZfGXbNR?orgId=1     |
-
-Insert value you're looking for in the 'Line contains' box.
-
 ### Documentation for developers
 
 Located in the `/docs/how-tos` directory. All important information on local run, deployments, etc is stored there.
@@ -24,14 +13,33 @@ Located in the `/docs/how-tos` directory. All important information on local run
 ### How to run project locally
 
 1. Follow `/docs/how-tos/setup_local_postgresql`, step "Setting up Local PostgreSQL instance"
-2. Update your .env accordingly. Here is sample .env structure:
+2. Use `.env.local` file for environment variables (default `.env` is picked up by Docker so to avoid confusion we use explicit local file for local development). Update your `.env.local` accordingly. Here is sample structure or reach out for up-to-date .env to fellow devs:
+```
    DB_USER=marina_kim
    DB_HOST=localhost
    DB_NAME=mydatabase
    DB_PASS=password
    DB_PORT=5432
    ENVIRONMENT=local
+```
 
-Note: ENVIRONMENT should be set to local for running the project locally, otherwise you have to authenticate with AWS CLI first (ref. `/docs/how-tos/aws_local_db_connection.md`)
+Note: ENVIRONMENT should be set to local for running the project locally, otherwise you have to authenticate with AWS CLI first (ref. `/docs/how-tos/local_run_and_configs.md`)
 
-Once you are authenticated with AWS CLI or you have the local PostgreSQL setup, you should successfully run `npm start` to start the server
+Once you are authenticated with AWS CLI or you have the local PostgreSQL setup, you can successfully run `npm start` (or use `nodemon`) to start the server.
+
+### Useful commands: Makefile
+
+Refer to the `Makefile` to see commands frequently used in development.
+Example usage:
+
+```bash
+make connect-dev
+```
+This will execute the `connect-dev` command and connect you to the dev EC2 instance.
+Make sure you have all required environment variables set.
+
+Run 
+```bash
+make help
+```
+to list all available Makefile commands.
