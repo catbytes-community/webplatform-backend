@@ -5,19 +5,17 @@ async function verifyRole(userId, roleId) {
   return await knex("user_roles").where("user_id", userId).andWhere("role_id", roleId).select("*");
 }
 
+async function getRolesByUserId(id) {
+  const knex = getKnex();
+  return await knex("roles")
+    .join("user_roles", "roles.id", "user_roles.role_id")
+    .where("user_roles.user_id", id)
+    .select("roles.role_name", "roles.id");
+}
+
 async function verifyOwnership(entityTable, resourceId, userId) {
   const knex = getKnex();
   return await knex(entityTable).where("id", resourceId).andWhere("created_by", userId).select("*");
 }
 
-async function userIsAdmin(userId) {
-  const knex = getKnex();
-  const adminRole = await knex("roles")
-    .where("role_name", "admin")
-    .first();   
-  if (!adminRole) return false;
-  const result =  await verifyRole(userId, adminRole.id);
-  return result.length !== 0;
-}
-
-module.exports = { verifyRole, verifyOwnership, userIsAdmin };
+module.exports = { verifyRole, verifyOwnership, getRolesByUserId };

@@ -1,6 +1,5 @@
 const utils = require('../utils');
 const repo = require('../repositories/authorization_repository');
-const userRepo = require('../repositories/user_repository');
 const { respondWithError } = require('../routes/helpers');
 const logger = require('../logger')(__filename);
 
@@ -11,7 +10,7 @@ function verifyRole(roleName) {
       if (!userId) {
         return respondWithError(res, 401, "User not authenticated");
       }
-      const userRoles = await userRepo.getUserRolesById(userId);
+      const userRoles = await repo.getRolesByUserId(userId);
       const result = userRoles.some(role => role.role_name === roleName || utils.ROLE_NAMES.admin);
       req.userRoles = userRoles;
       if (!result) {
