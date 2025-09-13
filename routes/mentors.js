@@ -26,7 +26,6 @@ router.get("/mentors", async (req, res) => {
   }
 });
 
-
 // Get mentor by ID
 router.get("/mentors/:id", verifyRole(ROLE_NAMES.member), async (req, res) => {
   const { id } = req.params;
@@ -44,6 +43,7 @@ router.get("/mentors/:id", verifyRole(ROLE_NAMES.member), async (req, res) => {
     respondWithError(res);
   }
 });
+
 // Create new mentor application
 router.post("/mentors", verifyRole(ROLE_NAMES.member), async (req, res) => {
   try {
