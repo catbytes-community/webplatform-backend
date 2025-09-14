@@ -1,6 +1,6 @@
 const express = require("express");
 const applService = require("../services/applications_service");
-const { verifyRole } = require("../middleware/authorization");
+const { verifyRoles } = require("../middleware/authorization");
 const { ROLE_NAMES, APPL_STATUSES } = require("../utils");
 const {
   respondWithError,
@@ -12,7 +12,7 @@ const logger = require('../logger')(__filename);
 const router = express.Router();
 router.use(express.json());
 
-router.get("/applications", verifyRole(ROLE_NAMES.mentor), async (req, res) => {
+router.get("/applications", verifyRoles([ROLE_NAMES.mentor]), async (req, res) => {
   try {
     const result = await applService.getAllApplications();
     res.json({ applications: result });
@@ -40,7 +40,7 @@ router.post("/applications", async (req, res) => {
   }
 });
 
-router.put("/applications/:id", verifyRole(ROLE_NAMES.mentor), async (req, res) => {
+router.put("/applications/:id", verifyRoles([ROLE_NAMES.mentor]), async (req, res) => {
   const { id } = req.params;
   const { status, comment } = req.body;
   const today = new Date();

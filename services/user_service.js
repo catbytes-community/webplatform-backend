@@ -16,7 +16,7 @@ async function createNewMemberUser(name, email, about, languages, discordNicknam
 async function getUserById(id) {
   const userInfo = await repo.getUserInfoById(id);
   if (userInfo) {
-    const roles = await repo.getUserRolesById(id);
+    const roles = await rolesService.getUserRoles(id);
     userInfo.roles = roles.length ? roles : [];    
   }
   return userInfo;

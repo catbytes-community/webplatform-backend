@@ -1,22 +1,26 @@
-const utils = require('../utils');
 const repo = require('../repositories/authorization_repository');
 const { respondWithError } = require('../routes/helpers');
 const logger = require('../logger')(__filename);
 
-function verifyRole(roleName) {
+function verifyRoles(roleNames) {
   return async (req, res, next) => {
     try {
       const userId = req.userId;
       if (!userId) {
         return respondWithError(res, 401, "User not authenticated");
       }
+      const userRoles = await repo.getRolesByUserId(userId);
 
-      const roleId = utils.getRole(roleName);
-      const userRole = await repo.verifyRole(userId, roleId);
-      if (userRole.length === 0){
-        return respondWithError(res, 403, "You're not allowed to access this resource");
+      const hasRole = roleNames.some(roleName => {
+        return userRoles.some(userRole => userRole.role_name === roleName);
+      });
+
+      if (hasRole) {
+        return next();
       }
-      next();
+
+      return respondWithError(res, 403, "You're not allowed to access this resource");
+
     } catch (err) {
       logger.error(err, 'Error verifying role');
       return respondWithError(res);
@@ -64,4 +68,4 @@ function verifyOwnership(entityTable) {
 }
 
 
-module.exports = { verifyRole, verifyOwnership, OWNED_ENTITIES };
+module.exports = { verifyRoles, verifyOwnership, OWNED_ENTITIES };
