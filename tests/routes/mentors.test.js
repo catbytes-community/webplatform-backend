@@ -52,7 +52,7 @@ describe('POST /mentors', () => {
     expect(mentorService.createMentor).toHaveBeenCalledWith(mockedMentor.user_id, payload);
 
     expect(res.statusCode).toBe(201);
-    expect(res.body).toStrictEqual({ mentor_id: mockedMentor.id });
+    expect(res.body).toStrictEqual({ id: mockedMentor.id });
   });
 
   it('Create mentor application - user already has mentor entity', async () => {

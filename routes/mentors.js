@@ -19,7 +19,7 @@ router.post("/mentors", verifyRoles([ROLE_NAMES.member]), async (req, res) => {
     };
 
     const newMentor = await mentorService.createMentor(req.userId, mentorData);
-    res.status(201).json({ mentor_id: newMentor.id});
+    res.status(201).json({ id: newMentor.id});
   } catch(err) {
     logger.error(`Error while creating mentor application for user ${req.userId}: ${err.message}`);
     if (err instanceof MentorAlreadyExistsError) {

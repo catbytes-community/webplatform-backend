@@ -22,16 +22,8 @@ async function createMentor(mentorData) {
   const [mentor] = await knex("mentors")
     .insert(mentorData)
     .returning("*");
-
-  //get user name
-  const user = await knex("users")
-    .select("name")
-    .where("id", mentor.user_id)
-    .first();
-  return {
-    ...mentor,
-    name: user.name
-  };
+    
+    return mentor;
 }
 
 module.exports = { getMentors, createMentor, getMentorByUserId };
