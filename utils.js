@@ -6,8 +6,9 @@ const logger = require('./logger')(__filename);
 let rolesCache = null;
 
 const ROLE_NAMES = {
+  admin: 'admin',
   mentor: 'mentor',
-  member: 'member'
+  member: 'member',
 };
 
 async function getFirebaseSdkServiceAccount() {

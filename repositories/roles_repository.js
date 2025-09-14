@@ -7,7 +7,15 @@ async function getAllRoles() {
 
 async function assignRoleToUser(userId, roleId) {
   const knex = getKnex();
-  await knex("user_roles").insert({ role_id: roleId, user_id: userId });
+  await knex("user_roles")
+    .insert({ role_id: roleId, user_id: userId });
 }
 
-module.exports = { getAllRoles, assignRoleToUser };
+async function removeRoleFromUser(userId, roleId) {
+  const knex = getKnex();
+  await knex("user_roles")
+    .where({ user_id: userId, role_id: roleId })
+    .del();
+}
+
+module.exports = { getAllRoles, assignRoleToUser, removeRoleFromUser };
