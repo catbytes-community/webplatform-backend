@@ -20,34 +20,46 @@ describe('verifyRoles', () => {
     expect(next).not.toHaveBeenCalled();
   });
 
-  it('Returns 403 if no roles found', async () => {
-    const req = { userId: 1 };
-    const res = {};
-    const next = jest.fn();
+  const roleCheckTestCases = [
+    {
+      description: 'Calls next on success for member role',
+      rolesToVerify: [ROLE_NAMES.member],
+      userRoles: [{ role_name: 'member', role_id: 1 }],
+      expectedNextCalled: true,
+    },
+    {
+      description: 'Calls next on success for admin role',
+      rolesToVerify: [ROLE_NAMES.mentor, ROLE_NAMES.admin],
+      userRoles: [{ role_name: 'admin', role_id: 3 }],
+      expectedNextCalled: true,
+    },
+    {
+      description: 'Returns 403 when user does not have the required role',
+      rolesToVerify: [ROLE_NAMES.mentor, ROLE_NAMES.admin],
+      userRoles: [{ role_name: 'member', role_id: 1 }],
+      expectedNextCalled: false,
+    },
+  ];
 
-    jest.spyOn(require('../../repositories/authorization_repository'), 'getRolesByUserId')
-      .mockResolvedValue([]);
+  roleCheckTestCases.forEach(({ description, rolesToVerify, userRoles, expectedNextCalled }) => {
+    it(description, async () => {
+      const req = { userId: 1 };
+      const res = {};
+      const next = jest.fn();
 
-    await verifyRoles([ROLE_NAMES.member])(req, res, next);
+      jest.spyOn(require('../../repositories/authorization_repository'), 'getRolesByUserId')
+        .mockResolvedValue(userRoles);
 
-    expect(res.statusCode).toBe(403);
-    expect(res.body).toEqual({ error: "You're not allowed to access this resource" });
-    expect(next).not.toHaveBeenCalled();
-  });
+      await verifyRoles(rolesToVerify)(req, res, next);
 
-  it('Returns 403 if no sufficient role found', async () => {
-    const req = { userId: 1 };
-    const res = {};
-    const next = jest.fn();
-
-    jest.spyOn(require('../../repositories/authorization_repository'), 'getRolesByUserId')
-      .mockResolvedValue([{ role_name: 'member', role_id: 1 }]);
-
-    await verifyRoles([ROLE_NAMES.member])(req, res, next);
-
-    expect(res.statusCode).toBe(403);
-    expect(res.body).toEqual({ error: "You're not allowed to access this resource" });
-    expect(next).not.toHaveBeenCalled();
+      if (expectedNextCalled) {
+        expect(next).toHaveBeenCalled();
+      } else {
+        expect(res.statusCode).toBe(403);
+        expect(res.body).toEqual({ error: "You're not allowed to access this resource" });
+        expect(next).not.toHaveBeenCalled();
+      }
+    });
   });
 });
 

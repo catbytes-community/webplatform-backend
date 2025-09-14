@@ -3,7 +3,7 @@ const express = require("express");
 const router = express.Router();
 const mentorService = require("../services/mentor_service");
 const { ROLE_NAMES } = require("../utils");
-const { verifyRole } = require("../middleware/authorization");
+const { verifyRoles } = require("../middleware/authorization");
 const { isValidIntegerId, respondWithError } = require("./helpers");
 const logger = require('../logger')(__filename);
 
@@ -27,7 +27,7 @@ router.get("/mentors", async (req, res) => {
 });
 
 // Get mentor by ID
-router.get("/mentors/:id", verifyRole(ROLE_NAMES.member), async (req, res) => {
+router.get("/mentors/:id", verifyRoles([ROLE_NAMES.member]), async (req, res) => {
   const { id } = req.params;
   if (!isValidIntegerId(id)) {
     return respondWithError(res, 400, "Invalid user id supplied");
@@ -45,7 +45,7 @@ router.get("/mentors/:id", verifyRole(ROLE_NAMES.member), async (req, res) => {
 });
 
 // Create new mentor application
-router.post("/mentors", verifyRole(ROLE_NAMES.member), async (req, res) => {
+router.post("/mentors", verifyRoles([ROLE_NAMES.member]), async (req, res) => {
   try {
     const mentorData = {
       about: req.body.about,

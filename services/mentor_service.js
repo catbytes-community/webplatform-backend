@@ -23,7 +23,7 @@ const memberVisibleStatuses = ['active'];
 const allFields = [...baseFields, ...privateFields];
 
 async function getMentors(userId, status, includeAdditionalFields) {
-  const userRoles = await rolesService.getUserRoles(userId)
+  const userRoles = await rolesService.getUserRoles(userId);
   const allowedStatuses = await getEligibleMentorStatuses(userRoles);
 
   const selectedFields = includeAdditionalFields
@@ -73,4 +73,4 @@ async function getEligibleMentorStatuses(userRoles) {
 module.exports = { 
   getMentors, getMentorById, createMentor,
   adminVisibleStatuses, memberVisibleStatuses
- };
+};

@@ -22,7 +22,7 @@ jest.mock('../../middleware/authorization', () => {
   const actual = jest.requireActual('../../middleware/authorization');
   return {
     ...actual,
-    verifyRole: jest.fn(() => (req, res, next) => {
+    verifyRoles: jest.fn(() => (req, res, next) => {
       req.userId = defautlUserId;
       req.userRoles = defaultUserRoles;
       next()}),
