@@ -10,7 +10,7 @@ async function getRolesByUserId(id) {
   return await knex("roles")
     .join("user_roles", "roles.id", "user_roles.role_id")
     .where("user_roles.user_id", id)
-    .select("roles.role_name", "roles.id");
+    .select("roles.role_name", "roles.id as role_id");
 }
 
 async function verifyOwnership(entityTable, resourceId, userId) {

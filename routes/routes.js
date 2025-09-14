@@ -6,8 +6,8 @@ const applRoutes = require("./applications");
 const rolesRoutes = require("./roles");
 const mailerService = require("../services/mailer_service");
 const discordRoutes = require("./discord");
+const { verifyRoles } = require("../middleware/authorization");
 const mentorsRoutes = require("./mentors");
-const { verifyRole } = require("../middleware/authorization");
 const { ROLE_NAMES, APPL_STATUSES } = require("../utils");
 
 router.use(express.json());
@@ -24,7 +24,7 @@ router.get("/", (req, res) => {
 });
 
 // helper route to quickly trigger email sending for testing
-router.post("/mail-test", verifyRole(ROLE_NAMES.mentor), async (req, res) => {
+router.post("/mail-test", verifyRoles([ROLE_NAMES.mentor]), async (req, res) => {
   const { name, email} = req.body;
   await mailerService.sendEmailOnApplicationStatusChange(email, name, APPL_STATUSES.approved);
   res.json({"message": "email successfully sent"});

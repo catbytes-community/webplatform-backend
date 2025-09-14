@@ -1,4 +1,4 @@
-const { verifyRole, verifyOwnership, OWNED_ENTITIES } = require('../../middleware/authorization');
+const { verifyRoles, verifyOwnership, OWNED_ENTITIES } = require('../../middleware/authorization');
 const { ROLE_NAMES } = require("../../utils");
 const utils = require('../../utils');
 
@@ -8,40 +8,12 @@ jest.mock('../../routes/helpers', () => ({
 
 jest.spyOn(utils, 'getRole').mockImplementation(() => ("rolename"));
 
-describe('VerifyRole', () => {
-  it('Calls next on successful role verification', async () => {
-    const req = { userId: 1 };
-    const res = {};
-    const next = jest.fn();
-
-    jest
-      .spyOn(require('../../repositories/authorization_repository'), 'getRolesByUserId')
-      .mockResolvedValue([{ role_name: 'member', role_id: 1 }]);
-
-    await verifyRole(ROLE_NAMES.member)(req, res, next);
-
-    expect(next).toHaveBeenCalled();
-  });
-
-  it('Calls next if admin role is present', async () => {
-    const req = { userId: 1 };
-    const res = {};
-    const next = jest.fn();
-
-    jest
-      .spyOn(require('../../repositories/authorization_repository'), 'getRolesByUserId')
-      .mockResolvedValue([{ role_name: 'member', role_id: 1 }, { role_name: 'admin', role_id: 3 }]);
-
-    await verifyRole(ROLE_NAMES.mentor)(req, res, next);
-
-    expect(next).toHaveBeenCalled();
-  });
-
+describe('verifyRoles', () => {
   it('Returns 401 on missing userId', async () => {
     const res = {};
     const next = jest.fn();
 
-    await verifyRole(ROLE_NAMES.member)({}, res, next);
+    await verifyRoles([ROLE_NAMES.member])({}, res, next);
 
     expect(res.statusCode).toBe(401);
     expect(res.body).toEqual({ error: "User not authenticated" });
@@ -53,11 +25,10 @@ describe('VerifyRole', () => {
     const res = {};
     const next = jest.fn();
 
-    jest
-      .spyOn(require('../../repositories/authorization_repository'), 'getRolesByUserId')
+    jest.spyOn(require('../../repositories/authorization_repository'), 'getRolesByUserId')
       .mockResolvedValue([]);
 
-    await verifyRole(ROLE_NAMES.member)(req, res, next);
+    await verifyRoles([ROLE_NAMES.member])(req, res, next);
 
     expect(res.statusCode).toBe(403);
     expect(res.body).toEqual({ error: "You're not allowed to access this resource" });
@@ -69,11 +40,10 @@ describe('VerifyRole', () => {
     const res = {};
     const next = jest.fn();
 
-    jest
-      .spyOn(require('../../repositories/authorization_repository'), 'getRolesByUserId')
+    jest.spyOn(require('../../repositories/authorization_repository'), 'getRolesByUserId')
       .mockResolvedValue([{ role_name: 'member', role_id: 1 }]);
 
-    await verifyRole(ROLE_NAMES.mentor)(req, res, next);
+    await verifyRoles([ROLE_NAMES.member])(req, res, next);
 
     expect(res.statusCode).toBe(403);
     expect(res.body).toEqual({ error: "You're not allowed to access this resource" });

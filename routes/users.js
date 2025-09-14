@@ -4,7 +4,7 @@ const router = express.Router();
 const userService = require("../services/user_service");
 const authService = require("../services/auth_service");
 const { ROLE_NAMES } = require("../utils");
-const {verifyOwnership, verifyRole, OWNED_ENTITIES} = require("../middleware/authorization");
+const {verifyOwnership, verifyRoles, OWNED_ENTITIES} = require("../middleware/authorization");
 const { isValidIntegerId, respondWithError, isUniqueConstraintViolation, 
   isNotNullConstraintViolation, parseColumnNameFromConstraint } = require("./helpers");
 
@@ -39,7 +39,7 @@ router.post("/users/login", async (req, res) => {
 });
 
 // Get all users
-router.get("/users", verifyRole(ROLE_NAMES.member), async (req, res) => {
+router.get("/users", verifyRoles([ROLE_NAMES.member]), async (req, res) => {
   try {
     const users = await userService.getAllUsers();
     res.json({ users });
@@ -76,7 +76,7 @@ router.post("/users", async (req, res) => {
 });
 
 // Get user by ID
-router.get("/users/:id", verifyRole(ROLE_NAMES.member), async (req, res) => {
+router.get("/users/:id", verifyRoles([ROLE_NAMES.member]), async (req, res) => {
   const { id } = req.params;
   if (!isValidIntegerId(id)) {
     return respondWithError(res, 400, "Invalid user id supplied");
