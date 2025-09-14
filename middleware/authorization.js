@@ -1,4 +1,3 @@
-const utils = require('../utils');
 const repo = require('../repositories/authorization_repository');
 const { respondWithError } = require('../routes/helpers');
 const logger = require('../logger')(__filename);
