@@ -1,6 +1,6 @@
 const repo = require('../repositories/roles_repository');
-const authRepo = require('../repositories/authorization_repository');
 const utils = require('../utils');
+const authRepo = require('../repositories/authorization_repository');
 
 async function assignRoleToUser(userId, roleName) {
   try {

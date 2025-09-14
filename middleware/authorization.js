@@ -42,11 +42,11 @@ function verifyOwnership(entityTable) {
       if (!userId) {
         return respondWithError(res, 401, "User not authenticated");
       }
-
+    
       if (!resourceId || !userId) {
         return respondWithError(res, 400, `Invalid request: missing ${entityTable} ID or user information`);
       }
-
+            
       let resource;
       if (entityTable === OWNED_ENTITIES.USER) {
         resource = userId.toString() === resourceId.toString();
@@ -54,11 +54,11 @@ function verifyOwnership(entityTable) {
         const result = await repo.verifyOwnership(entityTable, resourceId, userId);
         resource = result.rows && result.length !== 0;
       }
-
+    
       if (!resource) {
         return respondWithError(res, 403, "You're not allowed to edit this resource");
       }
-
+    
       next();
     } catch (err) {
       logger.error(err, 'Error verifying ownership');

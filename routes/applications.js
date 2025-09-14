@@ -12,7 +12,7 @@ const logger = require('../logger')(__filename);
 const router = express.Router();
 router.use(express.json());
 
-router.get("/applications", verifyRoles([ROLE_NAMES.mentor]), async (req, res) => {
+router.get("/applications", verifyRoles([ROLE_NAMES.mentor, ROLE_NAMES.admin]), async (req, res) => {
   try {
     const result = await applService.getAllApplications();
     res.json({ applications: result });
@@ -40,7 +40,7 @@ router.post("/applications", async (req, res) => {
   }
 });
 
-router.put("/applications/:id", verifyRoles([ROLE_NAMES.mentor]), async (req, res) => {
+router.put("/applications/:id", verifyRoles([ROLE_NAMES.mentor, ROLE_NAMES.admin]), async (req, res) => {
   const { id } = req.params;
   const { status, comment } = req.body;
   const today = new Date();

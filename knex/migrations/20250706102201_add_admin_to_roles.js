@@ -11,7 +11,7 @@ exports.up = async function(knex) {
     .onConflict('role_name')
     .ignore();
 };
-
+  
 /**
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
