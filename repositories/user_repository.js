@@ -32,14 +32,6 @@ async function getUserByFields(fields) {
   return user;
 }
 
-async function getUserRolesById(id) {
-  const knex = getKnex();
-  return await knex("roles")
-    .join("user_roles", "roles.id", "user_roles.role_id")
-    .where("user_roles.user_id", id)
-    .select("roles.role_name", "roles.id");
-}
-
 async function updateUserById(id, updates) {
   const knex = getKnex();
   const [user] = await knex("users")
@@ -57,5 +49,5 @@ async function deleteUserById(id) {
   return await knex("users").where("id", id).del();
 }
 
-module.exports = { getAllUsers, createNewUser, getUserInfoById, getUserRolesById, updateUserById, 
+module.exports = { getAllUsers, createNewUser, getUserInfoById, updateUserById, 
   deleteUserById, getUserByFields };
