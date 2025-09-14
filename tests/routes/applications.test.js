@@ -10,7 +10,7 @@ jest.mock('../../middleware/authorization', () => {
   const actual = jest.requireActual('../../middleware/authorization');
   return {
     ...actual,
-    verifyRole: jest.fn(() => (req, res, next) => next()),
+    verifyRoles: jest.fn(() => (req, res, next) => next()),
   };
 });
 

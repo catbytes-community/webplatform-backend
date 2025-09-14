@@ -1,7 +1,7 @@
 const express = require('express');
 const discordService = require('../services/discord_bot_service');
 const { respondWithError } = require("./helpers");
-const { verifyRole } = require("../middleware/authorization");
+const { verifyRoles } = require("../middleware/authorization");
 const { ROLE_NAMES } = require("../utils");
 const logger = require('../logger')(__filename);
 
@@ -10,7 +10,7 @@ const {discordAuth} = require ("../oauth.js");
 const router = express.Router();
 router.use(express.json());
 
-router.post('/generate-invite', verifyRole(ROLE_NAMES.member), async (req, res) => {
+router.post('/generate-invite', verifyRoles([ROLE_NAMES.member]), async (req, res) => {
   try {
     const invite = await discordService.generateInviteLink(req.userId);
     res.json({ invite_link: invite });
