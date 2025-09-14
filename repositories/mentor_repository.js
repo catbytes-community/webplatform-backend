@@ -22,8 +22,8 @@ async function createMentor(mentorData) {
   const [mentor] = await knex("mentors")
     .insert(mentorData)
     .returning("*");
-    
-    return mentor;
+
+  return mentor;
 }
 
 module.exports = { getMentors, createMentor, getMentorByUserId };
