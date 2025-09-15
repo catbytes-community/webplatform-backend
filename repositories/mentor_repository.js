@@ -19,11 +19,11 @@ async function getMentorByUserId(userId) {
 
 async function createMentor(mentorData) {
   const knex = getKnex();
-  const [mentor] = await knex("mentors")
+  const [res] = await knex("mentors")
     .insert(mentorData)
-    .returning("*");
+    .returning("id");
 
-  return mentor;
+  return res.id;
 }
 
 module.exports = { getMentors, createMentor, getMentorByUserId };

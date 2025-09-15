@@ -1,14 +1,7 @@
 const repo = require('../repositories/mentor_repository');
 const rolesService = require('../services/roles_service');
 const { MentorAlreadyExistsError, DataRequiresElevatedRoleError } = require("../errors");
-const { ROLE_NAMES } = require("../utils");
-
-const MENTOR_STATUSES = {
-  active: 'active',
-  inactive: 'inactive',
-  rejected: 'rejected',
-  pending: 'pending',
-};
+const { ROLE_NAMES, MENTOR_STATUSES } = require("../utils");
 
 const baseFields = [
   'mentors.id as mentor_id',
@@ -42,9 +35,9 @@ async function createMentor(userId, mentorData) {
     about: mentorData.about,
     contact: mentorData.contact,
   };
-  const createdMentor = await repo.createMentor(mentor);
+  const mentorId = await repo.createMentor(mentor);
   // todo: send email to admins
-  return createdMentor;
+  return mentorId;
 }
 
 async function getMentors(userId, status, includeAdditionalFields) {

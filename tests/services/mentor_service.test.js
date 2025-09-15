@@ -1,4 +1,5 @@
 const mentorService = require('../../services/mentor_service');
+const { MENTOR_STATUSES } = require('../../utils');
 const rolesService = require('../../services/roles_service');
 const repo = require('../../repositories/mentor_repository');
 const { MentorAlreadyExistsError, DataRequiresElevatedRoleError } = require('../../errors');
@@ -16,7 +17,7 @@ describe('Mentor Service', () => {
   describe('createMentor', () => {
     it('Create mentor in pending state success', async () => {
       const mentorData = { about: 'I am a mentor', contact: 'mentor@example.com' };
-      const createdMentor = { id: 1, ...mentorData, user_id: defaultUserId, status: mentorService.MENTOR_STATUSES.pending };
+      const createdMentor = { id: 1, ...mentorData, user_id: defaultUserId, status: MENTOR_STATUSES.pending };
       repo.getMentorByUserId.mockResolvedValue(null);
       repo.createMentor.mockResolvedValue(createdMentor);
 
@@ -25,7 +26,7 @@ describe('Mentor Service', () => {
       expect(repo.getMentorByUserId).toHaveBeenCalledWith(defaultUserId);
       expect(repo.createMentor).toHaveBeenCalledWith({
         user_id: defaultUserId,
-        status: mentorService.MENTOR_STATUSES.pending,
+        status: MENTOR_STATUSES.pending,
         about: mentorData.about,
         contact: mentorData.contact,
       });
@@ -49,7 +50,7 @@ describe('Mentor Service', () => {
   describe('getMentors', () => {
     it('Unauthenticated users only see active mentors', async () => {
       const allowedStatuses = mentorService.generalVisitbleStatuses;
-      const mentor = { id: 1, user_id: defaultUserId, status: mentorService.MENTOR_STATUSES.active };
+      const mentor = { id: 1, user_id: defaultUserId, status: MENTOR_STATUSES.active };
 
       rolesService.getUserRoles.mockResolvedValue();
       repo.getMentors.mockResolvedValue([mentor]);
@@ -64,7 +65,7 @@ describe('Mentor Service', () => {
       rolesService.getUserRoles.mockResolvedValue();
       repo.getMentors.mockResolvedValue();
 
-      expect(mentorService.getMentors(undefined, mentorService.MENTOR_STATUSES.pending, false)).rejects
+      expect(mentorService.getMentors(undefined, MENTOR_STATUSES.pending, false)).rejects
         .toBeInstanceOf(DataRequiresElevatedRoleError);
 
       expect(rolesService.getUserRoles).not.toHaveBeenCalled();
@@ -74,7 +75,7 @@ describe('Mentor Service', () => {
     it('Member users only see active mentors', async () => {
       const userRoles = [{ role_name: 'member' }];
       const allowedStatuses = mentorService.generalVisitbleStatuses;
-      const mentor = { id: 1, user_id: defaultUserId, status: mentorService.MENTOR_STATUSES.active };
+      const mentor = { id: 1, user_id: defaultUserId, status: MENTOR_STATUSES.active };
 
       rolesService.getUserRoles.mockResolvedValue(userRoles);
       repo.getMentors.mockResolvedValue([mentor]);
@@ -87,7 +88,7 @@ describe('Mentor Service', () => {
     it('Member users only see active mentors', async () => {
       const userRoles = [{ role_name: 'member' }];
       const allowedStatuses = mentorService.generalVisitbleStatuses;
-      const mentor = { id: 1, user_id: defaultUserId, status: mentorService.MENTOR_STATUSES.active };
+      const mentor = { id: 1, user_id: defaultUserId, status: MENTOR_STATUSES.active };
 
       rolesService.getUserRoles.mockResolvedValue(userRoles);
       repo.getMentors.mockResolvedValue([mentor]);
@@ -102,7 +103,7 @@ describe('Mentor Service', () => {
       rolesService.getUserRoles.mockResolvedValue(userRoles);
       repo.getMentors.mockResolvedValue();
 
-      expect(mentorService.getMentors(defaultUserId, mentorService.MENTOR_STATUSES.pending, false)).rejects
+      expect(mentorService.getMentors(defaultUserId, MENTOR_STATUSES.pending, false)).rejects
         .toBeInstanceOf(DataRequiresElevatedRoleError);
       
       expect(repo.getMentors).not.toHaveBeenCalled();
@@ -112,7 +113,7 @@ describe('Mentor Service', () => {
       const userRoles = [{ role_name: 'member' }, { role_name: 'admin' }];
       const mentorId = 1;
       const allowedStatuses = mentorService.adminVisibleStatuses;
-      const mentor = { id: mentorId, user_id: defaultUserId, status: mentorService.MENTOR_STATUSES.active };
+      const mentor = { id: mentorId, user_id: defaultUserId, status: MENTOR_STATUSES.active };
 
       rolesService.getUserRoles.mockResolvedValue(userRoles);
       repo.getMentors.mockResolvedValue([mentor]);
@@ -125,13 +126,13 @@ describe('Mentor Service', () => {
     it('Admin users see all existing mentors - filter by pending', async () => {
       const userRoles = [{ role_name: 'member' }, { role_name: 'admin' }];
       const mentorId = 1;
-      const allowedStatuses = [mentorService.MENTOR_STATUSES.pending];
-      const mentor = { id: mentorId, user_id: defaultUserId, status: mentorService.MENTOR_STATUSES.active };
+      const allowedStatuses = [MENTOR_STATUSES.pending];
+      const mentor = { id: mentorId, user_id: defaultUserId, status: MENTOR_STATUSES.active };
 
       rolesService.getUserRoles.mockResolvedValue(userRoles);
       repo.getMentors.mockResolvedValue([mentor]);
 
-      await mentorService.getMentors(defaultUserId, mentorService.MENTOR_STATUSES.pending, true);
+      await mentorService.getMentors(defaultUserId, MENTOR_STATUSES.pending, true);
 
       expect(repo.getMentors).toHaveBeenCalledWith(allowedStatuses, mentorService.allFields);
     });

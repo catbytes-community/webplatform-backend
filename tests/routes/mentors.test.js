@@ -38,7 +38,7 @@ describe('POST /mentors', () => {
   });
 
   it('Create mentor application success', async () => {
-    mentorService.createMentor.mockResolvedValue(mockedMentor);
+    mentorService.createMentor.mockResolvedValue(mockedMentor.id);
 
     const payload = {
       contact: 'sample@test.com',
