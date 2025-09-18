@@ -297,6 +297,102 @@
         }
       }
     },
+    "/admin/grant-role": {
+      "post": {
+        "tags": [
+          "roles"
+        ],
+        "summary": "✅ Grant role to user",
+        "description": "Grants a role to a user. Only accessible by users with admin privileges.",
+        "operationId": "grantRole",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "userId",
+                  "roleId"
+                ],
+                "properties": {
+                  "userId": {
+                    "type": "integer",
+                    "example": 42
+                  },
+                  "roleId": {
+                    "type": "integer",
+                    "example": 2
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Role successfully granted"
+          },
+          "400": {
+            "description": "Missing required parameters"
+          },
+          "403": {
+            "description": "User is not authorized to grant roles"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/admin/revoke-role": {
+      "post": {
+        "tags": [
+          "roles"
+        ],
+        "summary": "✅ Revoke role from user",
+        "description": "Revokes a role from a user. Only accessible by users with admin privileges.",
+        "operationId": "revokeRole",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "userId",
+                  "roleId"
+                ],
+                "properties": {
+                  "userId": {
+                    "type": "integer",
+                    "example": 42
+                  },
+                  "roleId": {
+                    "type": "integer",
+                    "example": 2
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Role successfully revoked"
+          },
+          "400": {
+            "description": "Missing required parameters"
+          },
+          "403": {
+            "description": "User is not authorized to revoke roles"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
     "/users": {
       "post": {
         "tags": [
@@ -433,7 +529,7 @@
             "required": false
           },
           {
-            "name": "X-Discord-Token",
+            "name": "X-Discord-Code",
             "in": "header",
             "description": "Authorization code returned by Discord OAuth2 flow",
             "schema": {
@@ -599,6 +695,14 @@
                       "example": [
                         "mentee"
                       ]
+                    },
+                    "mentor_id": {
+                      "type": "string",
+                      "example": 10
+                    },
+                    "is_mentor_active": {
+                      "type": "boolean",
+                      "example": true
                     }
                   }
                 }
@@ -1571,7 +1675,7 @@
         "tags": [
           "mentors"
         ],
-        "summary": "Create a new mentor application",
+        "summary": "✅ Create a new mentor application",
         "description": "Creates a new mentor entity in 'pending' status. Available to all logged-in users. If user already has a mentor profile, creation is not allowed.\n",
         "operationId": "createMentor",
         "requestBody": {
@@ -1614,7 +1718,7 @@
         "tags": [
           "mentors"
         ],
-        "summary": "Get mentor list",
+        "summary": "✅  Get mentor list",
         "description": "Returns a list of mentor applications. When filtering by 'pending' or 'rejected', or not filtering at all, user must have elevated (admin) role. Returns user_id and some aggregated data from user profile\n",
         "operationId": "getMentors",
         "parameters": [
@@ -1903,7 +2007,7 @@
         }
       }
     },
-     "/auth/discord": {
+    "/auth/discord": {
       "get": {
         "tags": [
           "discord integration"
