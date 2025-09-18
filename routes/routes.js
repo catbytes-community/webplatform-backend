@@ -7,6 +7,7 @@ const rolesRoutes = require("./roles");
 const mailerService = require("../services/mailer_service");
 const discordRoutes = require("./discord");
 const adminRoutes = require("./admin");
+const mentorsRoutes = require("./mentors");
 const { verifyRoles } = require("../middleware/authorization");
 const { ROLE_NAMES, APPL_STATUSES } = require("../utils");
 
@@ -18,6 +19,7 @@ router.use(applRoutes);
 router.use(rolesRoutes);  
 router.use(discordRoutes); 
 router.use(adminRoutes);
+router.use(mentorsRoutes);
 
 router.get("/", (req, res) => {
   res.send("API Specification in Swagger: https://catbytes-community.github.io/webplatform-backend/");

@@ -16,7 +16,15 @@ async function createNewUser(values) {
 
 async function getUserInfoById(id, safeOutput = true) {
   const knex = getKnex();
-  const user = await knex("users").where("id", id).first();
+  const user = await knex("users")
+    .leftJoin("mentors", "users.id", "mentors.user_id")
+    .select(
+      "users.*",
+      "mentors.id as mentor_id",
+      knex.raw("CASE WHEN mentors.status = 'active' THEN TRUE ELSE FALSE END AS is_mentor_active")
+    )
+    .where("users.id", id)
+    .first();
   if (user !== undefined && safeOutput){
     delete user["firebase_id"];
   }
