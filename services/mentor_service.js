@@ -56,9 +56,14 @@ async function getMentors(userId, status, includeAdditionalFields) {
   return await repo.getMentors(statusesFilter, selectedFields);
 }
 
-async function getEligibleMentorStatuses(userRoles) {
+async function getMentorById(userRoles, mentorId, isOwner) {
+  const allowedStatuses = await getEligibleMentorStatuses(userRoles, isOwner);
+  return repo.getMentorById(allowedStatuses, allFields, mentorId);
+}
+
+async function getEligibleMentorStatuses(userRoles, isOwner) {
   const isAdmin = userRoles.some(role => role.role_name === ROLE_NAMES.admin);
-  if (isAdmin) {
+  if (isAdmin || isOwner) {
     return adminVisibleStatuses;
   } else {
     return generalVisitbleStatuses;
@@ -66,7 +71,7 @@ async function getEligibleMentorStatuses(userRoles) {
 }
 
 module.exports = { 
-  getMentors, createMentor,
+  getMentors, createMentor, getMentorById,
   adminVisibleStatuses, generalVisitbleStatuses,
   allFields, baseFields, privateFields,
   MENTOR_STATUSES

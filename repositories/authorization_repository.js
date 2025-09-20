@@ -13,9 +13,9 @@ async function getRolesByUserId(id) {
     .select("roles.role_name", "roles.id as role_id");
 }
 
-async function verifyOwnership(entityTable, resourceId, userId) {
+async function verifyOwnership(entityTable, resourceId, userId, fieldToAssess) {
   const knex = getKnex();
-  return await knex(entityTable).where("id", resourceId).andWhere("created_by", userId).select("*");
+  return await knex(entityTable).where("id", resourceId).andWhere(fieldToAssess, userId).select("*");
 }
 
 module.exports = { verifyRole, verifyOwnership, getRolesByUserId };

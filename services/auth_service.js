@@ -43,8 +43,6 @@ async function handleFirebaseAuth(firebaseToken) {
   }
 }
 
-;
-
 async function handleDiscordAuth(code){
   try {
     // exchange code for access token

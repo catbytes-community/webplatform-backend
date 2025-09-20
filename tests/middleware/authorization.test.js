@@ -53,6 +53,7 @@ describe('verifyRoles', () => {
       await verifyRoles(rolesToVerify)(req, res, next);
 
       if (expectedNextCalled) {
+        expect(req.userRoles).toBe(userRoles);
         expect(next).toHaveBeenCalled();
       } else {
         expect(res.statusCode).toBe(403);
@@ -101,7 +102,7 @@ describe('VerifyOwnership', () => {
     const res = {};
     const next = jest.fn();
 
-    jest.spyOn(require('../../repositories/authorization_repository'), 'verifyOwnership').mockResolvedValue({});
+    jest.spyOn(require('../../repositories/authorization_repository'), 'verifyOwnership').mockResolvedValue([]);
 
     await verifyOwnership(OWNED_ENTITIES.MENTOR)(req, res, next);
 

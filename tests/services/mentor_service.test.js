@@ -137,4 +137,48 @@ describe('Mentor Service', () => {
       expect(repo.getMentors).toHaveBeenCalledWith(allowedStatuses, mentorService.allFields);
     });
   });
+
+  describe('getMentorById', () => {
+    it('Returns mentor to member users only if active', async () => {
+      const mentorId = 1;
+      const allowedStatuses = mentorService.generalVisitbleStatuses;
+      const userRoles = [{ role_name: 'member' }];
+      const mentor = { id: mentorId, user_id: defaultUserId, status: MENTOR_STATUSES.active };
+
+      repo.getMentorById.mockResolvedValue(mentor);
+
+      const result = await mentorService.getMentorById(userRoles, mentorId, false);
+
+      expect(repo.getMentorById).toHaveBeenCalledWith(allowedStatuses, mentorService.allFields, mentorId);
+      expect(result).toEqual(mentor);
+    });
+
+    it('Returns mentor to owner even if not active', async () => {
+      const mentorId = 1;
+      const allowedStatuses = mentorService.adminVisibleStatuses;
+      const userRoles = [{ role_name: 'member' }];
+      const mentor = { id: mentorId, user_id: defaultUserId, status: MENTOR_STATUSES.pending };
+
+      repo.getMentorById.mockResolvedValue(mentor);
+
+      const result = await mentorService.getMentorById(userRoles, mentorId, true);
+
+      expect(repo.getMentorById).toHaveBeenCalledWith(allowedStatuses, mentorService.allFields, mentorId);
+      expect(result).toEqual(mentor);
+    });
+
+    it('Returns mentor to admin even if not active', async () => {
+      const mentorId = 1;
+      const allowedStatuses = mentorService.adminVisibleStatuses;
+      const userRoles = [{ role_name: 'member' }, { role_name: 'admin' }];
+      const mentor = { id: mentorId, user_id: defaultUserId, status: MENTOR_STATUSES.pending };
+
+      repo.getMentorById.mockResolvedValue(mentor);
+
+      const result = await mentorService.getMentorById(userRoles, mentorId, false);
+
+      expect(repo.getMentorById).toHaveBeenCalledWith(allowedStatuses, mentorService.allFields, mentorId);
+      expect(result).toEqual(mentor);
+    });
+  });
 });
