@@ -27,6 +27,7 @@ jest.mock('../../middleware/authorization', () => {
       req.userRoles = defaultUserRoles;
       next();
     }),
+    verifyMentorOwnership: jest.fn(() => false),
   };
 });
 
@@ -126,6 +127,48 @@ describe('GET /mentors', () => {
     const res = await request(app)
       .get('/mentors')
       .set('userId', defautlUserId); // simulate authenticated user
+    
+    expect(res.statusCode).toBe(500);
+    expect(res.body.error).toBe('Internal Server Error');
+  });
+});
+
+describe('GET /mentors/:id', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+  
+  it('Get mentor by ID success', async () => {
+    mentorService.getMentorById.mockResolvedValue(mockedMentor);
+
+    const res = await request(app)
+      .get(`/mentors/${mockedMentor.id}`)
+      .set('userId', defautlUserId);
+    
+    expect(mentorService.getMentorById).toHaveBeenCalledWith(defaultUserRoles, mockedMentor.id.toString(), false);
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toStrictEqual(mockedMentor);
+  });
+
+  it('Get mentor by ID - not found', async () => {
+    mentorService.getMentorById.mockResolvedValue(null);
+    const res = await request(app)
+      .get(`/mentors/9999`)
+      .set('userId', defautlUserId);
+    
+    expect(mentorService.getMentorById).toHaveBeenCalledWith(defaultUserRoles, "9999", false);
+
+    expect(res.statusCode).toBe(404);
+    expect(res.body.error).toBe('Mentor not found');
+  });
+
+  it('Get mentor by ID - unexpected error', async () => {
+    mentorService.getMentorById.mockRejectedValue(new Error());
+    
+    const res = await request(app)
+      .get(`/mentors/${mockedMentor.id}`)
+      .set('userId', defautlUserId);
     
     expect(res.statusCode).toBe(500);
     expect(res.body.error).toBe('Internal Server Error');
