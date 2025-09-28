@@ -70,8 +70,18 @@ async function getEligibleMentorStatuses(userRoles, isOwner) {
   }
 }
 
+async function updateMentorStatus(userRoles, mentorId, status, isOwner) {
+  const isAdmin = userRoles.some(role => role.role_name === ROLE_NAMES.admin);
+  if(isAdmin || isOwner) {
+    return repo.updateMentorStatus(mentorId, status)
+  } 
+  else {
+    throw new DataRequiresElevatedRoleError('Action requires elevated role');
+  }
+}
+
 module.exports = { 
-  getMentors, createMentor, getMentorById,
+  getMentors, createMentor, getMentorById, updateMentorStatus,
   adminVisibleStatuses, generalVisitbleStatuses,
   allFields, baseFields, privateFields,
   MENTOR_STATUSES

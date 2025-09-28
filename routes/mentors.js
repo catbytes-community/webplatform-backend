@@ -2,7 +2,7 @@ const express = require("express");
 
 const router = express.Router();
 const mentorService = require("../services/mentor_service");
-const { ROLE_NAMES } = require("../utils");
+const { ROLE_NAMES, ALLOWED_MENTOR_STATUSES } = require("../utils");
 const { verifyRoles, verifyMentorOwnership } = require("../middleware/authorization");
 const { isValidIntegerId, respondWithError } = require("./helpers");
 const { MentorAlreadyExistsError, DataRequiresElevatedRoleError } = require("../errors");
@@ -63,5 +63,28 @@ router.get("/mentors/:id", verifyRoles([ROLE_NAMES.member]),  async (req, res) =
     respondWithError(res);
   }
 });
+
+// Update mentor status
+router.patch("/mentors/:id", verifyRoles([ROLE_NAMES.member]), async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+  if(!isValidIntegerId(id)) {
+    return respondWithError(res, 400, "Invalid user id supplied");
+  }
+  if(!ALLOWED_MENTOR_STATUSES[status]) {
+    return respondWithError(res, 400, "Invalid status supplied");
+  }
+  try {
+    const isOwner = await verifyMentorOwnership(id, req.userId);
+    const mentorId = await mentorService.updateMentorStatus(req.userRoles, id, status, isOwner);
+    res.json(mentorId);
+  } catch (err) {
+    logger.error(err);
+    if (err instanceof DataRequiresElevatedRoleError) {
+      return respondWithError(res, 403, err.message);
+    }
+    respondWithError(res);
+  }
+})
 
 module.exports = router;
