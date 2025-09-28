@@ -1,11 +1,13 @@
 const mentorService = require('../../services/mentor_service');
 const { MENTOR_STATUSES } = require('../../utils');
 const rolesService = require('../../services/roles_service');
+const mailerService = require('../../services/mailer_service');
 const repo = require('../../repositories/mentor_repository');
 const { MentorAlreadyExistsError, DataRequiresElevatedRoleError } = require('../../errors');
 
 jest.mock('../../repositories/mentor_repository');
 jest.mock('../../services/roles_service');
+jest.mock('../../services/mailer_service');
 
 const defaultUserId = 42;
 
@@ -17,7 +19,7 @@ describe('Mentor Service', () => {
   describe('createMentor', () => {
     it('Create mentor in pending state success', async () => {
       const mentorData = { about: 'I am a mentor', contact: 'mentor@example.com' };
-      const createdMentor = { id: 1, ...mentorData, user_id: defaultUserId, status: MENTOR_STATUSES.pending };
+      const createdMentor = { id: 1, name: 'Name', about: mentorData.about };
       repo.getMentorByUserId.mockResolvedValue(null);
       repo.createMentor.mockResolvedValue(createdMentor);
 
@@ -30,7 +32,9 @@ describe('Mentor Service', () => {
         about: mentorData.about,
         contact: mentorData.contact,
       });
-      expect(result).toEqual(createdMentor);
+      expect(rolesService.getAdminEmails).toHaveBeenCalled();
+      expect(mailerService.sendEmailOnNewMentorApplication).toHaveBeenCalled();
+      expect(result).toEqual(createdMentor.id);
     });
 
     it('Create mentor is not allowed if user already has a mentor', async () => {
