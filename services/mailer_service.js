@@ -116,4 +116,26 @@ async function sendEmailOnApplicationStatusChange(email, name, status) {
   }
 }
 
-module.exports = { initMailer, sendEmailOnApplicationStatusChange };
+async function sendEmailOnNewMentorApplication(emails, mentorApplication) {
+  try {
+    const mailOptions = {
+      from: mailerConfig.user,
+      to: emails,
+      subject: "New Mentor Application Submitted",
+      template: "new_mentor_application_email",
+      context: {
+        name: mentorApplication.name,
+        about: mentorApplication.about,
+        reviewLink: `${webplatformUrl}applications`,
+        catbytesLink: webplatformUrl,
+      },
+    };
+
+    await mailTransporter.sendMail(mailOptions);
+  }
+  catch (err) {
+    logger.error(`Error sending new mentor application email to ${emails}: ${err.message}`);
+  }
+}
+
+module.exports = { initMailer, sendEmailOnApplicationStatusChange, sendEmailOnNewMentorApplication };

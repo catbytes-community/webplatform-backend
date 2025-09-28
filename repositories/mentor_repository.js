@@ -28,11 +28,18 @@ async function getMentorById(allowedStatuses, selectedFields, mentorId) {
 
 async function createMentor(mentorData) {
   const knex = getKnex();
-  const [res] = await knex("mentors")
+
+  const [createdMentor] = await knex("mentors")
     .insert(mentorData)
     .returning("id");
 
-  return res.id;
+  const result = await knex("mentors")
+    .join("users", "mentors.user_id", "users.id")
+    .select("mentors.id", "users.name", "mentors.about")
+    .where("mentors.id", createdMentor.id)
+    .first();
+
+  return result;
 }
 
 module.exports = { getMentors, createMentor, getMentorByUserId, getMentorById };
