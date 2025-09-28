@@ -1,5 +1,6 @@
 const repo = require('../repositories/mentor_repository');
 const rolesService = require('../services/roles_service');
+const mailerService = require('../services/mailer_service');
 const { MentorAlreadyExistsError, DataRequiresElevatedRoleError } = require("../errors");
 const { ROLE_NAMES, MENTOR_STATUSES } = require("../utils");
 
@@ -35,9 +36,11 @@ async function createMentor(userId, mentorData) {
     about: mentorData.about,
     contact: mentorData.contact,
   };
-  const mentorId = await repo.createMentor(mentor);
-  // todo: send email to admins
-  return mentorId;
+  const mentorInfo = await repo.createMentor(mentor);
+
+  const adminEmails = await rolesService.getAdminEmails();
+  await mailerService.sendEmailOnNewMentorApplication(adminEmails, mentorInfo);
+  return mentorInfo.id;
 }
 
 async function getMentors(userId, status, includeAdditionalFields) {

@@ -19,4 +19,8 @@ async function getAllRoles() {
   return await repo.getAllRoles();
 }
 
-module.exports = { getAllRoles, assignRoleToUser, getUserRoles };
+async function getAdminEmails() {
+  return await repo.getEmailsByRole(utils.ROLE_NAMES.admin);
+}
+
+module.exports = { getAllRoles, assignRoleToUser, getUserRoles, getAdminEmails };
