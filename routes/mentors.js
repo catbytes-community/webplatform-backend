@@ -2,7 +2,7 @@ const express = require("express");
 
 const router = express.Router();
 const mentorService = require("../services/mentor_service");
-const { ROLE_NAMES, ALLOWED_MENTOR_STATUSES } = require("../utils");
+const { ROLE_NAMES } = require("../utils");
 const { verifyRoles, verifyMentorOwnership } = require("../middleware/authorization");
 const { isValidIntegerId, respondWithError } = require("./helpers");
 const { MentorAlreadyExistsError, DataRequiresElevatedRoleError } = require("../errors");
