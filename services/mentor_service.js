@@ -2,6 +2,9 @@ const repo = require('../repositories/mentor_repository');
 const rolesService = require('../services/roles_service');
 const { MentorAlreadyExistsError, DataRequiresElevatedRoleError } = require("../errors");
 const { ROLE_NAMES, MENTOR_STATUSES } = require("../utils");
+const { updateUserById } = require('../repositories/user_repository');
+const { getUserById } = require('./user_service');
+const { assignRoleToUser, removeRoleFromUser } = require('../repositories/roles_repository');
 
 const baseFields = [
   'mentors.id as mentor_id',
@@ -71,13 +74,39 @@ async function getEligibleMentorStatuses(userRoles, isOwner) {
 }
 
 async function updateMentorStatus(userRoles, mentorId, status, isOwner) {
+  const mentorData = await getMentorById(userRoles, mentorId, isOwner);
   const isAdmin = userRoles.some(role => role.role_name === ROLE_NAMES.admin);
-  if(isAdmin || isOwner) {
-    return repo.updateMentorStatus(mentorId, status)
-  } 
-  else {
-    throw new DataRequiresElevatedRoleError('Action requires elevated role');
+  const allowedStatusesForOwner = [
+    MENTOR_STATUSES.active,
+    MENTOR_STATUSES.inactive,
+  ];
+
+  if(isAdmin) {
+    // if admin approves mentor (pending -> active -> add mentor role)
+    if(mentorData.status === MENTOR_STATUSES.pending && status === MENTOR_STATUSES.active) {
+      repo.updateMentorById(mentorId, { status });
+      assignRoleToUser(mentorData.user_id, 2);
+      return "Mentor application approved"
+    } else if(status === MENTOR_STATUSES.rejected) {
+      // if admin rejects mentor (change mentor status to rejected => remove mentor role)
+      repo.updateMentorById(mentorId, { status });
+      removeRoleFromUser(mentorData.user_id, 2);
+      return "Mentor application rejected"
+    } else {
+      // any other status changes allowed without side effect actions
+      repo.updateMentorById(mentorId, { status });
+      return "Mentor application status updated"
+    }
   }
+  if(isOwner) {
+    if(allowedStatusesForOwner.includes(status)) {
+      if(![MENTOR_STATUSES.pending, MENTOR_STATUSES.rejected].includes(mentorData.status)) {
+        return repo.updateMentorById(mentorId, { status })
+      }
+    }
+  }
+
+  throw new DataRequiresElevatedRoleError("You're not allowed to edit this resource");
 }
 
 module.exports = { 

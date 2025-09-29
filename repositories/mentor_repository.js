@@ -35,11 +35,11 @@ async function createMentor(mentorData) {
   return res.id;
 }
 
-async function updateMentorStatus(mentorId, status) {
+async function updateMentorById(mentorId, updates) {
   const knex = getKnex();
   return await knex("mentors")
     .where("id", mentorId)
-    .update({ status });
+    .update(updates);
 }
 
-module.exports = { getMentors, createMentor, getMentorByUserId, getMentorById, updateMentorStatus };
+module.exports = { getMentors, createMentor, getMentorByUserId, getMentorById, updateMentorById };

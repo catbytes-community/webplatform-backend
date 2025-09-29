@@ -71,9 +71,6 @@ router.patch("/mentors/:id", verifyRoles([ROLE_NAMES.member]), async (req, res) 
   if(!isValidIntegerId(id)) {
     return respondWithError(res, 400, "Invalid user id supplied");
   }
-  if(!ALLOWED_MENTOR_STATUSES[status]) {
-    return respondWithError(res, 400, "Invalid status supplied");
-  }
   try {
     const isOwner = await verifyMentorOwnership(id, req.userId);
     const mentorId = await mentorService.updateMentorStatus(req.userRoles, id, status, isOwner);
