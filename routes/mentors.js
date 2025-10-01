@@ -78,7 +78,7 @@ router.patch("/mentors/:id", verifyRoles([ROLE_NAMES.member]), async (req, res) 
       return respondWithError(res, 404, "Mentor not found");
     }
     const mentorId = await mentorService.updateMentorStatus(req.userRoles, id, status, isOwner);
-    res.json(mentorId);
+    res.json({id: mentorId});
   } catch (err) {
     logger.error(err);
     if (err instanceof DataRequiresElevatedRoleError) {
