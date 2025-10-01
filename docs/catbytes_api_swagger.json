@@ -1861,8 +1861,7 @@
                     "enum": [
                       "active",
                       "rejected",
-                      "inactive",
-                      "pending"
+                      "inactive"
                     ]
                   }
                 }
