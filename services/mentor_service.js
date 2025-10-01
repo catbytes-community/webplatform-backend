@@ -2,8 +2,6 @@ const repo = require('../repositories/mentor_repository');
 const rolesService = require('../services/roles_service');
 const { MentorAlreadyExistsError, DataRequiresElevatedRoleError } = require("../errors");
 const { ROLE_NAMES, MENTOR_STATUSES } = require("../utils");
-const { updateUserById } = require('../repositories/user_repository');
-const { getUserById } = require('./user_service');
 const { assignRoleToUser, removeRoleFromUser } = require('../repositories/roles_repository');
 
 const baseFields = [
@@ -100,10 +98,10 @@ async function updateMentorStatus(userRoles, mentorId, status, isOwner) {
   if(isOwner) {
     if(allowedStatusesForOwner.includes(status)) {
       if(![MENTOR_STATUSES.pending, MENTOR_STATUSES.rejected].includes(mentorData.status)) {
-        return repo.updateMentorById(mentorId, { status })
+        return repo.updateMentorById(mentorId, { status });
       }
-    }
-  }
+    };
+  };
 
   throw new DataRequiresElevatedRoleError("You're not allowed to edit this resource");
 }

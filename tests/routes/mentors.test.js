@@ -229,4 +229,4 @@ describe('PATCH /mentors/:id', () => {
     expect(res.statusCode).toBe(404);
     expect(res.body.error).toBe('Mentor not found');
   });
-})
+});

@@ -86,6 +86,6 @@ router.patch("/mentors/:id", verifyRoles([ROLE_NAMES.member]), async (req, res) 
     }
     respondWithError(res);
   }
-})
+});
 
 module.exports = router;
