@@ -82,21 +82,20 @@ async function updateMentorStatus(userRoles, mentorId, status, isOwner) {
   ];
 
   if(isAdmin) {
+    let updatedMentorId;
     // if admin approves mentor (pending -> active -> add mentor role)
     if(mentorData.status === MENTOR_STATUSES.pending && status === MENTOR_STATUSES.active) {
-      repo.updateMentorById(mentorId, { status });
+      updatedMentorId = await repo.updateMentorById(mentorId, { status });
       assignRoleToUser(mentorData.user_id, 2);
-      return "Mentor application approved"
     } else if(status === MENTOR_STATUSES.rejected) {
       // if admin rejects mentor (change mentor status to rejected => remove mentor role)
-      repo.updateMentorById(mentorId, { status });
+      updatedMentorId = await repo.updateMentorById(mentorId, { status });
       removeRoleFromUser(mentorData.user_id, 2);
-      return "Mentor application rejected"
     } else {
       // any other status changes allowed without side effect actions
-      repo.updateMentorById(mentorId, { status });
-      return "Mentor application status updated"
+      updatedMentorId = await repo.updateMentorById(mentorId, { status });
     }
+    return updatedMentorId;
   }
   if(isOwner) {
     if(allowedStatusesForOwner.includes(status)) {
