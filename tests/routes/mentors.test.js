@@ -193,7 +193,7 @@ describe('PATCH /mentors/:id', () => {
       .toHaveBeenCalledWith(defaultUserRoles, mockedMentor.id.toString(), 'active', false);
     
     expect(res.statusCode).toBe(200);
-    expect(res.body).toStrictEqual(mockedMentor.id);
+    expect(res.body.id).toStrictEqual(mockedMentor.id);
   });
 
   it('Update mentor status - not authorized', async () => {
