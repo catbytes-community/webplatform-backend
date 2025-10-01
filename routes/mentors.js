@@ -64,4 +64,28 @@ router.get("/mentors/:id", verifyRoles([ROLE_NAMES.member]),  async (req, res) =
   }
 });
 
+// Update mentor status
+router.patch("/mentors/:id", verifyRoles([ROLE_NAMES.member]), async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+  if(!isValidIntegerId(id)) {
+    return respondWithError(res, 400, "Invalid user id supplied");
+  }
+  try {
+    const isOwner = await verifyMentorOwnership(id, req.userId);
+    const mentorInfo = await mentorService.getMentorById(req.userRoles, id, isOwner);
+    if (!mentorInfo) {
+      return respondWithError(res, 404, "Mentor not found");
+    }
+    const mentorId = await mentorService.updateMentorStatus(req.userRoles, id, status, isOwner);
+    res.json({id: mentorId});
+  } catch (err) {
+    logger.error(err);
+    if (err instanceof DataRequiresElevatedRoleError) {
+      return respondWithError(res, 403, err.message);
+    }
+    respondWithError(res);
+  }
+});
+
 module.exports = router;

@@ -3,9 +3,11 @@ const { MENTOR_STATUSES } = require('../../utils');
 const rolesService = require('../../services/roles_service');
 const mailerService = require('../../services/mailer_service');
 const repo = require('../../repositories/mentor_repository');
+const rolesRepo = require('../../repositories/roles_repository');
 const { MentorAlreadyExistsError, DataRequiresElevatedRoleError } = require('../../errors');
 
 jest.mock('../../repositories/mentor_repository');
+jest.mock('../../repositories/roles_repository');
 jest.mock('../../services/roles_service');
 jest.mock('../../services/mailer_service');
 
@@ -183,6 +185,120 @@ describe('Mentor Service', () => {
 
       expect(repo.getMentorById).toHaveBeenCalledWith(allowedStatuses, mentorService.allFields, mentorId);
       expect(result).toEqual(mentor);
+    });
+  });
+
+  describe('updateMentorStatus', () => {
+    const mentorId = 13;
+    const userId = defaultUserId;
+
+    it('Successful status change for mentor profile owner', async () => {
+      // mentor profile owner changes status from 'active' to 'inactive'
+      repo.getMentorById.mockResolvedValue({
+        id: mentorId,
+        user_id: userId,
+        status: MENTOR_STATUSES.active,
+      });
+      repo.updateMentorById.mockResolvedValue(mentorId);
+
+      const result = await mentorService.updateMentorStatus(
+        [{ role_name: 'member' }],
+        mentorId.toString(),
+        MENTOR_STATUSES.inactive,
+        true // isOwner
+      );
+
+      expect(repo.updateMentorById).toHaveBeenCalledWith(mentorId.toString(), { status: MENTOR_STATUSES.inactive });
+      expect(result).toBe(mentorId);
+    });
+
+    it('Successful status change for admin', async () => {
+      repo.getMentorById.mockResolvedValue({
+        id: mentorId,
+        user_id: userId,
+        status: MENTOR_STATUSES.pending,
+      });
+
+      repo.updateMentorById.mockResolvedValue(mentorId);
+
+      const result = await mentorService.updateMentorStatus(
+        [{ role_name: 'member' }, { role_name: 'admin' }],
+        mentorId.toString(),
+        MENTOR_STATUSES.active,
+        false // isOwner
+      );
+
+      expect(repo.updateMentorById).toHaveBeenCalledWith(
+        mentorId.toString(),
+        { status: MENTOR_STATUSES.active }
+      );
+      expect(rolesRepo.assignRoleToUser).toHaveBeenCalledWith(userId, 2);
+      expect(rolesRepo.removeRoleFromUser).not.toHaveBeenCalled();
+      expect(result).toBe(mentorId);
+    });
+
+    it('User with no ownership nor admin role cannot make changes', async () => {
+      repo.getMentorById.mockResolvedValue({
+        id: mentorId,
+        user_id: userId,
+        status: MENTOR_STATUSES.pending,
+      });
+
+      await expect(
+        mentorService.updateMentorStatus(
+          [{ role_name: 'member' }],
+          mentorId.toString(),
+          MENTOR_STATUSES.inactive,
+          false // isOwner
+        )
+      ).rejects.toBeInstanceOf(DataRequiresElevatedRoleError);
+
+      expect(repo.getMentorById).toHaveBeenCalledTimes(1);
+      expect(repo.updateMentorById).not.toHaveBeenCalled();
+      expect(rolesRepo.assignRoleToUser).not.toHaveBeenCalled();
+      expect(rolesRepo.removeRoleFromUser).not.toHaveBeenCalled();
+    });
+
+    it('User owning the profile cannot change status when current status is pending', async () => { 
+      repo.getMentorById.mockResolvedValue({
+        id: mentorId,
+        user_id: userId,
+        status: MENTOR_STATUSES.pending,
+      });
+
+      await expect(
+        mentorService.updateMentorStatus(
+          [{ role_name: 'member' }],
+          mentorId.toString(),
+          MENTOR_STATUSES.active,
+          true  // isOwner
+        )
+      ).rejects.toBeInstanceOf(DataRequiresElevatedRoleError);
+
+      expect(repo.updateMentorById).not.toHaveBeenCalled();
+      expect(rolesRepo.assignRoleToUser).not.toHaveBeenCalled();
+      expect(rolesRepo.removeRoleFromUser).not.toHaveBeenCalled();
+    });
+
+    it('User owning the profile cannot change status when current status is rejected', async () => {
+      repo.getMentorById.mockResolvedValue({
+        id: mentorId,
+        user_id: userId,
+        status: MENTOR_STATUSES.rejected,
+      });
+
+      await expect(
+        mentorService.updateMentorStatus(
+          [{ role_name: 'member' }],
+          mentorId.toString(),
+          MENTOR_STATUSES.inactive,
+          true // isOwner
+        )
+      ).rejects.toBeInstanceOf(DataRequiresElevatedRoleError);
+
+      expect(repo.updateMentorById).not.toHaveBeenCalled();
+      expect(rolesRepo.assignRoleToUser).not.toHaveBeenCalled();
+      expect(rolesRepo.removeRoleFromUser).not.toHaveBeenCalled();
     });
   });
 });

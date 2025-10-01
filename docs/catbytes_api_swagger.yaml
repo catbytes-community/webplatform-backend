@@ -1177,7 +1177,7 @@ paths:
     get:
       tags:
         - mentors
-      summary: Get mentor by ID
+      summary: ✅ Get mentor by ID
       description: |
         Returns full mentor data if user is logged in. Pending/rejected mentors require admin role.
       operationId: getMentorById
@@ -1228,9 +1228,9 @@ paths:
     patch:
       tags:
         - mentors
-      summary: Update mentor status
+      summary: ✅ Update mentor status
       description: |
-        Only users with admin or mentor role can change mentor status.
+        Available to users with elevated role (admin) only or to user owning the mentor card.
       operationId: patchMentorStatus
       parameters:
         - name: mentor_id

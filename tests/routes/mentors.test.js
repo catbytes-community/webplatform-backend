@@ -174,3 +174,59 @@ describe('GET /mentors/:id', () => {
     expect(res.body.error).toBe('Internal Server Error');
   });
 });
+
+describe('PATCH /mentors/:id', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('Update mentor status success', async () => {
+    mentorService.getMentorById.mockResolvedValue({ ...mockedMentor });
+    mentorService.updateMentorStatus.mockResolvedValue(mockedMentor.id);
+
+    const res = await request(app)
+      .patch(`/mentors/${mockedMentor.id}`)
+      .send({ status: 'active' })
+      .set('userId', defautlUserId);
+
+    expect(mentorService.updateMentorStatus)
+      .toHaveBeenCalledWith(defaultUserRoles, mockedMentor.id.toString(), 'active', false);
+    
+    expect(res.statusCode).toBe(200);
+    expect(res.body.id).toStrictEqual(mockedMentor.id);
+  });
+
+  it('Update mentor status - not authorized', async () => {
+    mentorService.getMentorById.mockResolvedValue({ ...mockedMentor });
+    mentorService.updateMentorStatus.mockRejectedValue(
+      new DataRequiresElevatedRoleError("You're not allowed to edit this resource")
+    );
+
+    const res = await request(app)
+      .patch(`/mentors/${mockedMentor.id}`)
+      .send({ status: 'rejected' })
+      .set('userId', defautlUserId);
+    
+    expect(mentorService.updateMentorStatus)
+      .toHaveBeenCalledWith(defaultUserRoles, mockedMentor.id.toString(), 'rejected', false);
+    
+    expect(res.statusCode).toBe(403);
+    expect(res.body.error).toBe("You're not allowed to edit this resource");
+  });
+
+  it('Update mentor status - mentor not found', async () => {
+    mentorService.getMentorById.mockResolvedValue(null);
+
+    const res = await request(app)
+      .patch('/mentors/9999') // some non-existing mentorId
+      .send({ status: 'active' })
+      .set('userId', defautlUserId);
+    
+    expect(mentorService.getMentorById)
+      .toHaveBeenCalledWith(defaultUserRoles, '9999', false);
+    
+    expect(mentorService.updateMentorStatus).not.toHaveBeenCalled();
+    expect(res.statusCode).toBe(404);
+    expect(res.body.error).toBe('Mentor not found');
+  });
+});
