@@ -203,4 +203,9 @@ async function sendEmailOnMentorApplicationStatusChange(email, name, status) {
   }
 }
 
-module.exports = { initMailer, sendEmailOnApplicationStatusChange, sendEmailOnNewMentorApplication, sendEmailOnMentorApplicationStatusChange };
+module.exports = { 
+  initMailer,
+  sendEmailOnApplicationStatusChange,
+  sendEmailOnNewMentorApplication,
+  sendEmailOnMentorApplicationStatusChange
+};

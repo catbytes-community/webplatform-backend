@@ -18,6 +18,13 @@ const mockedMentor = {
 
 jest.mock('../../services/auth_service');
 jest.mock('../../services/mentor_service');
+// added below so PATCH mentor success route test doesn't fail
+jest.mock('../../services/user_service', () => ({
+  getUserById: jest.fn().mockResolvedValue({ email: 'user@test.com', name: 'Test User' }),
+}));
+jest.mock('../../services/mailer_service', () => ({
+  sendEmailOnMentorApplicationStatusChange: jest.fn().mockResolvedValue(),
+}));
 jest.mock('../../middleware/authorization', () => {
   const actual = jest.requireActual('../../middleware/authorization');
   return {
