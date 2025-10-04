@@ -2,7 +2,7 @@ const nodemailer = require('nodemailer');
 const path = require('path');
 const config = require('config');
 const { loadSecrets } = require("../aws/ssm-helper");
-const { APPL_STATUSES } = require("../utils");
+const { APPL_STATUSES, MENTOR_STATUSES } = require("../utils");
 const discordService = require("../services/discord_bot_service");
 const logger = require('../logger')(__filename);
 
@@ -95,6 +95,50 @@ async function sendApplicationRejectedEmail(email, name) {
   return mailTransporter.sendMail(mailOptions);
 }
 
+async function sendMentorApplicationApprovedEmail(email, name) {
+  const mailOptions = {
+    from: mailerConfig.user,
+    to: email,
+    subject: "You are now a CatBytes Mentor!",
+    template: "mentor_application_approved_email",
+    context: {
+      name: name,
+      catbytesLink: webplatformUrl,
+    },
+    attachments: [
+      {
+        filename: "happy-cat.png",
+        path: path.resolve("./templates/email/src/happy-cat.png"),
+        cid: "happycat",
+      },
+    ],
+  };
+
+  return mailTransporter.sendMail(mailOptions);
+}
+
+async function sendMentorApplicationRejectedEmail(email, name) {
+  const mailOptions = {
+    from: mailerConfig.user,
+    to: email,
+    subject: "Thank you for your CatBytes mentor application",
+    template: "mentor_application_rejected_email",
+    context: {
+      name: name,
+      catbytesLink: webplatformUrl,
+    },
+    attachments: [
+      {
+        filename: "sad-cat.png",
+        path: path.resolve("./templates/email/src/sad-cat.png"),
+        cid: "sadcat",
+      },
+    ],
+  };
+
+  return mailTransporter.sendMail(mailOptions);
+}
+
 async function sendEmailOnApplicationStatusChange(email, name, status) {
   try {
     if (status === APPL_STATUSES.approved) {
@@ -138,4 +182,30 @@ async function sendEmailOnNewMentorApplication(emails, mentorApplication) {
   }
 }
 
-module.exports = { initMailer, sendEmailOnApplicationStatusChange, sendEmailOnNewMentorApplication };
+async function sendEmailOnMentorApplicationStatusChange(email, name, status) {
+  try {
+    if (status === MENTOR_STATUSES.active) {
+      await sendMentorApplicationApprovedEmail(email, name);
+    } 
+    else if (status === MENTOR_STATUSES.rejected) {
+      await sendMentorApplicationRejectedEmail(email, name);
+    }
+    else {
+      logger.warn(`Not sending aplication status change email, because status ${status}
+        is not in email-sending allow-list.`);
+    }
+  }
+  catch (err) {
+    // todo: add correct error processing: if "domain does not accept mail" - log it, 
+    // put to some deadletter for future manual verification
+    // if some other error - we should retry sending email - add queue
+    logger.error(`Error sending email to ${email} on mentor application status change: ${err.message}`);
+  }
+}
+
+module.exports = { 
+  initMailer,
+  sendEmailOnApplicationStatusChange,
+  sendEmailOnNewMentorApplication,
+  sendEmailOnMentorApplicationStatusChange
+};
