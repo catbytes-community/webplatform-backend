@@ -1202,7 +1202,7 @@ paths:
     put:
       tags:
         - mentors
-      summary: Update mentor profile
+      summary: ✅ Update mentor profile
       description: |
         Only the user who owns this mentor card can update it. Only selected fields can be changed.
       operationId: updateMentor
@@ -1261,7 +1261,7 @@ paths:
     delete:
       tags:
         - mentors
-      summary: Delete mentor profile
+      summary: ✅ Delete mentor profile
       description: |
         Only the owner can delete their mentor card. Deletes the entity and removes mentor role from user.
       operationId: deleteMentor

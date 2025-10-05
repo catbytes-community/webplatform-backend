@@ -109,9 +109,14 @@ async function updateMentorStatus(userRoles, mentorId, status, isOwner) {
   throw new DataRequiresElevatedRoleError("You're not allowed to edit this resource");
 }
 
-async function updateMentor(mentorId, updates) {
-  const updatedMentorId = await repo.updateMentorById(mentorId, updates);
-  return updatedMentorId;
+async function updateMentor(userRoles, mentorId, updates, isOwner) {
+  const mentorData = await getMentorById(userRoles, mentorId, isOwner);
+  if(mentorData.status === 'active' || mentorData.status === 'inactive') {
+    const updatedMentorId = await repo.updateMentorById(mentorId, updates);
+    return updatedMentorId;
+  } else {
+    return 0;
+  }
 }
 
 async function deleteMentorById(mentorId, userId) {

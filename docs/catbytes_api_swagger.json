@@ -1885,7 +1885,7 @@
         "tags": [
           "mentors"
         ],
-        "summary": "Delete mentor profile",
+        "summary": "✅   Delete mentor profile",
         "description": "Only the owner can delete their mentor card. Deletes the entity and removes mentor role from user.\n",
         "operationId": "deleteMentor",
         "parameters": [

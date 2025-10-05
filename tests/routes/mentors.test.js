@@ -1,6 +1,7 @@
 const request = require('supertest');
 const mentorService = require('../../services/mentor_service');
 const { MentorAlreadyExistsError, DataRequiresElevatedRoleError } = require('../../errors');
+const { verifyOwnership } = require('../../middleware/authorization');
 
 const defautlUserId = 42;
 const defaultUserRoles = [{ role_name: 'member', role_id: 1 }];
@@ -35,6 +36,10 @@ jest.mock('../../middleware/authorization', () => {
       next();
     }),
     verifyMentorOwnership: jest.fn(() => false),
+    verifyOwnership: jest.fn(() => (req, res, next) => {
+      req.userId = defautlUserId;
+      next();
+    }),
   };
 });
 
@@ -237,3 +242,55 @@ describe('PATCH /mentors/:id', () => {
     expect(res.body.error).toBe('Mentor not found');
   });
 });
+
+describe('PUT /mentors/:id', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('Update mentor success', async () => {
+    mentorService.updateMentor.mockResolvedValue(mockedMentor.id);
+
+    const res = await request(app)
+      .put(`/mentors/${mockedMentor.id}`)
+      .send({ updates: { about: 'updated about field', contact: 'updated@email.com' } });
+
+    expect(mentorService.updateMentor).toHaveBeenCalledWith(
+      defaultUserRoles,
+      mockedMentor.id.toString(),
+      { about: 'updated about field', contact: 'updated@email.com' },
+      false // verifyMentorOwnership is mocked to return false
+    );
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toStrictEqual({ id: mockedMentor.id });
+  });
+  it('Update mentor - invalid field', async () => {
+    const res = await request(app)
+      .put(`/mentors/${mockedMentor.id}`)
+      .send({ updates: { name: 'new name' } });
+
+    expect(res.statusCode).toBe(400);
+    expect(mentorService.updateMentor).not.toHaveBeenCalled();
+  });
+  it('Update mentor - not authorized', async () => {
+    mentorService.updateMentor.mockRejectedValue(
+      new DataRequiresElevatedRoleError("You're not allowed to edit this resource")
+    );
+
+    const res = await request(app)
+      .put(`/mentors/${mockedMentor.id}`)
+      .set('userId', defautlUserId)
+      .send({ updates: { about: 'new about that will not be applied', contact: 'new contact' } });
+
+    expect(mentorService.updateMentor).toHaveBeenCalledWith(
+      defaultUserRoles,
+      mockedMentor.id.toString(),
+      { about: 'new about that will not be applied', contact: 'new contact' },
+      false // verifyMentorOwnership is mocked to return false
+    );
+
+    expect(res.statusCode).toBe(403);
+    expect(res.body.error).toBe("You're not allowed to edit this resource");
+  });
+})
