@@ -1,5 +1,5 @@
 const request = require('supertest');
-const s3_client = require('../../aws/s3_client');
+const s3Client = require('../../aws/s3_client');
 const app = require('../../appForTests');
 
 jest.mock('../../aws/s3_client', () => {;
@@ -25,8 +25,8 @@ describe('POST /presigned-url', () => {
         objectType: 'application_video'
       });
 
-    expect(s3_client.generateUploadUrl).toHaveBeenCalledWith(
-      s3_client.BUCKET_PREFIXES.applications,
+    expect(s3Client.generateUploadUrl).toHaveBeenCalledWith(
+      s3Client.BUCKET_PREFIXES.applications,
       '61a54a37-6c7a-466a-8100-a6b09daecded',
       'video/quicktime'
     );
@@ -43,7 +43,7 @@ describe('POST /presigned-url', () => {
       .post('/presigned-url')
       .send({ objectKey: '61a54a37-6c7a-466a-8100-a6b09daecded'});
     
-    expect(s3_client.generateUploadUrl).not.toHaveBeenCalled();
+    expect(s3Client.generateUploadUrl).not.toHaveBeenCalled();
 
     expect(res.statusCode).toBe(400);
     expect(res.body).toHaveProperty('error');
@@ -58,7 +58,7 @@ describe('POST /presigned-url', () => {
         objectType: 'application_video'
       });
     
-    expect(s3_client.generateUploadUrl).not.toHaveBeenCalled();
+    expect(s3Client.generateUploadUrl).not.toHaveBeenCalled();
     
     expect(res.statusCode).toBe(400);
     expect(res.body).toHaveProperty('error');
@@ -73,7 +73,7 @@ describe('POST /presigned-url', () => {
         objectType: 'something_weird'
       });
 
-    expect(s3_client.generateUploadUrl).not.toHaveBeenCalled();
+    expect(s3Client.generateUploadUrl).not.toHaveBeenCalled();
     
     expect(res.statusCode).toBe(400);
     expect(res.body).toHaveProperty('error');
