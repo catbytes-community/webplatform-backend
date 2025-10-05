@@ -3,7 +3,7 @@ const express = require("express");
 const router = express.Router();
 const mentorService = require("../services/mentor_service");
 const { ROLE_NAMES, MENTOR_STATUSES, ALLOWED_MENTOR_UPDATES } = require("../utils");
-const { verifyRoles, verifyMentorOwnership } = require("../middleware/authorization");
+const { verifyRoles, verifyMentorOwnership, verifyOwnership, OWNED_ENTITIES } = require("../middleware/authorization");
 const { isValidIntegerId, respondWithError } = require("./helpers");
 const { MentorAlreadyExistsError, DataRequiresElevatedRoleError } = require("../errors");
 const { sendEmailOnMentorApplicationStatusChange } = require("../services/mailer_service");
@@ -100,7 +100,7 @@ router.patch("/mentors/:id", verifyRoles([ROLE_NAMES.member]), async (req, res) 
 });
 
 // Update mentor information by user owning mentorship card
-router.put("/mentors/:id", verifyRoles([ROLE_NAMES.mentor]), async (req, res) => {
+router.put("/mentors/:id", verifyRoles([ROLE_NAMES.mentor]), verifyOwnership(OWNED_ENTITIES.MENTOR), async (req, res) => {
   const { id } = req.params;
   const { updates } = req.body;
   
@@ -112,28 +112,14 @@ router.put("/mentors/:id", verifyRoles([ROLE_NAMES.mentor]), async (req, res) =>
   const invalidFields = Object.keys(updates)
     .filter(field => !ALLOWED_MENTOR_UPDATES.includes(field));
   if(invalidFields.length) {
-    return respondWithError(res, 400, "You are not allowed to edit this field");
+    return respondWithError(res, 400,
+      `You can't edit ${invalidFields.length === 1 ? `field '${invalidFields[0]}'` : `fields '${invalidFields.join(', ')}'`}`
+    );
   }
 
   try {
-    const isOwner = await verifyMentorOwnership(id, req.userId);
-    const mentorInfo = await mentorService.getMentorById(
-      req.userRoles,
-      id,
-      isOwner
-    );
-    if (!mentorInfo) {
-      return respondWithError(res, 404, "Mentor not found");
-    }
-
-    // can edit is mentor status is active or inactive
-    if (
-      mentorInfo.status === MENTOR_STATUSES.active ||
-      mentorInfo.status === MENTOR_STATUSES.inactive
-    ) {
-      const updatedMentor = await mentorService.updateMentor(id, updates, isOwner);
-      res.json({ mentor: updatedMentor });
-    }
+    const mentorId = await mentorService.updateMentor(id, updates);
+    res.json({ id: mentorId });
   } catch (err) {
     logger.error(err);
     if (err instanceof DataRequiresElevatedRoleError) {
