@@ -54,7 +54,7 @@ describe('Mentor Service', () => {
   });
 
   describe('getMentors', () => {
-    it('Unauthenticated users only see active mentors', async () => {
+    it('Unauthenticated users see active and inactive mentors with limited fields', async () => {
       const allowedStatuses = mentorService.generalVisitbleStatuses;
       const mentor = { id: 1, user_id: defaultUserId, status: MENTOR_STATUSES.active };
 
@@ -63,6 +63,8 @@ describe('Mentor Service', () => {
 
       await mentorService.getMentors(undefined, undefined, false);
 
+      expect(allowedStatuses).toContain(MENTOR_STATUSES.active);
+      expect(allowedStatuses).toContain(MENTOR_STATUSES.inactive);
       expect(rolesService.getUserRoles).not.toHaveBeenCalled();
       expect(repo.getMentors).toHaveBeenCalledWith(allowedStatuses, mentorService.baseFields);
     });
@@ -78,7 +80,7 @@ describe('Mentor Service', () => {
       expect(repo.getMentors).not.toHaveBeenCalled();
     });
 
-    it('Member users only see active mentors', async () => {
+    it('Member users see active and inactive mentors', async () => {
       const userRoles = [{ role_name: 'member' }];
       const allowedStatuses = mentorService.generalVisitbleStatuses;
       const mentor = { id: 1, user_id: defaultUserId, status: MENTOR_STATUSES.active };
@@ -88,19 +90,8 @@ describe('Mentor Service', () => {
 
       await mentorService.getMentors(defaultUserId, undefined, false);
 
-      expect(repo.getMentors).toHaveBeenCalledWith(allowedStatuses, mentorService.baseFields);
-    });
-
-    it('Member users only see active mentors', async () => {
-      const userRoles = [{ role_name: 'member' }];
-      const allowedStatuses = mentorService.generalVisitbleStatuses;
-      const mentor = { id: 1, user_id: defaultUserId, status: MENTOR_STATUSES.active };
-
-      rolesService.getUserRoles.mockResolvedValue(userRoles);
-      repo.getMentors.mockResolvedValue([mentor]);
-
-      await mentorService.getMentors(defaultUserId, undefined, false);
-
+      expect(allowedStatuses).toContain(MENTOR_STATUSES.active);
+      expect(allowedStatuses).toContain(MENTOR_STATUSES.inactive);
       expect(repo.getMentors).toHaveBeenCalledWith(allowedStatuses, mentorService.baseFields);
     });
 
