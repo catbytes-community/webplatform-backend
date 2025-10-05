@@ -2028,6 +2028,96 @@
           }
         }
       }
+    },
+    "/presigned-url": {
+      "post": {
+        "tags": ["service endpoints"],
+        "summary": "✅ Generate presigned S3 upload URL",
+        "description": "Generates a presigned URL to upload a file to S3 (e.g. application video).\nCurrently supports only `application_video` objectType.\nRequires `objectKey` to be a valid UUIDv4 string. \nReturned filename should be sent to backend in a separate request to store in the database.",
+        "operationId": "generatePresignedUrl",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["objectKey", "contentType", "objectType"],
+                "properties": {
+                  "objectKey": {
+                    "type": "string",
+                    "format": "uuid",
+                    "example": "d41d8cd9-8f00-3204-a980-001e4bcd0000"
+                  },
+                  "contentType": {
+                    "type": "string",
+                    "example": "video/mp4"
+                  },
+                  "objectType": {
+                    "type": "string",
+                    "enum": ["application_video"],
+                    "example": "application_video"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully generated presigned URL",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "uploadUrl": {
+                      "type": "string",
+                      "format": "uri",
+                      "example": "https://catbytes-bucket.s3.amazonaws.com/videos/applications/d41d8cd9-8f00-3204-a980-001e4bcd0000.mp4?X-Amz-Algorithm=..."
+                    },
+                    "key": {
+                      "type": "string",
+                      "example": "d41d8cd9-8f00-3204-a980-001e4bcd0000.mp4"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input (missing fields, unsupported content type, invalid objectType, etc.)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "objectKey must be a valid uuid v4."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error during URL generation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Failed to generate presigned URL"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
