@@ -122,7 +122,7 @@ router.put("/mentors/:id", verifyRoles([ROLE_NAMES.mentor]), verifyOwnership(OWN
     const mentorId = await mentorService.updateMentor(req.userRoles, id, updates, isOwner);
     if(mentorId === 0) {
       // could not update mentor, as it was in pending or rejected state
-      return respondWithError(res, 400, 'You cannot update mentor when its status is pending or rejected')
+      return respondWithError(res, 400, 'You cannot update mentor when its status is pending or rejected');
     }
     res.json({ id: mentorId });
   } catch (err) {

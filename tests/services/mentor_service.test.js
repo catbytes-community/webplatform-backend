@@ -1,5 +1,5 @@
 const mentorService = require('../../services/mentor_service');
-const { MENTOR_STATUSES, ROLE_NAMES } = require('../../utils');
+const { MENTOR_STATUSES } = require('../../utils');
 const rolesService = require('../../services/roles_service');
 const mailerService = require('../../services/mailer_service');
 const repo = require('../../repositories/mentor_repository');

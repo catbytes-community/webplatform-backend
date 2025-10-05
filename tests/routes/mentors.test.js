@@ -1,7 +1,6 @@
 const request = require('supertest');
 const mentorService = require('../../services/mentor_service');
 const { MentorAlreadyExistsError, DataRequiresElevatedRoleError } = require('../../errors');
-const { verifyOwnership } = require('../../middleware/authorization');
 
 const defautlUserId = 42;
 const defaultUserRoles = [{ role_name: 'member', role_id: 1 }];
@@ -293,4 +292,4 @@ describe('PUT /mentors/:id', () => {
     expect(res.statusCode).toBe(403);
     expect(res.body.error).toBe("You're not allowed to edit this resource");
   });
-})
+});
