@@ -24,15 +24,15 @@ router.post('/presigned-url', async (req, res) => {
     
     var bucketKey;
     switch (objectType) {
-      case 'application_video':
-        // currently only application videos are supported
-        bucketKey = BUCKET_PREFIXES.applications;
-        break;
-      default:
-        return respondWithError(res, 400, 'Invalid objectType provided.');
+    case 'application_video':
+      // currently only application videos are supported
+      bucketKey = BUCKET_PREFIXES.applications;
+      break;
+    default:
+      return respondWithError(res, 400, 'Invalid objectType provided.');
     }
 
-    result = await generateUploadUrl(bucketKey, objectKey, contentType);
+    const result = await generateUploadUrl(bucketKey, objectKey, contentType);
     res.json(result);
     
   } catch (err) {
@@ -45,7 +45,7 @@ function validateObjectKeyIsUuid(objectKey) {
   try {
     return validate(objectKey) && version(objectKey) === 4;
   }
-  catch (error) {
+  catch {
     return false;
   }
 }

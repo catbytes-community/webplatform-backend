@@ -6,7 +6,7 @@ jest.mock('../../aws/s3_client', () => {;
   const actual = jest.requireActual('../../aws/s3_client');
   return {
     ...actual,
-    generateUploadUrl: jest.fn((bucketPrefix, filename, contentType) => {
+    generateUploadUrl: jest.fn((bucketPrefix, filename, _contentType) => {
       return {
         url: `https://mocked-s3-url/${bucketPrefix}/${filename}.mov`,
         filename: `${filename}.mov`,
