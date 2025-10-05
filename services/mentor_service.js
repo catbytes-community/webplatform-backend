@@ -114,9 +114,15 @@ async function updateMentor(mentorId, updates) {
   return updatedMentorId;
 }
 
+async function deleteMentorById(mentorId, userId) {
+  const deletedMentorId = await repo.deleteMentorById(mentorId);
+  removeRoleFromUser(userId, 2);
+  return deletedMentorId;
+}  
+
 module.exports = { 
   getMentors, createMentor, getMentorById,
-  updateMentorStatus, updateMentor,
+  updateMentorStatus, updateMentor, deleteMentorById,
   adminVisibleStatuses, generalVisitbleStatuses,
   allFields, baseFields, privateFields,
   MENTOR_STATUSES

@@ -129,4 +129,22 @@ router.put("/mentors/:id", verifyRoles([ROLE_NAMES.mentor]), verifyOwnership(OWN
   }
 });
 
+// Delete mentorship card by owning user
+router.delete("/mentors/:id", verifyOwnership(OWNED_ENTITIES.MENTOR), async (req, res) => {
+  const { id } = req.params;
+  if (!isValidIntegerId(id)) {
+    return respondWithError(res, 400, "Invalid user id supplied");
+  }
+  try {
+    const result = await mentorService.deleteMentorById(id, req.userId);
+    if (result === 0) {
+      return respondWithError(res, 404, "Mentor not found.");
+    }
+    res.status(200).json({ mentor_id: id });
+  } catch (err) {
+    logger.error(err);
+    respondWithError(res);
+  }
+});
+
 module.exports = router;
