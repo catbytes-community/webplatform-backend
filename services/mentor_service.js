@@ -109,8 +109,18 @@ async function updateMentorStatus(userRoles, mentorId, status, isOwner) {
   throw new DataRequiresElevatedRoleError("You're not allowed to edit this resource");
 }
 
+async function updateMentor(mentorId, updates, isOwner) {
+  if(isOwner) {
+    const updatedMentor = await repo.updateMentorById(mentorId, updates);
+    return updatedMentor;
+  } else {
+    throw new DataRequiresElevatedRoleError("You're not allowed to edit this resource");
+  }
+}
+
 module.exports = { 
-  getMentors, createMentor, getMentorById, updateMentorStatus,
+  getMentors, createMentor, getMentorById,
+  updateMentorStatus, updateMentor,
   adminVisibleStatuses, generalVisitbleStatuses,
   allFields, baseFields, privateFields,
   MENTOR_STATUSES

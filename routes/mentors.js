@@ -2,7 +2,7 @@ const express = require("express");
 
 const router = express.Router();
 const mentorService = require("../services/mentor_service");
-const { ROLE_NAMES, MENTOR_STATUSES } = require("../utils");
+const { ROLE_NAMES, MENTOR_STATUSES, ALLOWED_MENTOR_UPDATES } = require("../utils");
 const { verifyRoles, verifyMentorOwnership } = require("../middleware/authorization");
 const { isValidIntegerId, respondWithError } = require("./helpers");
 const { MentorAlreadyExistsError, DataRequiresElevatedRoleError } = require("../errors");
@@ -90,6 +90,50 @@ router.patch("/mentors/:id", verifyRoles([ROLE_NAMES.member]), async (req, res) 
     };
 
     res.json({ id: mentorId });
+  } catch (err) {
+    logger.error(err);
+    if (err instanceof DataRequiresElevatedRoleError) {
+      return respondWithError(res, 403, err.message);
+    }
+    respondWithError(res);
+  }
+});
+
+// Update mentor information by user owning mentorship card
+router.put("/mentors/:id", verifyRoles([ROLE_NAMES.mentor]), async (req, res) => {
+  const { id } = req.params;
+  const { updates } = req.body;
+  
+  if (!isValidIntegerId(id)) {
+    return respondWithError(res, 400, "Invalid user id supplied");
+  }
+
+  // check that only fields 'about' and 'contact' can be updated
+  const invalidFields = Object.keys(updates)
+    .filter(field => !ALLOWED_MENTOR_UPDATES.includes(field));
+  if(invalidFields.length) {
+    return respondWithError(res, 400, "You are not allowed to edit this field");
+  }
+
+  try {
+    const isOwner = await verifyMentorOwnership(id, req.userId);
+    const mentorInfo = await mentorService.getMentorById(
+      req.userRoles,
+      id,
+      isOwner
+    );
+    if (!mentorInfo) {
+      return respondWithError(res, 404, "Mentor not found");
+    }
+
+    // can edit is mentor status is active or inactive
+    if (
+      mentorInfo.status === MENTOR_STATUSES.active ||
+      mentorInfo.status === MENTOR_STATUSES.inactive
+    ) {
+      const updatedMentor = await mentorService.updateMentor(id, updates, isOwner);
+      res.json({ mentor: updatedMentor });
+    }
   } catch (err) {
     logger.error(err);
     if (err instanceof DataRequiresElevatedRoleError) {
