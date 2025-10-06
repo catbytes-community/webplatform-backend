@@ -111,7 +111,7 @@ async function updateMentorStatus(userRoles, mentorId, status, isOwner) {
 
 async function updateMentor(userRoles, mentorId, updates, isOwner) {
   const mentorData = await getMentorById(userRoles, mentorId, isOwner);
-  if(mentorData.status === 'active' || mentorData.status === 'inactive') {
+  if(mentorData.status === MENTOR_STATUSES.active || mentorData.status === MENTOR_STATUSES.inactive) {
     const updatedMentorId = await repo.updateMentorById(mentorId, updates);
     return updatedMentorId;
   } else {
