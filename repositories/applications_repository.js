@@ -6,9 +6,9 @@ async function getAllApplications() {
   return await knex("applications").select("*"); 
 }
 
-async function createNewApplication(name, about, email, videoLink, discordNickname) {
+async function createNewApplication(payload) {
   return await knex('applications')
-    .insert({ name: name, about: about, email: email, video_link: videoLink, discord_nickname: discordNickname })
+    .insert(payload)
     .returning('*');
 }
 

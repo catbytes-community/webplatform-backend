@@ -22,16 +22,28 @@ router.get("/applications", verifyRoles([ROLE_NAMES.mentor, ROLE_NAMES.admin]), 
   }
 });
 
+router.get("/applications/:id", verifyRoles([ROLE_NAMES.mentor, ROLE_NAMES.admin]), async (req, res) => {
+  const { id } = req.params;
+  try {
+    const application = await applService.getApplicationById(id);
+    if (!application) {
+      return respondWithError(res, 404, "Application not found");
+    }
+    res.json(application);
+  } catch (err) {
+    logger.error(err);
+    respondWithError(res);
+  }
+});
+
 router.post("/applications", async (req, res) => {
   const payload = req.body;
+  if (!payload.video_link && !payload.video_filename) {
+    return respondWithError(res, 400, "Video link or filename is required");
+  }
+
   try {
-    const result = await applService.createNewApplication(
-      payload.name,
-      payload.about,
-      payload.email,
-      payload.video_link,
-      payload.discord_nickname
-    );
+    const result = await applService.createNewApplication(payload);
 
     res.status(201).json(result);
   } catch (err) {
