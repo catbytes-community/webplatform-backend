@@ -1,4 +1,4 @@
-const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
+const { S3Client, PutObjectCommand, GetObjectCommand } = require("@aws-sdk/client-s3");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 const config = require("config");
 
@@ -39,6 +39,20 @@ async function generateUploadUrl(bucketPrefix, filename, contentType) {
   };
 }
 
+async function getDownloadUrl(bucketPrefix, filename) {
+  if (!Object.values(BUCKET_PREFIXES).includes(bucketPrefix)) {
+    throw new Error("Invalid bucket prefix");
+  }
+
+  const command = new GetObjectCommand({
+    Bucket: awsConfig.s3_bucket,
+    Key: buildFullObjectKey(bucketPrefix, filename)
+  });
+
+  const signedUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
+  return signedUrl;
+}
+
 function buildFullObjectKey(bucketPrefix, filename) {
   return `${bucketPrefix}/${filename}`;
 }
@@ -47,4 +61,5 @@ module.exports = {
   BUCKET_PREFIXES,
   MIME_EXTENSION_MAP,
   generateUploadUrl,
+  getDownloadUrl,
 };
