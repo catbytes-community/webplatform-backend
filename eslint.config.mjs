@@ -21,7 +21,7 @@ export default [
         "no-console": ["warn"],
         "eqeqeq": ["error", "always"],
         "prefer-const": "error",
-        "no-unused-vars": "error",
+        "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
         "camelcase": ["error", {"properties": "never"}],
         "indent": ["error", 2],
         "semi": ["error", "always"],

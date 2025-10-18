@@ -7,6 +7,7 @@ Table applications {
   about text [not null]
   email email [unique, not null]
   video_link varchar
+  video_filename varchar
   discord_nickname varchar [unique, not null]
   created_at timestamp
   status enum 

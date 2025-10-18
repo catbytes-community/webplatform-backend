@@ -21,7 +21,7 @@ const privateFields = [
 
 const adminVisibleStatuses = [MENTOR_STATUSES.active, MENTOR_STATUSES.inactive, 
   MENTOR_STATUSES.rejected, MENTOR_STATUSES.pending];
-const generalVisitbleStatuses = [MENTOR_STATUSES.active];
+const generalVisitbleStatuses = [MENTOR_STATUSES.active, MENTOR_STATUSES.inactive];
 
 const allFields = [...baseFields, ...privateFields];
 
