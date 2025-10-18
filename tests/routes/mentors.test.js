@@ -257,8 +257,7 @@ describe('PUT /mentors/:id', () => {
     expect(mentorService.updateMentor).toHaveBeenCalledWith(
       defaultUserRoles,
       mockedMentor.id.toString(),
-      { about: 'updated about field', contact: 'updated@email.com' },
-      false // verifyMentorOwnership is mocked to return false
+      { about: 'updated about field', contact: 'updated@email.com' }
     );
 
     expect(res.statusCode).toBe(200);
@@ -285,8 +284,7 @@ describe('PUT /mentors/:id', () => {
     expect(mentorService.updateMentor).toHaveBeenCalledWith(
       defaultUserRoles,
       mockedMentor.id.toString(),
-      { about: 'new about that will not be applied', contact: 'new contact' },
-      false // verifyMentorOwnership is mocked to return false
+      { about: 'new about that will not be applied', contact: 'new contact' }
     );
 
     expect(res.statusCode).toBe(403);
