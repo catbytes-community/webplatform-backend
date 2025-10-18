@@ -61,13 +61,7 @@ describe('POST /applications', () => {
       .post('/applications')
       .send(applicationPayload);
     
-    expect(applicationService.createNewApplication).toHaveBeenCalledWith(
-      applicationPayload.name,
-      applicationPayload.about,
-      applicationPayload.email,
-      applicationPayload.video_link,
-      applicationPayload.discord_nickname
-    );
+    expect(applicationService.createNewApplication).toHaveBeenCalledWith(applicationPayload);
     expect(res.statusCode).toBe(201);
     expect(res.body).toEqual({ id: 1, ...applicationPayload });
   });
@@ -82,13 +76,7 @@ describe('POST /applications', () => {
       .post('/applications')
       .send(applicationPayload);
     
-    expect(applicationService.createNewApplication).toHaveBeenCalledWith(
-      applicationPayload.name,
-      applicationPayload.about,
-      applicationPayload.email,
-      applicationPayload.video_link,
-      applicationPayload.discord_nickname
-    );
+    expect(applicationService.createNewApplication).toHaveBeenCalledWith(applicationPayload);
     expect(res.statusCode).toBe(409);
     expect(res.body.error).toContain('already exists');
   });
@@ -103,13 +91,7 @@ describe('POST /applications', () => {
       .post('/applications')
       .send(applicationPayload);
     
-    expect(applicationService.createNewApplication).toHaveBeenCalledWith(
-      applicationPayload.name,
-      applicationPayload.about,
-      applicationPayload.email,
-      applicationPayload.video_link,
-      applicationPayload.discord_nickname
-    );
+    expect(applicationService.createNewApplication).toHaveBeenCalledWith(applicationPayload);
     expect(res.statusCode).toBe(400);
     expect(res.body.error).toContain('email is required');
   });
@@ -120,15 +102,38 @@ describe('POST /applications', () => {
       .post('/applications')
       .send(applicationPayload);
     
-    expect(applicationService.createNewApplication).toHaveBeenCalledWith(
-      applicationPayload.name,
-      applicationPayload.about,
-      applicationPayload.email,
-      applicationPayload.video_link,
-      applicationPayload.discord_nickname
-    );
+    expect(applicationService.createNewApplication).toHaveBeenCalledWith(applicationPayload);
     expect(res.statusCode).toBe(500);
     expect(res.body.error).toContain('Internal Server Error');
+  });
+
+  describe('Create new application - video field validation', () => {
+    const basePayload = {
+      name: 'Test Application',
+      about: 'This is a test application',
+      email: 'test@test.com',
+      discord_nickname: 'TestUser'
+    };
+  
+    const testCases = [
+      ['both missing', {}],
+      ['both empty strings', { video_link: '', video_filename: '' }],
+      ['video_link missing, video_filename empty', { video_filename: '' }],
+      ['video_link empty, video_filename missing', { video_link: '' }],
+    ];
+  
+    test.each(testCases)(
+      'should return 400 if %s',
+      async (_desc, videoFields) => {
+        const payload = { ...basePayload, ...videoFields };
+  
+        const res = await request(app).post('/applications').send(payload);
+  
+        expect(applicationService.createNewApplication).not.toHaveBeenCalled();
+        expect(res.statusCode).toBe(400);
+        expect(res.body.error).toContain('Video link or filename is required');
+      }
+    );
   });
 });
 
