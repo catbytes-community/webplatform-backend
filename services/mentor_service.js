@@ -109,8 +109,8 @@ async function updateMentorStatus(userRoles, mentorId, status, isOwner) {
   throw new DataRequiresElevatedRoleError("You're not allowed to edit this resource");
 }
 
-async function updateMentor(userRoles, mentorId, updates, isOwner) {
-  const mentorData = await getMentorById(userRoles, mentorId, isOwner);
+async function updateMentor(userRoles, mentorId, updates) {
+  const mentorData = await getMentorById(userRoles, mentorId);
   if(mentorData.status === MENTOR_STATUSES.active || mentorData.status === MENTOR_STATUSES.inactive) {
     const updatedMentorId = await repo.updateMentorById(mentorId, updates);
     return updatedMentorId;
