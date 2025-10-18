@@ -252,7 +252,7 @@ describe('PUT /mentors/:id', () => {
 
     const res = await request(app)
       .put(`/mentors/${mockedMentor.id}`)
-      .send({ updates: { about: 'updated about field', contact: 'updated@email.com' } });
+      .send({ about: 'updated about field', contact: 'updated@email.com' });
 
     expect(mentorService.updateMentor).toHaveBeenCalledWith(
       defaultUserRoles,
@@ -266,7 +266,7 @@ describe('PUT /mentors/:id', () => {
   it('Update mentor - invalid field', async () => {
     const res = await request(app)
       .put(`/mentors/${mockedMentor.id}`)
-      .send({ updates: { name: 'new name' } });
+      .send({ name: 'new name' });
 
     expect(res.statusCode).toBe(400);
     expect(mentorService.updateMentor).not.toHaveBeenCalled();
@@ -279,7 +279,7 @@ describe('PUT /mentors/:id', () => {
     const res = await request(app)
       .put(`/mentors/${mockedMentor.id}`)
       .set('userId', defautlUserId)
-      .send({ updates: { about: 'new about that will not be applied', contact: 'new contact' } });
+      .send({ about: 'new about that will not be applied', contact: 'new contact' });
 
     expect(mentorService.updateMentor).toHaveBeenCalledWith(
       defaultUserRoles,

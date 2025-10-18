@@ -114,8 +114,6 @@ async function updateMentor(userRoles, mentorId, updates) {
   if(mentorData.status === MENTOR_STATUSES.active || mentorData.status === MENTOR_STATUSES.inactive) {
     const updatedMentorId = await repo.updateMentorById(mentorId, updates);
     return updatedMentorId;
-  } else {
-    return 0;
   }
 }
 

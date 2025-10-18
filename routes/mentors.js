@@ -102,7 +102,7 @@ router.patch("/mentors/:id", verifyRoles([ROLE_NAMES.member]), async (req, res) 
 // Update mentor information by user owning mentorship card
 router.put("/mentors/:id", verifyRoles([ROLE_NAMES.mentor]), verifyOwnership(OWNED_ENTITIES.MENTOR), async (req, res) => {
   const { id } = req.params;
-  const { updates } = req.body;
+  const updates = req.body;
   
   if (!isValidIntegerId(id)) {
     return respondWithError(res, 400, "Invalid user id supplied");

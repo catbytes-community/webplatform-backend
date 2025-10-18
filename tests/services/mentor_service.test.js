@@ -363,11 +363,10 @@ describe('Mentor Service', () => {
         [{ role_name: 'member' }],
         mockedMentorId.toString(),
         { about: 'trying to change' },
-        true // isOwner
       );
 
       expect(repo.updateMentorById).not.toHaveBeenCalled();
-      expect(result).toBe(0);
+      expect(result).toBe(undefined);
     });
   });
 });
