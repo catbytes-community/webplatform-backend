@@ -21,7 +21,7 @@ async function getApplicationByEmail(email) {
 }
 
 async function getApplicationById(id) {
-  application = await repo.getApplicationByFields({id: id});
+  const application = await repo.getApplicationByFields({id: id});
   if (application?.video_filename) {
     application.video_file = await getDownloadUrl(BUCKET_PREFIXES.applications, application.video_filename);
   }
