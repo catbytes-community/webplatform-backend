@@ -115,6 +115,7 @@ async function updateMentor(userRoles, mentorId, updates) {
     const updatedMentorId = await repo.updateMentorById(mentorId, updates);
     return updatedMentorId;
   }
+  return 0;
 }
 
 async function deleteMentorById(mentorId, userId) {

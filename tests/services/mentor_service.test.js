@@ -357,7 +357,7 @@ describe('Mentor Service', () => {
       );
 
       expect(repo.updateMentorById).not.toHaveBeenCalled();
-      expect(result).toBe(undefined);
+      expect(result).toBe(0);
     });
   });
 });
