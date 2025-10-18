@@ -1889,7 +1889,7 @@
                 "tags": [
                     "mentors"
                 ],
-                "summary": "Update mentor profile",
+                "summary": "✅ Update mentor profile",
                 "description": "Only the user who owns this mentor card can update it. Only selected fields can be changed.\n",
                 "operationId": "updateMentor",
                 "parameters": [

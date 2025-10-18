@@ -35,6 +35,10 @@ jest.mock('../../middleware/authorization', () => {
       next();
     }),
     verifyMentorOwnership: jest.fn(() => false),
+    verifyOwnership: jest.fn(() => (req, res, next) => {
+      req.userId = defautlUserId;
+      next();
+    }),
   };
 });
 
@@ -235,5 +239,55 @@ describe('PATCH /mentors/:id', () => {
     expect(mentorService.updateMentorStatus).not.toHaveBeenCalled();
     expect(res.statusCode).toBe(404);
     expect(res.body.error).toBe('Mentor not found');
+  });
+});
+
+describe('PUT /mentors/:id', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('Update mentor success', async () => {
+    mentorService.updateMentor.mockResolvedValue(mockedMentor.id);
+
+    const res = await request(app)
+      .put(`/mentors/${mockedMentor.id}`)
+      .send({ about: 'updated about field', contact: 'updated@email.com' });
+
+    expect(mentorService.updateMentor).toHaveBeenCalledWith(
+      defaultUserRoles,
+      mockedMentor.id.toString(),
+      { about: 'updated about field', contact: 'updated@email.com' }
+    );
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toStrictEqual({ id: mockedMentor.id });
+  });
+  it('Update mentor - invalid field', async () => {
+    const res = await request(app)
+      .put(`/mentors/${mockedMentor.id}`)
+      .send({ name: 'new name' });
+
+    expect(res.statusCode).toBe(400);
+    expect(mentorService.updateMentor).not.toHaveBeenCalled();
+  });
+  it('Update mentor - not authorized', async () => {
+    mentorService.updateMentor.mockRejectedValue(
+      new DataRequiresElevatedRoleError("You're not allowed to edit this resource")
+    );
+
+    const res = await request(app)
+      .put(`/mentors/${mockedMentor.id}`)
+      .set('userId', defautlUserId)
+      .send({ about: 'new about that will not be applied', contact: 'new contact' });
+
+    expect(mentorService.updateMentor).toHaveBeenCalledWith(
+      defaultUserRoles,
+      mockedMentor.id.toString(),
+      { about: 'new about that will not be applied', contact: 'new contact' }
+    );
+
+    expect(res.statusCode).toBe(403);
+    expect(res.body.error).toBe("You're not allowed to edit this resource");
   });
 });

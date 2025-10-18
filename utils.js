@@ -74,7 +74,9 @@ const MENTOR_STATUSES = {
   pending: 'pending',
 };
 
+const ALLOWED_MENTOR_UPDATES = ['contact', 'about'];
+
 module.exports = { 
-  APPL_STATUSES, MENTOR_STATUSES, ROLE_NAMES, 
+  APPL_STATUSES, MENTOR_STATUSES, ROLE_NAMES, ALLOWED_MENTOR_UPDATES, 
   isRoleExists, loadRolesIntoMemory, getRole, getFirebaseSdkServiceAccount 
 };

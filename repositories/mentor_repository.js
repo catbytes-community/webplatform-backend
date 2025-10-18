@@ -49,4 +49,9 @@ async function updateMentorById(mentorId, updates) {
     .update(updates);
 }
 
-module.exports = { getMentors, createMentor, getMentorByUserId, getMentorById, updateMentorById };
+async function deleteMentorById(id) {
+  const knex = getKnex();
+  return await knex("mentors").where("id", id).del();
+}
+
+module.exports = { getMentors, createMentor, getMentorByUserId, getMentorById, updateMentorById, deleteMentorById };

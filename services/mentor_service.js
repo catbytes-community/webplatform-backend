@@ -109,8 +109,24 @@ async function updateMentorStatus(userRoles, mentorId, status, isOwner) {
   throw new DataRequiresElevatedRoleError("You're not allowed to edit this resource");
 }
 
+async function updateMentor(userRoles, mentorId, updates) {
+  const mentorData = await getMentorById(userRoles, mentorId);
+  if(mentorData.status === MENTOR_STATUSES.active || mentorData.status === MENTOR_STATUSES.inactive) {
+    const updatedMentorId = await repo.updateMentorById(mentorId, updates);
+    return updatedMentorId;
+  }
+  return 0;
+}
+
+async function deleteMentorById(mentorId, userId) {
+  const deletedMentorId = await repo.deleteMentorById(mentorId);
+  removeRoleFromUser(userId, 2);
+  return deletedMentorId;
+}  
+
 module.exports = { 
-  getMentors, createMentor, getMentorById, updateMentorStatus,
+  getMentors, createMentor, getMentorById,
+  updateMentorStatus, updateMentor, deleteMentorById,
   adminVisibleStatuses, generalVisitbleStatuses,
   allFields, baseFields, privateFields,
   MENTOR_STATUSES

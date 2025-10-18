@@ -12,6 +12,7 @@ jest.mock('../../services/roles_service');
 jest.mock('../../services/mailer_service');
 
 const defaultUserId = 42;
+const mockedMentorId = 1;
 
 describe('Mentor Service', () => {
   afterEach(() => {
@@ -290,6 +291,73 @@ describe('Mentor Service', () => {
       expect(repo.updateMentorById).not.toHaveBeenCalled();
       expect(rolesRepo.assignRoleToUser).not.toHaveBeenCalled();
       expect(rolesRepo.removeRoleFromUser).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('updateMentor', () => {
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('Successful update of valid field', async () => {
+      repo.getMentorById.mockResolvedValue({
+        id: mockedMentorId,
+        user_id: defaultUserId,
+        status: MENTOR_STATUSES.active,
+      });
+      repo.updateMentorById.mockResolvedValue(mockedMentorId);
+
+      const result = await mentorService.updateMentor(
+        [{ role_name: 'mentor' }],
+        mockedMentorId.toString(),
+        { about: 'new value for about field' },
+        true // isOwner
+      );
+
+      expect(repo.updateMentorById).toHaveBeenCalledWith(
+        mockedMentorId.toString(),
+        { about: 'new value for about field' }
+      );
+      expect(result).toBe(mockedMentorId);
+    });
+
+    it('Successful update of more than one valid field', async () => {
+      repo.getMentorById.mockResolvedValue({
+        id: mockedMentorId,
+        user_id: defaultUserId,
+        status: MENTOR_STATUSES.inactive,
+      });
+      repo.updateMentorById.mockResolvedValue(mockedMentorId);
+
+      const result = await mentorService.updateMentor(
+        [{ role_name: 'mentor' }],
+        mockedMentorId.toString(),
+        { about: 'updated about text', contact: 'updated@example.com' },
+        true // isOwner
+      );
+
+      expect(repo.updateMentorById).toHaveBeenCalledWith(
+        mockedMentorId.toString(),
+        { about: 'updated about text', contact: 'updated@example.com' }
+      );
+      expect(result).toBe(mockedMentorId);
+    });
+
+    it('Failed update if mentor status is not active or inactive', async () => {
+      repo.getMentorById.mockResolvedValue({
+        id: mockedMentorId,
+        user_id: defaultUserId,
+        status: MENTOR_STATUSES.pending,
+      });
+
+      const result = await mentorService.updateMentor(
+        [{ role_name: 'member' }],
+        mockedMentorId.toString(),
+        { about: 'trying to change' },
+      );
+
+      expect(repo.updateMentorById).not.toHaveBeenCalled();
+      expect(result).toBe(0);
     });
   });
 });
