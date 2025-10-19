@@ -7,7 +7,7 @@ exports.up = async function(knex) {
     .createTable('tags', function(table) {
       table.increments('id').primary();
       table.string('name').notNullable();
-    })
+    });
   await knex.schema
     .createTable('tags_assigned', function(table) {
       table.primary(['tag_id', 'assigned_id', 'assigned_to']);
