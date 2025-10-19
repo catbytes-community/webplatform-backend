@@ -22,6 +22,11 @@ jest.mock('firebase-admin', () => {
 });
 
 const defaultUserId = 42;
+const defaultUserInfo = {
+    id: defaultUserId,
+    email: 'sample@email.com',
+    name: 'Sample User',
+}
 
 describe('User Service', () => {
   afterEach(() => {
@@ -31,9 +36,7 @@ describe('User Service', () => {
   describe('deleteUserById', () => {
     it('Delete user and associated data successfully', async () => {
       repo.getUserInfoById.mockResolvedValue({
-        id: defaultUserId,
-        email: 'sample@email.com',
-        name: 'Sample User',
+        ...defaultUserInfo,
         firebase_id: 'firebase-uid-123',
         mentor_id: 7});
       applicationService.getApplicationByEmail.mockResolvedValue({ id: 3, video_filename: 'video-file.mp4' });
@@ -89,6 +92,54 @@ describe('User Service', () => {
     });
   });
 
+  describe('createNewMemberUser', () => {
+    it('Create new member user successfully', async () => {
+      repo.createNewUser.mockResolvedValue(defaultUserInfo);
+      rolesService.assignRoleToUser.mockResolvedValue(true);
 
+      const result = await userService.createNewMemberUser(
+        defaultUserInfo.name,
+        defaultUserInfo.email,
+        'About me',
+        ['English', 'Spanish'],
+        'DiscordNick'
+      );
 
+      expect(repo.createNewUser).toHaveBeenCalledWith({
+        name: defaultUserInfo.name,
+        email: defaultUserInfo.email,
+        about: 'About me',
+        languages: ['English', 'Spanish'],
+        discord_nickname: 'DiscordNick'
+      });
+
+      expect(rolesService.assignRoleToUser).toHaveBeenCalledWith(defaultUserId, 'member');
+      expect(result).toEqual(defaultUserInfo);
+    });
+  });
+
+  describe('getUserById', () => {
+    it('Get user by ID with roles successfully', async () => {
+      repo.getUserInfoById.mockResolvedValue(defaultUserInfo);
+      rolesService.getUserRoles.mockResolvedValue(['member', 'admin']);
+
+      const result = await userService.getUserById(defaultUserId);
+      expect(repo.getUserInfoById).toHaveBeenCalledWith(defaultUserId);
+      expect(rolesService.getUserRoles).toHaveBeenCalledWith(defaultUserId);
+      expect(result).toEqual({
+        ...defaultUserInfo,
+        roles: ['member', 'admin']
+      });
+    });
+
+    it('Get user by ID - no user', async () => {
+      repo.getUserInfoById.mockResolvedValue(null);
+
+      const result = await userService.getUserById(defaultUserId);
+
+      expect(repo.getUserInfoById).toHaveBeenCalledWith(defaultUserId);
+      expect(rolesService.getUserRoles).not.toHaveBeenCalled();
+      expect(result).toBeNull();
+    });
+  });
 });
