@@ -13,6 +13,7 @@ jest.mock('../../services/mailer_service');
 
 const defaultUserId = 42;
 const mockedMentorId = 1;
+const mockedTags = ["React", "PHP"];
 
 describe('Mentor Service', () => {
   afterEach(() => {
@@ -21,7 +22,7 @@ describe('Mentor Service', () => {
 
   describe('createMentor', () => {
     it('Create mentor in pending state success', async () => {
-      const mentorData = { about: 'I am a mentor', contact: 'mentor@example.com' };
+      const mentorData = { about: 'I am a mentor', contact: 'mentor@example.com', tags: mockedTags };
       const createdMentor = { id: 1, name: 'Name', about: mentorData.about };
       repo.getMentorByUserId.mockResolvedValue(null);
       repo.createMentor.mockResolvedValue(createdMentor);
@@ -34,6 +35,7 @@ describe('Mentor Service', () => {
         status: MENTOR_STATUSES.pending,
         about: mentorData.about,
         contact: mentorData.contact,
+        tags: mentorData.tags
       });
       expect(rolesService.getAdminEmails).toHaveBeenCalled();
       expect(mailerService.sendEmailOnNewMentorApplication).toHaveBeenCalled();

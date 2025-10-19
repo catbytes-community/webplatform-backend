@@ -18,6 +18,7 @@ router.post("/mentors", verifyRoles([ROLE_NAMES.member]), async (req, res) => {
     const mentorData = {
       about: req.body.about,
       contact: req.body.contact,
+      tags: req.body.tags
     };
 
     const mentorId = await mentorService.createMentor(req.userId, mentorData);
