@@ -3,18 +3,18 @@
  * @returns { Promise<void> }
  */
 exports.up = async function(knex) {
-    await knex.schema
+  await knex.schema
     .createTable('tags', function(table) {
-        table.increments('id').primary();
-        table.string('name').notNullable();
+      table.increments('id').primary();
+      table.string('name').notNullable();
     })
     .then(function() {
-        return knex.schema.createTable('tags_assigned', function(table) {
-            table.primary(['tag_id', 'assigned_id', 'assigned_to']);
-            table.integer('tag_id').unsigned().notNullable();
-            table.integer('assigned_id').unsigned().notNullable();
-            table.enu('assigned_to', ['mentor', 'project', 'study_buddy']).notNullable();
-        });
+      return knex.schema.createTable('tags_assigned', function(table) {
+        table.primary(['tag_id', 'assigned_id', 'assigned_to']);
+        table.integer('tag_id').unsigned().notNullable();
+        table.integer('assigned_id').unsigned().notNullable();
+        table.enu('assigned_to', ['mentor', 'project', 'study_buddy']).notNullable();
+      });
     });
 };
 
@@ -23,6 +23,6 @@ exports.up = async function(knex) {
  * @returns { Promise<void> }
  */
 exports.down = async function(knex) {
-    await knex.schema.dropTableIfExists('tags_assigned')
-    await knex.schema.dropTableIfExists('tags');
+  await knex.schema.dropTableIfExists('tags_assigned');
+  await knex.schema.dropTableIfExists('tags');
 };

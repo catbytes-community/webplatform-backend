@@ -14,18 +14,18 @@ jest.mock('../../middleware/authorization', () => {
 });
 
 describe('GET /tags', () => {
-    it('Return all tags success', async () => {
-        tagsService.getAllTags.mockResolvedValue(mockedTags);
-        const res = await request(app).get('/tags');
-        expect(res.statusCode).toBe(200);
-        expect(res.body.tags.length).toBeGreaterThan(0);
-        expect(res.body.tags[0]['id']).toBe(1);
-    });
+  it('Return all tags success', async () => {
+    tagsService.getAllTags.mockResolvedValue(mockedTags);
+    const res = await request(app).get('/tags');
+    expect(res.statusCode).toBe(200);
+    expect(res.body.tags.length).toBeGreaterThan(0);
+    expect(res.body.tags[0]['id']).toBe(1);
+  });
 
-    it('Unexpected error during tags retrieval', async () => {
-        tagsService.getAllTags.mockRejectedValue(new Error('Database error'));
-        const res = await request(app).get('/tags');
-        expect(res.statusCode).toBe(500);
-        expect(res.body.error).toBeDefined();
-    });
+  it('Unexpected error during tags retrieval', async () => {
+    tagsService.getAllTags.mockRejectedValue(new Error('Database error'));
+    const res = await request(app).get('/tags');
+    expect(res.statusCode).toBe(500);
+    expect(res.body.error).toBeDefined();
+  });
 });
