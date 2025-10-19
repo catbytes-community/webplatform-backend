@@ -18,6 +18,13 @@ async function removeRoleFromUser(userId, roleId) {
     .del();
 }
 
+async function removeAllRolesFromUser(userId) {
+  const knex = getKnex();
+  await knex("user_roles")
+    .where({ user_id: userId })
+    .del();
+}
+
 async function getEmailsByRole(role) {
   const knex = getKnex();
   return await knex("user_roles")
@@ -27,4 +34,4 @@ async function getEmailsByRole(role) {
     .pluck("users.email");
 }
 
-module.exports = { getAllRoles, assignRoleToUser, removeRoleFromUser, getEmailsByRole };
+module.exports = { getAllRoles, assignRoleToUser, removeRoleFromUser, removeAllRolesFromUser, getEmailsByRole };

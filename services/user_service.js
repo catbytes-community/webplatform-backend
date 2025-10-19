@@ -1,5 +1,12 @@
 const repo = require('../repositories/user_repository');
 const rolesService = require('../services/roles_service');
+const mentorService = require('../services/mentor_service');
+const applicationService = require('../services/applications_service');
+const mailerService = require('../services/mailer_service');
+const s3client = require('../aws/s3_client');
+const firebaseAdmin = require('firebase-admin');
+
+const logger = require('../logger')(__filename);
 
 async function getAllUsers() {
 
@@ -27,6 +34,24 @@ async function updateUserById(id, updates) {
 }
 
 async function deleteUserById(id) {
+  const user = await repo.getUserInfoById(id, false);
+  const application = await applicationService.getApplicationByEmail(user.email);
+  try {
+    await mentorService.deleteMentorById(user.mentor_id);
+    await rolesService.deleteAllUserRoles(id);
+    
+    await applicationService.deleteApplicationById(application.id);
+  } finally {
+    if (application?.video_filename) {
+      await s3client.deleteObject(s3client.BUCKET_PREFIXES.applications, application.video_filename);
+    }
+
+    firebaseAdmin.auth().deleteUser(user.firebase_id).catch((error) => {
+      logger.error({ error: error.message }, `Failed to delete Firebase user with ID ${user.firebase_id}`);
+    });
+  }
+
+  await mailerService.sendUserDeletionEmail(user.email, user.name);
   return await repo.deleteUserById(id);
 }  
 

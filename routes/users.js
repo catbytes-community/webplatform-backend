@@ -51,12 +51,12 @@ router.get("/users", verifyRoles([ROLE_NAMES.member]), async (req, res) => {
 
 // Create a new user
 router.post("/users", async (req, res) => {
-  const { name, email, about, languages } = req.body;
+  const { name, email, about, languages, discord_nickname } = req.body;
   // console.log(req.body); // Log the entire request body
   try {
     // todo: firebase will only know user's email, we will need to get user's application by email
     // and populate user entity with that data here 
-    const user = await userService.createNewMemberUser(name, email, about, languages);       
+    const user = await userService.createNewMemberUser(name, email, about, languages, discord_nickname);       
     res.status(201).json({ id: user.id });
   } catch (err) {
     logger.error(err);
@@ -120,6 +120,11 @@ router.delete("/users/:id", verifyOwnership(OWNED_ENTITIES.USER), async (req, re
   }
   try {
     const result = await userService.deleteUserById(id);
+    res.clearCookie("userUID", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+    });
     if (result === 0) {
       return respondWithError(res, 404, "User not found.");
     }

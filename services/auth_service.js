@@ -1,4 +1,4 @@
-const admin = require('firebase-admin');
+const firebaseAdmin = require('firebase-admin');
 const axios = require('axios');
 const querystring = require('querystring');
 const userService = require('../services/user_service');
@@ -10,7 +10,7 @@ const logger = require('../logger')(__filename);
 
 async function handleFirebaseAuth(firebaseToken) {
   try {
-    const decodedToken = await admin.auth().verifyIdToken(firebaseToken);
+    const decodedToken = await firebaseAdmin.auth().verifyIdToken(firebaseToken);
     const email = decodedToken.email;
     const firebaseId = decodedToken.uid;
 

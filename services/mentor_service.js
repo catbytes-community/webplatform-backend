@@ -119,6 +119,9 @@ async function updateMentor(userRoles, mentorId, updates) {
 }
 
 async function deleteMentorById(mentorId, userId) {
+  if (!mentorId) {
+    return;
+  }
   const deletedMentorId = await repo.deleteMentorById(mentorId);
   removeRoleFromUser(userId, 2);
   return deletedMentorId;

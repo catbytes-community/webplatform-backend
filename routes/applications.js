@@ -1,5 +1,6 @@
 const express = require("express");
 const applService = require("../services/applications_service");
+const discordService = require("../services/discord_bot_service");
 const { verifyRoles } = require("../middleware/authorization");
 const { ROLE_NAMES, APPL_STATUSES } = require("../utils");
 const {
@@ -91,8 +92,9 @@ router.put("/applications/:id", verifyRoles([ROLE_NAMES.mentor, ROLE_NAMES.admin
       req.userId,
       today
     );
-
-    await sendEmailOnApplicationStatusChange(application.email, application.name, status);
+    //no need to put restrictions on appl approved email
+    const inviteLink = await discordService.generateInviteLink(null);
+    await sendEmailOnApplicationStatusChange(application.email, application.name, status, inviteLink);
     res.status(200).json(application);
   } catch (err) {
     logger.error(err);

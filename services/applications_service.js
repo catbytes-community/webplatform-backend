@@ -28,4 +28,9 @@ async function getApplicationById(id) {
   return application;
 }
 
-module.exports = { getAllApplications, createNewApplication, updateApplicationStatus, getApplicationByEmail, getApplicationById };
+async function deleteApplicationById(id) {
+  return await repo.deleteApplicationById(id);
+}
+
+module.exports = { getAllApplications, createNewApplication, updateApplicationStatus, 
+  getApplicationByEmail, getApplicationById, deleteApplicationById };
