@@ -2,8 +2,8 @@ const { getKnex } = require("../db");
 
 async function getAllTags() {
   const knex = getKnex();
-  return knex('tags')
-    .select('id', 'name');
+  const names = await knex('tags').pluck('name');
+  return names;
 }
 
 module.exports = {

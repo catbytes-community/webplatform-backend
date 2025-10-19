@@ -11,7 +11,7 @@ router.use(express.json());
 router.get("/tags", verifyRoles([ROLE_NAMES.member]), async (req, res) => {
   try {
     const tags = await tagsService.getAllTags();
-    res.json({ tags });
+    res.json({ tags: tags });
   } catch (err) {
     logger.error(err);
     respondWithError(res);
