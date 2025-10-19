@@ -35,21 +35,27 @@ async function updateUserById(id, updates) {
 
 async function deleteUserById(id) {
   const user = await repo.getUserInfoById(id, false);
+  if (!user) {
+    return 0;
+  }
   const application = await applicationService.getApplicationByEmail(user.email);
   try {
+    // todo add transaction support
     await mentorService.deleteMentorById(user.mentor_id);
     await rolesService.deleteAllUserRoles(id);
     
     await applicationService.deleteApplicationById(application.id);
-  } finally {
-    if (application?.video_filename) {
-      await s3client.deleteObject(s3client.BUCKET_PREFIXES.applications, application.video_filename);
-    }
-
-    firebaseAdmin.auth().deleteUser(user.firebase_id).catch((error) => {
-      logger.error({ error: error.message }, `Failed to delete Firebase user with ID ${user.firebase_id}`);
-    });
+  } catch (error) {
+    throw new Error(`Failed to delete user associated data: ${error.message}`);
   }
+
+  if (application?.video_filename) {
+    await s3client.deleteObject(s3client.BUCKET_PREFIXES.applications, application.video_filename);
+  }
+
+  firebaseAdmin.auth().deleteUser(user.firebase_id).catch((error) => {
+    logger.error({ error: error.message }, `Failed to delete Firebase user with ID ${user.firebase_id}`);
+  });
 
   await mailerService.sendUserDeletionEmail(user.email, user.name);
   return await repo.deleteUserById(id);

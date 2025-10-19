@@ -9,6 +9,10 @@ jest.mock('../../middleware/authorization', () => {
   return {
     ...actual,
     verifyRoles: jest.fn(() => (req, res, next) => next()),
+    verifyOwnership: jest.fn(() => (req, res, next) => {
+      req.userId = 1;
+      next();
+    }),
   };
 });
 
@@ -133,5 +137,48 @@ describe('GET /users/:id', () => {
 
     expect(res.statusCode).toBe(404);
     expect(res.body.error).toBe('User not found');
+  });
+});
+
+describe('DELETE /users/:id', () => {
+  it('Delete user by ID success', async () => {
+    userService.deleteUserById.mockResolvedValue(1);
+
+    const res = await request(app)
+      .delete('/users/1');
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.id).toBe('1');
+
+    expect(userService.deleteUserById).toHaveBeenCalledWith('1');
+    // Expecting the cookie to be cleared
+    expect(res.headers['set-cookie']).toBeDefined();
+  });
+
+  it('Delete user by ID not found', async () => {
+    userService.deleteUserById.mockResolvedValue(0);
+
+    const res = await request(app)
+      .delete('/users/999');
+
+    expect(res.statusCode).toBe(404);
+    expect(res.body.error).toBe('User not found.');
+    expect(userService.deleteUserById).toHaveBeenCalledWith('999');
+    // No changes in cookies - not expecting cookies in response
+    expect(res.headers['set-cookie']).not.toBeDefined();
+  });
+
+  it('Unexpected error during user deletion', async () => {
+    userService.deleteUserById.mockRejectedValue(new Error('Database error'));
+
+    const res = await request(app)
+      .delete('/users/1');
+
+    expect(res.statusCode).toBe(500);
+    expect(res.body.error).toBe('Internal Server Error');
+
+    expect(userService.deleteUserById).toHaveBeenCalledWith('1');
+    // No changes in cookies - not expecting cookies in response
+    expect(res.headers['set-cookie']).not.toBeDefined();
   });
 });

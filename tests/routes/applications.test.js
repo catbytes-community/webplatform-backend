@@ -1,11 +1,13 @@
 const request = require('supertest');
 const applicationService = require('../../services/applications_service');
 const mailerService = require('../../services/mailer_service');
+const discordService = require('../../services/discord_bot_service');
 
 const mockedUserId = 123;
 
 jest.mock('../../services/applications_service');
 jest.mock('../../services/mailer_service');
+jest.mock('../../services/discord_bot_service');
 jest.mock('../../middleware/authorization', () => {
   const actual = jest.requireActual('../../middleware/authorization');
   return {
@@ -154,6 +156,7 @@ describe('PUT /applications/:id', () => {
     };
     applicationService.getApplicationById.mockResolvedValue(mockedApplication);
     applicationService.updateApplicationStatus.mockResolvedValue({ id: applicationId, ...mockedApplication, ...updatePayload });
+    discordService.generateInviteLink.mockResolvedValue("link");
 
     const res = await request(app)
       .put(`/applications/${applicationId}`)
@@ -170,7 +173,8 @@ describe('PUT /applications/:id', () => {
     expect(mailerService.sendEmailOnApplicationStatusChange).toHaveBeenCalledWith(
       mockedApplication.email,
       mockedApplication.name,
-      updatePayload.status
+      updatePayload.status,
+      expect.any(String)
     );
     expect(res.statusCode).toBe(200);
     expect(res.body.id).toBe(applicationId);

@@ -120,15 +120,15 @@ router.delete("/users/:id", verifyOwnership(OWNED_ENTITIES.USER), async (req, re
   }
   try {
     const result = await userService.deleteUserById(id);
+    if (result === 0) {
+      return respondWithError(res, 404, "User not found.");
+    }
     res.clearCookie("userUID", {
       httpOnly: true,
       secure: true,
       sameSite: "none",
     });
-    if (result === 0) {
-      return respondWithError(res, 404, "User not found.");
-    }
-    res.status(200).json({ user_id: id });
+    res.status(200).json({ id: id });
   } catch (err) {
     logger.error(err);
     respondWithError(res);
