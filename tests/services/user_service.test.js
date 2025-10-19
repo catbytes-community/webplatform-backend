@@ -23,10 +23,10 @@ jest.mock('firebase-admin', () => {
 
 const defaultUserId = 42;
 const defaultUserInfo = {
-    id: defaultUserId,
-    email: 'sample@email.com',
-    name: 'Sample User',
-}
+  id: defaultUserId,
+  email: 'sample@email.com',
+  name: 'Sample User',
+};
 
 describe('User Service', () => {
   afterEach(() => {

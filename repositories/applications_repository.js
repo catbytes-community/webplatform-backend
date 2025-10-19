@@ -33,4 +33,5 @@ async function deleteApplicationById(id) {
   return await knex("applications").where("id", id).del();
 }
 
-module.exports = { getAllApplications, createNewApplication, updateApplicationById, getApplicationByFields, deleteApplicationById };
+module.exports = { getAllApplications, createNewApplication, 
+  updateApplicationById, getApplicationByFields, deleteApplicationById };
