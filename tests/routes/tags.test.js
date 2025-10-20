@@ -2,7 +2,7 @@ const request = require("supertest");
 const tagsService = require("../../services/tags_service");
 const app = require("../../appForTests");
 
-const mockedTags = [{ id: 1, name: "React" }];
+const mockedTags = ["React"];
 
 jest.mock("../../services/tags_service");
 jest.mock("../../middleware/authorization", () => {
@@ -19,6 +19,8 @@ describe("GET /tags", () => {
     const res = await request(app).get("/tags");
     expect(res.statusCode).toBe(200);
     expect(res.body.tags.length).toBeGreaterThan(0);
+    expect(Array.isArray(res.body.tags)).toBe(true);
+    res.body.tags.forEach((tag) => expect(typeof tag).toBe("string"));
   });
 
   it("Unexpected error during tags retrieval", async () => {
