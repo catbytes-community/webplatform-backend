@@ -173,6 +173,13 @@ async function sendEmailOnNewMentorApplication(emails, mentorApplication) {
         reviewLink: `${webplatformUrl}applications`,
         catbytesLink: webplatformUrl,
       },
+      attachments: [
+        {
+          filename: "happy-cat.png",
+          path: path.resolve("./templates/email/src/happy-cat.png"),
+          cid: "happycat",
+        },
+      ],
     };
 
     await mailTransporter.sendMail(mailOptions);
