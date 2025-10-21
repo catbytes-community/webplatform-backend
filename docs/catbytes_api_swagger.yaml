@@ -1485,7 +1485,30 @@ paths:
                   error:
                     type: string
                     example: Failed to generate presigned URL
-  
+
+  /tags:
+    get:
+      tags:
+        - tags
+      summary: ✅  Get all tags
+      description: ''
+      operationId: getAllTags
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tags:
+                    type: object
+                    example:
+                      - id: 1
+                        name: React
+                      - id: 2
+                        name: React Native
+
 components:
   schemas:
     MentorCreateRequest:
