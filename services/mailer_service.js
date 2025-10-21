@@ -3,7 +3,6 @@ const path = require('path');
 const config = require('config');
 const { loadSecrets } = require("../aws/ssm-helper");
 const { APPL_STATUSES, MENTOR_STATUSES } = require("../utils");
-const discordService = require("../services/discord_bot_service");
 const logger = require('../logger')(__filename);
 
 require('dotenv').config({ path: '.env.local' });
@@ -46,10 +45,7 @@ async function initMailer() {
   mailTransporter.use('compile', nodemailerHbs(handleBarOptions));
 }
 
-async function sendApplicationApprovedEmail(email, name) {
-  //no need to put restrictions on appl approved email
-  const inviteLink = await discordService.generateInviteLink(null);
-
+async function sendApplicationApprovedEmail(email, name, inviteLink) {
   const mailOptions = {
     from: mailerConfig.user,
     to: email,
@@ -139,10 +135,10 @@ async function sendMentorApplicationRejectedEmail(email, name) {
   return mailTransporter.sendMail(mailOptions);
 }
 
-async function sendEmailOnApplicationStatusChange(email, name, status) {
+async function sendEmailOnApplicationStatusChange(email, name, status, inviteLink) {
   try {
     if (status === APPL_STATUSES.approved) {
-      await sendApplicationApprovedEmail(email, name);
+      await sendApplicationApprovedEmail(email, name, inviteLink);
     } 
     else if (status === APPL_STATUSES.rejected) {
       await sendApplicationRejectedEmail(email, name);
@@ -210,9 +206,29 @@ async function sendEmailOnMentorApplicationStatusChange(email, name, status) {
   }
 }
 
+async function sendUserDeletionEmail(email, name) {
+  try {
+    const mailOptions = {
+      from: mailerConfig.user,
+      to: email,
+      subject: "We're Sorry To See You Go",
+      template: "user_deleted_email",
+      context: {
+        name: name,
+      },
+    };
+
+    await mailTransporter.sendMail(mailOptions);
+  }
+  catch (err) {
+    logger.error(`Error sending user deletion email to ${email}: ${err.message}`);
+  }
+}
+
 module.exports = { 
   initMailer,
   sendEmailOnApplicationStatusChange,
   sendEmailOnNewMentorApplication,
-  sendEmailOnMentorApplicationStatusChange
+  sendEmailOnMentorApplicationStatusChange,
+  sendUserDeletionEmail
 };

@@ -1,4 +1,4 @@
-const { S3Client, PutObjectCommand, GetObjectCommand } = require("@aws-sdk/client-s3");
+const { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } = require("@aws-sdk/client-s3");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 const config = require("config");
 
@@ -53,6 +53,19 @@ async function getDownloadUrl(bucketPrefix, filename) {
   return signedUrl;
 }
 
+async function deleteObject(bucketPrefix, filename) {
+  if (!Object.values(BUCKET_PREFIXES).includes(bucketPrefix)) {
+    throw new Error("Invalid bucket prefix");
+  }
+
+  const command = new DeleteObjectCommand({
+    Bucket: awsConfig.s3_bucket,
+    Key: buildFullObjectKey(bucketPrefix, filename)
+  });
+
+  await s3.send(command);
+}
+
 function buildFullObjectKey(bucketPrefix, filename) {
   return `${bucketPrefix}/${filename}`;
 }
@@ -62,4 +75,5 @@ module.exports = {
   MIME_EXTENSION_MAP,
   generateUploadUrl,
   getDownloadUrl,
+  deleteObject,
 };
