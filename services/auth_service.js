@@ -6,6 +6,7 @@ const userService = require('../services/user_service');
 const applService = require("../services/applications_service");
 const mailerService = require("../services/mailer_service");
 const config = require('config');
+
 const {discordAuth} = require ("../oauth.js"); 
 
 const logger = require('../logger')(__filename);
@@ -20,7 +21,7 @@ async function sendLoginLinkToEmail(email) {
     url: `${config.platform_url}login`,
     handleCodeInApp: true,
   };
-  
+
   const link = await firebaseAdmin.auth().generateSignInWithEmailLink(email, actionCodeSettings);
   await mailerService.sendLoginLinkEmail(email, user.name, link);
 }

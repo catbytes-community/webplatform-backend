@@ -3,7 +3,6 @@ const path = require('path');
 const config = require('config');
 const { loadSecrets } = require("../aws/ssm-helper");
 const { APPL_STATUSES, MENTOR_STATUSES } = require("../utils");
-const { log } = require('console');
 const logger = require('../logger')(__filename);
 
 require('dotenv').config({ path: '.env.local' });
