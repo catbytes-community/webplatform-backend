@@ -3,6 +3,7 @@ const path = require('path');
 const config = require('config');
 const { loadSecrets } = require("../aws/ssm-helper");
 const { APPL_STATUSES, MENTOR_STATUSES } = require("../utils");
+const { log } = require('console');
 const logger = require('../logger')(__filename);
 
 require('dotenv').config({ path: '.env.local' });
@@ -225,10 +226,33 @@ async function sendUserDeletionEmail(email, name) {
   }
 }
 
+async function sendLoginLinkEmail(email, name, link) {
+  const mailOptions = {
+    from: mailerConfig.user,
+    to: email,
+    subject: "Your CatBytes Login Link",
+    template: "login_link_email",
+    context: {
+      name: name,
+      loginLink: link,
+    },
+    attachments: [
+      {
+        filename: "happy-cat.png",
+        path: path.resolve("./templates/email/src/happy-cat.png"),
+        cid: "happycat",
+      },
+    ],
+  };
+
+  await mailTransporter.sendMail(mailOptions);
+}
+
 module.exports = { 
   initMailer,
   sendEmailOnApplicationStatusChange,
   sendEmailOnNewMentorApplication,
   sendEmailOnMentorApplicationStatusChange,
-  sendUserDeletionEmail
+  sendUserDeletionEmail,
+  sendLoginLinkEmail
 };
