@@ -149,7 +149,7 @@ describe('User Service', () => {
 
       await userService.getUserByEmail(defaultUserInfo.email); 
 
-      expect(repo.getUserByFields).toHaveBeenCalledWith({ email: defaultUserInfo.email.toLowerCase() })
+      expect(repo.getUserByFields).toHaveBeenCalledWith({ email: defaultUserInfo.email.toLowerCase() });
     });
   });
 });
