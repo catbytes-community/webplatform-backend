@@ -14,8 +14,8 @@ async function getAllUsers() {
 }
 
 async function createNewMemberUser(name, email, about, languages, discordNickname) {
-  var user = await repo.createNewUser({ name: name, email: email, about: about, 
-    languages: languages, discord_nickname: discordNickname });
+  var user = await repo.createNewUser({ name: name, email: email.toLowerCase(), about: about, 
+    languages: languages, discord_nickname: discordNickname.toLowerCase() });
   await rolesService.assignRoleToUser(user.id, 'member');
   return user;
 }
@@ -66,7 +66,7 @@ async function getUserByFirebaseId(firebaseId) {
 }
 
 async function getUserByEmail(email) {
-  return await repo.getUserByFields({email: email});
+  return await repo.getUserByFields({email: email.toLowerCase()});
 }
 
 async function getUserFirebaseId(id) {

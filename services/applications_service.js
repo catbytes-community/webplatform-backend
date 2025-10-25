@@ -17,7 +17,7 @@ async function updateApplicationStatus(id, status, comment, modifiedBy, modified
 }
 
 async function getApplicationByEmail(email) {
-  return await repo.getApplicationByFields({email: email});
+  return await repo.getApplicationByFields({email: email.toLowerCase()});
 }
 
 async function getApplicationById(id) {
