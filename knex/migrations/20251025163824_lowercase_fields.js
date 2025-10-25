@@ -20,6 +20,12 @@ exports.up = async function(knex) {
       .update({
         email: knex.raw('LOWER(email)')
       });
+
+    await knex('applications')
+      .whereNotNull('discord_nickname')
+      .update({
+        email: knex.raw('LOWER(discord_nickname)')
+      });
   };
   
   /**
