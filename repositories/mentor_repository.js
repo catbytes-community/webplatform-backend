@@ -44,9 +44,11 @@ async function createMentor(mentorData) {
 
 async function updateMentorById(mentorId, updates) {
   const knex = getKnex();
-  return await knex("mentors")
+  const [mentor] = await knex("mentors")
     .where("id", mentorId)
-    .update(updates);
+    .update(updates)
+    .returning("id");
+  return mentor.id;
 }
 
 async function deleteMentorById(id) {
