@@ -8,6 +8,8 @@ async function getAllApplications() {
 async function createNewApplication(payload) {
   payload.video_link = payload.video_link || '';
   payload.video_filename = payload.video_filename || '';
+  payload.email = payload.email.toLowerCase();
+  payload.discord_nickname = payload.discord_nickname.toLowerCase();
 
   return await repo.createNewApplication(payload);
 }
@@ -17,7 +19,7 @@ async function updateApplicationStatus(id, status, comment, modifiedBy, modified
 }
 
 async function getApplicationByEmail(email) {
-  return await repo.getApplicationByFields({email: email});
+  return await repo.getApplicationByFields({email: email.toLowerCase()});
 }
 
 async function getApplicationById(id) {

@@ -24,7 +24,7 @@ jest.mock('firebase-admin', () => {
 const defaultUserId = 42;
 const defaultUserInfo = {
   id: defaultUserId,
-  email: 'sample@email.com',
+  email: 'SaMplE@email.com',
   name: 'Sample User',
 };
 
@@ -50,13 +50,13 @@ describe('User Service', () => {
       const result = await userService.deleteUserById(defaultUserId);
 
       expect(repo.getUserInfoById).toHaveBeenCalledWith(defaultUserId, false);
-      expect(applicationService.getApplicationByEmail).toHaveBeenCalledWith('sample@email.com');
+      expect(applicationService.getApplicationByEmail).toHaveBeenCalledWith(defaultUserInfo.email);
       expect(mentorService.deleteMentorById).toHaveBeenCalledWith(7);
       expect(rolesService.deleteAllUserRoles).toHaveBeenCalledWith(defaultUserId);
       expect(applicationService.deleteApplicationById).toHaveBeenCalledWith(3);
       expect(s3client.deleteObject).toHaveBeenCalledWith(s3client.BUCKET_PREFIXES.applications, 'video-file.mp4');
       expect(firebaseAdmin.auth().deleteUser).toHaveBeenCalledWith('firebase-uid-123');
-      expect(mailerService.sendUserDeletionEmail).toHaveBeenCalledWith('sample@email.com', 'Sample User');
+      expect(mailerService.sendUserDeletionEmail).toHaveBeenCalledWith(defaultUserInfo.email, 'Sample User');
       expect(repo.deleteUserById).toHaveBeenCalledWith(defaultUserId);
       expect(result).toBe(defaultUserId);        
     });
@@ -107,10 +107,10 @@ describe('User Service', () => {
 
       expect(repo.createNewUser).toHaveBeenCalledWith({
         name: defaultUserInfo.name,
-        email: defaultUserInfo.email,
+        email: defaultUserInfo.email.toLowerCase(),
         about: 'About me',
         languages: ['English', 'Spanish'],
-        discord_nickname: 'DiscordNick'
+        discord_nickname: 'discordnick'
       });
 
       expect(rolesService.assignRoleToUser).toHaveBeenCalledWith(defaultUserId, 'member');
@@ -140,6 +140,16 @@ describe('User Service', () => {
       expect(repo.getUserInfoById).toHaveBeenCalledWith(defaultUserId);
       expect(rolesService.getUserRoles).not.toHaveBeenCalled();
       expect(result).toBeNull();
+    });
+  });
+
+  describe('getUserByEmail', () => {
+    it('Get user by email should set to lowercase before search', async () => {
+      repo.getUserByFields.mockResolvedValue(null);
+
+      await userService.getUserByEmail(defaultUserInfo.email); 
+
+      expect(repo.getUserByFields).toHaveBeenCalledWith({ email: defaultUserInfo.email.toLowerCase() });
     });
   });
 });
