@@ -2404,6 +2404,12 @@
                     "name": {
                         "type": "string"
                     },
+                    "languages": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
                     "img_link": {
                         "type": "string"
                     }

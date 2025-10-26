@@ -11,7 +11,8 @@ const baseFields = [
   'mentors.about',
   'mentors.status',
   'users.name',
-  'users.img as img_link'
+  'users.img as img_link',
+  'users.languages'
 ];
 
 const privateFields = [
