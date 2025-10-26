@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 const userService = require("../services/user_service");
 const authService = require("../services/auth_service");
+const { UserDoesNotExistError } = require("../errors");
 const { ROLE_NAMES } = require("../utils");
 const {verifyOwnership, verifyRoles, OWNED_ENTITIES} = require("../middleware/authorization");
 const { isValidIntegerId, respondWithError, isUniqueConstraintViolation, 
@@ -11,6 +12,20 @@ const { isValidIntegerId, respondWithError, isUniqueConstraintViolation,
 const logger = require('../logger')(__filename);
 
 router.use(express.json());
+
+router.post("/users/request-login-link", async (req, res) => {
+  const { email } = req.body;
+  try {
+    await authService.sendLoginLinkToEmail(email);
+    res.status(200).json({ message: "Login link sent successfully." });
+  } catch (error) {
+    if (error instanceof UserDoesNotExistError){
+      return respondWithError(res, 404, error.message);
+    }
+    logger.error(`Error sending login link: ${error.message}`);
+    respondWithError(res);
+  }
+});
 
 // POST /users/login
 router.post("/users/login", async (req, res) => {

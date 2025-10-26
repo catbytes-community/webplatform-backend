@@ -225,10 +225,33 @@ async function sendUserDeletionEmail(email, name) {
   }
 }
 
+async function sendLoginLinkEmail(email, name, link) {
+  const mailOptions = {
+    from: mailerConfig.user,
+    to: email,
+    subject: "Your CatBytes Login Link",
+    template: "login_link_email",
+    context: {
+      name: name,
+      loginLink: link,
+    },
+    attachments: [
+      {
+        filename: "happy-cat.png",
+        path: path.resolve("./templates/email/src/happy-cat.png"),
+        cid: "happycat",
+      },
+    ],
+  };
+
+  await mailTransporter.sendMail(mailOptions);
+}
+
 module.exports = { 
   initMailer,
   sendEmailOnApplicationStatusChange,
   sendEmailOnNewMentorApplication,
   sendEmailOnMentorApplicationStatusChange,
-  sendUserDeletionEmail
+  sendUserDeletionEmail,
+  sendLoginLinkEmail
 };

@@ -1,12 +1,30 @@
 const firebaseAdmin = require('firebase-admin');
 const axios = require('axios');
 const querystring = require('querystring');
+const { UserDoesNotExistError } = require('../errors');
 const userService = require('../services/user_service');
 const applService = require("../services/applications_service");
+const mailerService = require("../services/mailer_service");
+const config = require('config');
 
 const {discordAuth} = require ("../oauth.js"); 
 
 const logger = require('../logger')(__filename);
+
+async function sendLoginLinkToEmail(email) {
+  const user = await userService.getUserByEmail(email);
+  if (!user) {
+    throw new UserDoesNotExistError();
+  }
+
+  const actionCodeSettings = {
+    url: `${config.platform_url}login`,
+    handleCodeInApp: true,
+  };
+
+  const link = await firebaseAdmin.auth().generateSignInWithEmailLink(email, actionCodeSettings);
+  await mailerService.sendLoginLinkEmail(email, user.name, link);
+}
 
 async function handleFirebaseAuth(firebaseToken) {
   try {
@@ -83,4 +101,4 @@ async function handleDiscordAuth(code){
   }
 }
 
-module.exports = { handleFirebaseAuth, handleDiscordAuth};
+module.exports = { sendLoginLinkToEmail, handleFirebaseAuth, handleDiscordAuth};
