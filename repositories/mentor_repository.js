@@ -83,17 +83,18 @@ async function updateMentorById(mentorId, updates) {
   const { tags = [], ...mentorUpdates } = updates;
 
   return await knex.transaction(async (trx) => {
+    await updateMentorTags(mentorId, tags, trx);
     // if other updates besides tags, then update mentor
     if (Object.keys(mentorUpdates).length) {
-      await trx("mentors")
+      const [mentor] = await trx("mentors")
         .where("id", mentorId)
-        .update(mentorUpdates);
+        .update(mentorUpdates)
+        .returning("id");
+      return mentor.id;
     }
 
-    await updateMentorTags(mentorId, tags, trx);
-
     return mentorId;
-  });
+  })
 }
 
 async function deleteMentorById(id) {

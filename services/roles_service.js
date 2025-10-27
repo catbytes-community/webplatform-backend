@@ -15,6 +15,10 @@ async function getUserRoles(userId) {
   return await authRepo.getRolesByUserId(userId) ?? [];
 }
 
+async function deleteAllUserRoles(userId) {
+  return await repo.removeAllRolesFromUser(userId);
+}
+
 async function getAllRoles() {
   return await repo.getAllRoles();
 }
@@ -23,4 +27,4 @@ async function getAdminEmails() {
   return await repo.getEmailsByRole(utils.ROLE_NAMES.admin);
 }
 
-module.exports = { getAllRoles, assignRoleToUser, getUserRoles, getAdminEmails };
+module.exports = { getAllRoles, assignRoleToUser, getUserRoles, deleteAllUserRoles, getAdminEmails };

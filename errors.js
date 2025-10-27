@@ -14,4 +14,12 @@ class DataRequiresElevatedRoleError extends Error {
   }
 }
 
-module.exports = { MentorAlreadyExistsError, DataRequiresElevatedRoleError };
+class UserDoesNotExistError extends Error {
+  constructor(message = 'User does not exist') {
+    super(message);
+    this.name = 'UserDoesNotExistError';
+    this.status = 404;
+  }
+}
+
+module.exports = { MentorAlreadyExistsError, DataRequiresElevatedRoleError, UserDoesNotExistError };

@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 const userService = require("../services/user_service");
 const authService = require("../services/auth_service");
+const { UserDoesNotExistError } = require("../errors");
 const { ROLE_NAMES } = require("../utils");
 const {verifyOwnership, verifyRoles, OWNED_ENTITIES} = require("../middleware/authorization");
 const { isValidIntegerId, respondWithError, isUniqueConstraintViolation, 
@@ -11,6 +12,20 @@ const { isValidIntegerId, respondWithError, isUniqueConstraintViolation,
 const logger = require('../logger')(__filename);
 
 router.use(express.json());
+
+router.post("/users/request-login-link", async (req, res) => {
+  const { email } = req.body;
+  try {
+    await authService.sendLoginLinkToEmail(email);
+    res.status(200).json({ message: "Login link sent successfully." });
+  } catch (error) {
+    if (error instanceof UserDoesNotExistError){
+      return respondWithError(res, 404, error.message);
+    }
+    logger.error(`Error sending login link: ${error.message}`);
+    respondWithError(res);
+  }
+});
 
 // POST /users/login
 router.post("/users/login", async (req, res) => {
@@ -51,12 +66,12 @@ router.get("/users", verifyRoles([ROLE_NAMES.member]), async (req, res) => {
 
 // Create a new user
 router.post("/users", async (req, res) => {
-  const { name, email, about, languages } = req.body;
+  const { name, email, about, languages, discordNickname } = req.body;
   // console.log(req.body); // Log the entire request body
   try {
     // todo: firebase will only know user's email, we will need to get user's application by email
     // and populate user entity with that data here 
-    const user = await userService.createNewMemberUser(name, email, about, languages);       
+    const user = await userService.createNewMemberUser(name, email, about, languages, discordNickname);       
     res.status(201).json({ id: user.id });
   } catch (err) {
     logger.error(err);
@@ -123,7 +138,12 @@ router.delete("/users/:id", verifyOwnership(OWNED_ENTITIES.USER), async (req, re
     if (result === 0) {
       return respondWithError(res, 404, "User not found.");
     }
-    res.status(200).json({ user_id: id });
+    res.clearCookie("userUID", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+    });
+    res.status(200).json({ id: id });
   } catch (err) {
     logger.error(err);
     respondWithError(res);

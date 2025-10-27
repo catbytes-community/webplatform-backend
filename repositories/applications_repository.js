@@ -1,18 +1,19 @@
 const { getKnex } = require("../db");
 
-const knex = getKnex();
-
 async function getAllApplications() {
+  const knex = getKnex();
   return await knex("applications").select("*"); 
 }
 
 async function createNewApplication(payload) {
+  const knex = getKnex();
   return await knex('applications')
     .insert(payload)
     .returning('*');
 }
 
 async function updateApplicationById(id, status, comment, modifiedBy, modifiedAt) {
+  const knex = getKnex();
   const [application] = await knex('applications')
     .where({ id })
     .update({ status: status, comment: comment, modified_by: modifiedBy, modified_at: modifiedAt })
@@ -21,9 +22,16 @@ async function updateApplicationById(id, status, comment, modifiedBy, modifiedAt
 }
 
 async function getApplicationByFields(fields) {
+  const knex = getKnex();
   return await knex('applications')
     .where(fields)
     .first();
 }
 
-module.exports = { getAllApplications, createNewApplication, updateApplicationById, getApplicationByFields };
+async function deleteApplicationById(id) {
+  const knex = getKnex();
+  return await knex("applications").where("id", id).del();
+}
+
+module.exports = { getAllApplications, createNewApplication, 
+  updateApplicationById, getApplicationByFields, deleteApplicationById };

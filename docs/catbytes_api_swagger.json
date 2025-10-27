@@ -602,6 +602,82 @@
                 }
             }
         },
+        "/users/request-login-link": {
+            "post": {
+            "tags": ["users"],
+            "summary": "✅ Request login link",
+            "description": "Sends a Firebase email sign-in link to the provided email address if a registered user is found.\nThe frontend should store the email in localStorage to complete the sign-in process when the link is clicked.",
+            "operationId": "requestLoginLink",
+            "requestBody": {
+                "required": true,
+                "content": {
+                "application/json": {
+                    "schema": {
+                    "type": "object",
+                    "required": ["email"],
+                    "properties": {
+                        "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "user@example.com"
+                        }
+                    }
+                    }
+                }
+                }
+            },
+            "responses": {
+                "200": {
+                "description": "Login link sent successfully",
+                "content": {
+                    "application/json": {
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                        "message": {
+                            "type": "string",
+                            "example": "Login link sent successfully."
+                        }
+                        }
+                    }
+                    }
+                }
+                },
+                "404": {
+                "description": "No user with the given email was found",
+                "content": {
+                    "application/json": {
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                        "error": {
+                            "type": "string",
+                            "example": "No user found with the provided email."
+                        }
+                        }
+                    }
+                    }
+                }
+                },
+                "500": {
+                "description": "Internal server error while sending the login link",
+                "content": {
+                    "application/json": {
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                        "error": {
+                            "type": "string",
+                            "example": "Internal Server Error"
+                        }
+                        }
+                    }
+                    }
+                }
+                }
+            }
+            }
+        },
         "/users/login": {
             "post": {
                 "tags": [
@@ -2327,6 +2403,12 @@
                     },
                     "name": {
                         "type": "string"
+                    },
+                    "languages": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
                     },
                     "img_link": {
                         "type": "string"
