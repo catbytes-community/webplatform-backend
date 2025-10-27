@@ -6,54 +6,77 @@ async function getAllTags() {
   return names;
 }
 
-async function findTagByName(name, trx) {
-  return await (trx || getKnex())('tags')
+async function getTagByName(name) {
+  const knex = getKnex();
+  return await knex('tags')
     .where('name', name)
     .first();
 }
 
-async function createTag(name, trx) {
-  const [{ id }] = await (trx || getKnex())('tags')
+async function createTag(name) {
+  const knex = getKnex();
+  const [{ id }] = await knex('tags')
     .insert({ name })
     .returning('id');
   return { id, name };
 }
 
-async function ensureTag(name, trx) {
-  let tag = await findTagByName(name, trx);
+async function ensureTag(name) {
+  let tag = await getTagByName(name);
   if (!tag) {
-    tag = await createTag(name, trx);
+    tag = await createTag(name);
   }
   return tag;
 }
 
-async function assignTagTo(tagId, assignedId, assignedTo, trx) {
-  return await (trx || getKnex())('tags_assigned')
+async function assignTagTo(tagId, assignedId, assignedTo) {
+  const knex = getKnex();
+  return await knex('tags_assigned')
     .insert({ tag_id: tagId, assigned_id: assignedId, assigned_to: assignedTo });
 }
 
-async function removeAssignments(tagIds, assignedId, assignedTo, trx) {
-  if (!tagIds.length) return;
-  return await (trx || getKnex())('tags_assigned')
-    .where('assigned_id', assignedId)
-    .andWhere('assigned_to', assignedTo)
-    .whereIn('tag_id', tagIds)
-    .del();
-}
-
-async function getAssignedTagNames(assignedId, assignedTo, trx) {
-  return await (trx || getKnex())('tags_assigned as ta')
+async function getAssignedTagNames(assignedId, assignedTo) {
+  const knex = getKnex();
+  return await knex('tags_assigned as ta')
     .join('tags as t', 'ta.tag_id', 't.id')
     .where({ 'ta.assigned_id': assignedId, 'ta.assigned_to': assignedTo })
     .pluck('t.name');
 }
 
+async function updateMentorTags(mentorId, tags = []) {
+  const knex = getKnex();
+  const existing = await getAssignedTagNames(mentorId, 'mentor');
+
+  const toRemove = existing.filter((name) => !tags.includes(name));
+  const toAdd = tags.filter((name) => !existing.includes(name));
+
+  if (toRemove.length) {
+    await knex('tags_assigned')
+      .where({ assigned_id: mentorId, assigned_to: 'mentor' })
+      .whereIn(
+        'tag_id',
+        (qb) => qb
+          .select('id')
+          .from('tags')
+          .whereIn('name', toRemove)
+      )
+      .del();
+  }
+
+  for (const name of toAdd) {
+    const tag = await ensureTag(name);
+    await assignTagTo(tag.id, mentorId, 'mentor');
+  }
+
+  return mentorId;
+}
+
 module.exports = {
   getAllTags,
-  findTagByName,
+  getTagByName,
   createTag,
   ensureTag,
   assignTagTo,
-  removeAssignments,
   getAssignedTagNames,
+  updateMentorTags
 };

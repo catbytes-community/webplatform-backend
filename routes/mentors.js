@@ -108,6 +108,9 @@ router.put("/mentors/:id", verifyRoles([ROLE_NAMES.mentor]), verifyOwnership(OWN
   if (!isValidIntegerId(id)) {
     return respondWithError(res, 400, "Invalid user id supplied");
   }
+  if (!Object.keys(updates).length) {
+    return respondWithError(res, 400, "Updated fields are required");
+  }
 
   // check that only fields 'about' and 'contact' can be updated
   const invalidFields = Object.keys(updates)
