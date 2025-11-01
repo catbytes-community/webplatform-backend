@@ -62,17 +62,24 @@ describe('Mentor Service', () => {
   describe('getMentors', () => {
     it('Unauthenticated users see active and inactive mentors with limited fields', async () => {
       const allowedStatuses = mentorService.generalVisitbleStatuses;
-      const mentor = { id: 1, user_id: defaultUserId, status: MENTOR_STATUSES.active };
+      const mentor = { mentor_id: 1, user_id: defaultUserId, status: MENTOR_STATUSES.active };
 
       rolesService.getUserRoles.mockResolvedValue();
       repo.getMentors.mockResolvedValue([mentor]);
-
-      await mentorService.getMentors(undefined, undefined, false);
+      tagsRepo.getAssignedTagNames.mockResolvedValue(mockedTags);
+      const result = await mentorService.getMentors(undefined, undefined, false);
 
       expect(allowedStatuses).toContain(MENTOR_STATUSES.active);
       expect(allowedStatuses).toContain(MENTOR_STATUSES.inactive);
       expect(rolesService.getUserRoles).not.toHaveBeenCalled();
       expect(repo.getMentors).toHaveBeenCalledWith(allowedStatuses, mentorService.baseFields);
+      expect(tagsRepo.getAssignedTagNames).toHaveBeenCalledWith(mentor.mentor_id, 'mentor');
+      expect(result).toEqual([
+        {
+          ...mentor,
+          tags: mockedTags
+        }
+      ]);
     });
 
     it('Unauthenticated users cannot see non-active mentors', async () => {

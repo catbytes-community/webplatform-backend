@@ -61,8 +61,19 @@ async function getMentors(userId, status, includeAdditionalFields) {
     throw new DataRequiresElevatedRoleError('Requested data requires elevated role');
   }
   const statusesFilter = status ? [status] : allowedStatuses;
+  const mentors = await repo.getMentors(statusesFilter, selectedFields);
+  
+  const mentorsWithTags = await Promise.all(
+    mentors.map(async (mentor) => {
+      const tags = await tagsRepo.getAssignedTagNames(mentor.mentor_id, 'mentor');
+      return {
+        ...mentor,
+        tags
+      };
+    })
+  );
 
-  return await repo.getMentors(statusesFilter, selectedFields);
+  return mentorsWithTags;
 }
 
 async function getMentorById(userRoles, mentorId, isOwner) {
