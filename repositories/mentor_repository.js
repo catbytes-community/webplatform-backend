@@ -19,31 +19,36 @@ async function getMentorByUserId(userId) {
 
 async function getMentorById(allowedStatuses, selectedFields, mentorId) {
   const knex = getKnex();
-  return await knex("mentors")
+  const mentor = await knex("mentors")
     .join("users", "mentors.user_id", "users.id")
     .where("mentors.id", mentorId)
     .whereIn("mentors.status", allowedStatuses)
     .select(selectedFields).first();
+  
+  return mentor;
 }
 
 async function createMentor(mentorData) {
   const knex = getKnex();
 
-  const [createdMentor] = await knex("mentors")
-    .insert(mentorData)
-    .returning("id");
+  return await knex.transaction(async (trx) => {
+    const [createdMentor] = await trx("mentors")
+      .insert(mentorData)
+      .returning("id");
 
-  const result = await knex("mentors")
-    .join("users", "mentors.user_id", "users.id")
-    .select("mentors.id", "users.name", "mentors.about")
-    .where("mentors.id", createdMentor.id)
-    .first();
+    const result = await trx("mentors")
+      .join("users", "mentors.user_id", "users.id")
+      .select("mentors.id", "users.name", "mentors.about")
+      .where("mentors.id", createdMentor.id)
+      .first();
 
-  return result;
+    return result;
+  });
 }
 
 async function updateMentorById(mentorId, updates) {
   const knex = getKnex();
+
   const [mentor] = await knex("mentors")
     .where("id", mentorId)
     .update(updates)

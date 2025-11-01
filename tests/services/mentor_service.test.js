@@ -4,15 +4,18 @@ const rolesService = require('../../services/roles_service');
 const mailerService = require('../../services/mailer_service');
 const repo = require('../../repositories/mentor_repository');
 const rolesRepo = require('../../repositories/roles_repository');
+const tagsRepo = require('../../repositories/tags_repository');
 const { MentorAlreadyExistsError, DataRequiresElevatedRoleError } = require('../../errors');
 
 jest.mock('../../repositories/mentor_repository');
 jest.mock('../../repositories/roles_repository');
+jest.mock('../../repositories/tags_repository');
 jest.mock('../../services/roles_service');
 jest.mock('../../services/mailer_service');
 
 const defaultUserId = 42;
 const mockedMentorId = 1;
+const mockedTags = ["React", "PHP"];
 
 describe('Mentor Service', () => {
   afterEach(() => {
@@ -21,8 +24,8 @@ describe('Mentor Service', () => {
 
   describe('createMentor', () => {
     it('Create mentor in pending state success', async () => {
-      const mentorData = { about: 'I am a mentor', contact: 'mentor@example.com' };
-      const createdMentor = { id: 1, name: 'Name', about: mentorData.about };
+      const mentorData = { about: 'I am a mentor', contact: 'mentor@example.com', tags: mockedTags };
+      const createdMentor = { id: 1, name: 'Name', about: mentorData.about, tags: mentorData.tags };
       repo.getMentorByUserId.mockResolvedValue(null);
       repo.createMentor.mockResolvedValue(createdMentor);
 
@@ -34,7 +37,9 @@ describe('Mentor Service', () => {
         status: MENTOR_STATUSES.pending,
         about: mentorData.about,
         contact: mentorData.contact,
+        tags: mentorData.tags
       });
+      expect(tagsRepo.updateMentorTags).toHaveBeenCalledWith(createdMentor.id, mentorData.tags);
       expect(rolesService.getAdminEmails).toHaveBeenCalled();
       expect(mailerService.sendEmailOnNewMentorApplication).toHaveBeenCalled();
       expect(result).toEqual(createdMentor.id);
@@ -57,17 +62,24 @@ describe('Mentor Service', () => {
   describe('getMentors', () => {
     it('Unauthenticated users see active and inactive mentors with limited fields', async () => {
       const allowedStatuses = mentorService.generalVisitbleStatuses;
-      const mentor = { id: 1, user_id: defaultUserId, status: MENTOR_STATUSES.active };
+      const mentor = { mentor_id: 1, user_id: defaultUserId, status: MENTOR_STATUSES.active };
 
       rolesService.getUserRoles.mockResolvedValue();
       repo.getMentors.mockResolvedValue([mentor]);
-
-      await mentorService.getMentors(undefined, undefined, false);
+      tagsRepo.getAssignedTagNames.mockResolvedValue(mockedTags);
+      const result = await mentorService.getMentors(undefined, undefined, false);
 
       expect(allowedStatuses).toContain(MENTOR_STATUSES.active);
       expect(allowedStatuses).toContain(MENTOR_STATUSES.inactive);
       expect(rolesService.getUserRoles).not.toHaveBeenCalled();
       expect(repo.getMentors).toHaveBeenCalledWith(allowedStatuses, mentorService.baseFields);
+      expect(tagsRepo.getAssignedTagNames).toHaveBeenCalledWith(mentor.mentor_id, 'mentor');
+      expect(result).toEqual([
+        {
+          ...mentor,
+          tags: mockedTags
+        }
+      ]);
     });
 
     it('Unauthenticated users cannot see non-active mentors', async () => {
@@ -339,6 +351,29 @@ describe('Mentor Service', () => {
       expect(repo.updateMentorById).toHaveBeenCalledWith(
         mockedMentorId.toString(),
         { about: 'updated about text', contact: 'updated@example.com' }
+      );
+      expect(result).toBe(mockedMentorId);
+    });
+
+    it('Successful update of tags field', async () => {
+      repo.getMentorById.mockResolvedValue({
+        id: mockedMentorId,
+        user_id: defaultUserId,
+        status: MENTOR_STATUSES.inactive,
+      });
+      repo.updateMentorById.mockResolvedValue(mockedMentorId);
+
+      const result = await mentorService.updateMentor(
+        [{ role_name: 'mentor' }],
+        mockedMentorId.toString(),
+        { tags: mockedTags },
+        true // isOwner
+      );
+
+      expect(repo.updateMentorById).not.toHaveBeenCalled();
+      expect(tagsRepo.updateMentorTags).toHaveBeenCalledWith(
+        mockedMentorId.toString(),
+        mockedTags
       );
       expect(result).toBe(mockedMentorId);
     });

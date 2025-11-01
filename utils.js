@@ -74,7 +74,7 @@ const MENTOR_STATUSES = {
   pending: 'pending',
 };
 
-const ALLOWED_MENTOR_UPDATES = ['contact', 'about'];
+const ALLOWED_MENTOR_UPDATES = ['contact', 'about', 'tags'];
 
 module.exports = { 
   APPL_STATUSES, MENTOR_STATUSES, ROLE_NAMES, ALLOWED_MENTOR_UPDATES, 

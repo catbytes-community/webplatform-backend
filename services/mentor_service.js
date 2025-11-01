@@ -1,4 +1,5 @@
 const repo = require('../repositories/mentor_repository');
+const tagsRepo = require('../repositories/tags_repository');
 const rolesService = require('../services/roles_service');
 const mailerService = require('../services/mailer_service');
 const { MentorAlreadyExistsError, DataRequiresElevatedRoleError } = require("../errors");
@@ -37,8 +38,11 @@ async function createMentor(userId, mentorData) {
     status: 'pending',
     about: mentorData.about,
     contact: mentorData.contact,
+    tags: mentorData.tags
   };
+
   const mentorInfo = await repo.createMentor(mentor);
+  await tagsRepo.updateMentorTags(mentorInfo.id, mentorData.tags);
 
   const adminEmails = await rolesService.getAdminEmails();
   await mailerService.sendEmailOnNewMentorApplication(adminEmails, mentorInfo);
@@ -57,13 +61,26 @@ async function getMentors(userId, status, includeAdditionalFields) {
     throw new DataRequiresElevatedRoleError('Requested data requires elevated role');
   }
   const statusesFilter = status ? [status] : allowedStatuses;
+  const mentors = await repo.getMentors(statusesFilter, selectedFields);
+  
+  const mentorsWithTags = await Promise.all(
+    mentors.map(async (mentor) => {
+      const tags = await tagsRepo.getAssignedTagNames(mentor.mentor_id, 'mentor');
+      return {
+        ...mentor,
+        tags
+      };
+    })
+  );
 
-  return await repo.getMentors(statusesFilter, selectedFields);
+  return mentorsWithTags;
 }
 
 async function getMentorById(userRoles, mentorId, isOwner) {
   const allowedStatuses = await getEligibleMentorStatuses(userRoles, isOwner);
-  return repo.getMentorById(allowedStatuses, allFields, mentorId);
+  const mentor = await repo.getMentorById(allowedStatuses, allFields, mentorId);
+  mentor.tags = await tagsRepo.getAssignedTagNames(mentorId, 'mentor');
+  return mentor;
 }
 
 async function getEligibleMentorStatuses(userRoles, isOwner) {
@@ -112,11 +129,19 @@ async function updateMentorStatus(userRoles, mentorId, status, isOwner) {
 
 async function updateMentor(userRoles, mentorId, updates) {
   const mentorData = await getMentorById(userRoles, mentorId);
-  if(mentorData.status === MENTOR_STATUSES.active || mentorData.status === MENTOR_STATUSES.inactive) {
-    const updatedMentorId = await repo.updateMentorById(mentorId, updates);
-    return updatedMentorId;
+  if (![MENTOR_STATUSES.active, MENTOR_STATUSES.inactive].includes(mentorData.status)) {
+    return 0;
   }
-  return 0;
+  let updatedMentorId;
+  const { tags, ...mentorUpdates } = updates;
+  if(tags) {
+    await tagsRepo.updateMentorTags(mentorId, tags);
+  }
+  if(Object.keys(mentorUpdates).length) {
+    updatedMentorId = await repo.updateMentorById(mentorId, mentorUpdates);
+  }
+  
+  return updatedMentorId || parseInt(mentorId, 10);
 }
 
 async function deleteMentorById(mentorId, userId) {
@@ -125,6 +150,8 @@ async function deleteMentorById(mentorId, userId) {
   }
   const deletedMentorId = await repo.deleteMentorById(mentorId);
   removeRoleFromUser(userId, 2);
+  // remove associated tags
+  await tagsRepo.updateMentorTags(mentorId, []);
   return deletedMentorId;
 }  
 
