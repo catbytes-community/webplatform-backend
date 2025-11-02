@@ -2,7 +2,7 @@ const repo = require('../repositories/mentor_repository');
 const tagsRepo = require('../repositories/tags_repository');
 const rolesService = require('../services/roles_service');
 const mailerService = require('../services/mailer_service');
-const { MentorAlreadyExistsError, DataRequiresElevatedRoleError } = require("../errors");
+const { MentorAlreadyExistsError, MentorDoesNotExistError, DataRequiresElevatedRoleError, ActionNotAllowedError } = require("../errors");
 const { ROLE_NAMES, MENTOR_STATUSES } = require("../utils");
 const { assignRoleToUser, removeRoleFromUser } = require('../repositories/roles_repository');
 
@@ -12,6 +12,7 @@ const baseFields = [
   'mentors.about',
   'mentors.status',
   'users.name',
+  'users.email as email',
   'users.img as img_link',
   'users.languages'
 ];
@@ -76,9 +77,9 @@ async function getMentors(userId, status, includeAdditionalFields) {
   return mentorsWithTags;
 }
 
-async function getMentorById(userRoles, mentorId, isOwner) {
+async function getMentorById(userRoles, mentorId, isOwner, safeOutput = true) {
   const allowedStatuses = await getEligibleMentorStatuses(userRoles, isOwner);
-  const mentor = await repo.getMentorById(allowedStatuses, allFields, mentorId);
+  const mentor = await repo.getMentorById(allowedStatuses, allFields, mentorId, safeOutput);
   mentor.tags = await tagsRepo.getAssignedTagNames(mentorId, 'mentor');
   return mentor;
 }
@@ -93,7 +94,15 @@ async function getEligibleMentorStatuses(userRoles, isOwner) {
 }
 
 async function updateMentorStatus(userRoles, mentorId, status, isOwner) {
-  const mentorData = await getMentorById(userRoles, mentorId, isOwner);
+  const mentorData = await getMentorById(userRoles, mentorId, isOwner, false);
+  if (!mentorData) {
+    throw new MentorDoesNotExistError(`Mentor with id ${mentorId} does not exist`);
+  }
+
+  if (mentorData.status === MENTOR_STATUSES.rejected) {
+    throw new ActionNotAllowedError('Cannot change status of a rejected mentor');
+  }
+
   const isAdmin = userRoles.some(role => role.role_name === ROLE_NAMES.admin);
   const allowedStatusesForOwner = [
     MENTOR_STATUSES.active,
@@ -106,10 +115,12 @@ async function updateMentorStatus(userRoles, mentorId, status, isOwner) {
     if(mentorData.status === MENTOR_STATUSES.pending && status === MENTOR_STATUSES.active) {
       updatedMentorId = await repo.updateMentorById(mentorId, { status });
       await assignRoleToUser(mentorData.user_id, 2);
+      await mailerService.sendEmailOnMentorApplicationStatusChange(mentorData.email, mentorData.name, status);
     } else if(status === MENTOR_STATUSES.rejected) {
       // if admin rejects mentor (change mentor status to rejected => remove mentor role)
       updatedMentorId = await repo.updateMentorById(mentorId, { status });
       await removeRoleFromUser(mentorData.user_id, 2);
+      await mailerService.sendEmailOnMentorApplicationStatusChange(mentorData.email, mentorData.name, status);
     } else {
       // any other status changes allowed without side effect actions
       updatedMentorId = await repo.updateMentorById(mentorId, { status });
