@@ -17,13 +17,17 @@ async function getMentorByUserId(userId) {
     .first();
 }
 
-async function getMentorById(allowedStatuses, selectedFields, mentorId) {
+async function getMentorById(allowedStatuses, selectedFields, mentorId, safeOutput = true) {
   const knex = getKnex();
   const mentor = await knex("mentors")
     .join("users", "mentors.user_id", "users.id")
     .where("mentors.id", mentorId)
     .whereIn("mentors.status", allowedStatuses)
     .select(selectedFields).first();
+
+  if (mentor !== undefined && safeOutput) {
+    delete mentor["email"];
+  }
   
   return mentor;
 }

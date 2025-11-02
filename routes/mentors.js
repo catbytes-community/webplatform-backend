@@ -2,12 +2,11 @@ const express = require("express");
 
 const router = express.Router();
 const mentorService = require("../services/mentor_service");
-const { ROLE_NAMES, MENTOR_STATUSES, ALLOWED_MENTOR_UPDATES } = require("../utils");
+const { ROLE_NAMES, ALLOWED_MENTOR_UPDATES } = require("../utils");
 const { verifyRoles, verifyMentorOwnership, verifyOwnership, OWNED_ENTITIES } = require("../middleware/authorization");
 const { isValidIntegerId, respondWithError } = require("./helpers");
-const { MentorAlreadyExistsError, DataRequiresElevatedRoleError } = require("../errors");
-const { sendEmailOnMentorApplicationStatusChange } = require("../services/mailer_service");
-const { getUserById } = require("../services/user_service");
+const { MentorAlreadyExistsError, MentorDoesNotExistError, 
+  DataRequiresElevatedRoleError, ActionNotAllowedError } = require("../errors");
 const logger = require('../logger')(__filename);
 
 router.use(express.json());
@@ -76,25 +75,16 @@ router.patch("/mentors/:id", verifyRoles([ROLE_NAMES.member]), async (req, res) 
   }
   try {
     const isOwner = await verifyMentorOwnership(id, req.userId);
-    const mentorInfo = await mentorService.getMentorById(req.userRoles, id, isOwner);
-    if (!mentorInfo) {
-      return respondWithError(res, 404, "Mentor not found");
-    }
     const mentorId = await mentorService.updateMentorStatus(req.userRoles, id, status, isOwner);
-    
-    if (status === MENTOR_STATUSES.active || status === MENTOR_STATUSES.rejected) {
-      const userInfo = await getUserById(mentorInfo.user_id);
-      if (!userInfo) {
-        return respondWithError(res, 404, "User not found");
-      }
-      await sendEmailOnMentorApplicationStatusChange(userInfo.email, mentorInfo.name, status);
-    };
 
     res.json({ id: mentorId });
   } catch (err) {
     logger.error(err);
-    if (err instanceof DataRequiresElevatedRoleError) {
+    if (err instanceof DataRequiresElevatedRoleError || err instanceof ActionNotAllowedError) {
       return respondWithError(res, 403, err.message);
+    }
+    if (err instanceof MentorDoesNotExistError) {
+      return respondWithError(res, 404, err.message);
     }
     respondWithError(res);
   }
