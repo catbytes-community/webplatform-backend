@@ -2,7 +2,8 @@ const repo = require('../repositories/mentor_repository');
 const tagsRepo = require('../repositories/tags_repository');
 const rolesService = require('../services/roles_service');
 const mailerService = require('../services/mailer_service');
-const { MentorAlreadyExistsError, MentorDoesNotExistError, DataRequiresElevatedRoleError, ActionNotAllowedError } = require("../errors");
+const { MentorAlreadyExistsError, MentorDoesNotExistError, 
+  DataRequiresElevatedRoleError, ActionNotAllowedError } = require("../errors");
 const { ROLE_NAMES, MENTOR_STATUSES } = require("../utils");
 const { assignRoleToUser, removeRoleFromUser } = require('../repositories/roles_repository');
 

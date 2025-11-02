@@ -38,4 +38,5 @@ class ActionNotAllowedError extends Error {
   }
 }
 
-module.exports = { MentorAlreadyExistsError, DataRequiresElevatedRoleError, UserDoesNotExistError, MentorDoesNotExistError, ActionNotAllowedError };
+module.exports = { MentorAlreadyExistsError, DataRequiresElevatedRoleError,
+  UserDoesNotExistError, MentorDoesNotExistError, ActionNotAllowedError };

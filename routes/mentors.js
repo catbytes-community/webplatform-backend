@@ -5,7 +5,8 @@ const mentorService = require("../services/mentor_service");
 const { ROLE_NAMES, ALLOWED_MENTOR_UPDATES } = require("../utils");
 const { verifyRoles, verifyMentorOwnership, verifyOwnership, OWNED_ENTITIES } = require("../middleware/authorization");
 const { isValidIntegerId, respondWithError } = require("./helpers");
-const { MentorAlreadyExistsError, MentorDoesNotExistError, DataRequiresElevatedRoleError, ActionNotAllowedError } = require("../errors");
+const { MentorAlreadyExistsError, MentorDoesNotExistError, 
+  DataRequiresElevatedRoleError, ActionNotAllowedError } = require("../errors");
 const logger = require('../logger')(__filename);
 
 router.use(express.json());
