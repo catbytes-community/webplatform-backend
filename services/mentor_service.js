@@ -161,7 +161,7 @@ async function deleteMentorById(mentorId, userId) {
     return;
   }
   const deletedMentorId = await repo.deleteMentorById(mentorId);
-  removeRoleFromUser(userId, 2);
+  await removeRoleFromUser(userId, 2);
   // remove associated tags
   await tagsRepo.updateMentorTags(mentorId, []);
   return deletedMentorId;
