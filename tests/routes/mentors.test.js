@@ -1,6 +1,6 @@
 const request = require('supertest');
 const mentorService = require('../../services/mentor_service');
-const { MentorAlreadyExistsError, DataRequiresElevatedRoleError } = require('../../errors');
+const { MentorAlreadyExistsError, DataRequiresElevatedRoleError, MentorDoesNotExistError } = require('../../errors');
 
 const defautlUserId = 42;
 const defaultUserRoles = [{ role_name: 'member', role_id: 1 }];
@@ -226,19 +226,16 @@ describe('PATCH /mentors/:id', () => {
   });
 
   it('Update mentor status - mentor not found', async () => {
-    mentorService.getMentorById.mockResolvedValue(null);
+    mentorService.updateMentorStatus.mockRejectedValue(new MentorDoesNotExistError('Mentor with id 9999 does not exist'));
 
     const res = await request(app)
       .patch('/mentors/9999') // some non-existing mentorId
       .send({ status: 'active' })
       .set('userId', defautlUserId);
     
-    expect(mentorService.getMentorById)
-      .toHaveBeenCalledWith(defaultUserRoles, '9999', false);
-    
-    expect(mentorService.updateMentorStatus).not.toHaveBeenCalled();
+    expect(mentorService.updateMentorStatus).toHaveBeenCalledWith(defaultUserRoles, '9999', 'active', false);
     expect(res.statusCode).toBe(404);
-    expect(res.body.error).toBe('Mentor not found');
+    expect(res.body.error).toContain('does not exist');
   });
 });
 
