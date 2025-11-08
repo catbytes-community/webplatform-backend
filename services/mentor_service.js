@@ -40,7 +40,6 @@ async function createMentor(userId, mentorData) {
     status: 'pending',
     about: mentorData.about,
     contact: mentorData.contact,
-    tags: mentorData.tags
   };
 
   const mentorInfo = await repo.createMentor(mentor);
