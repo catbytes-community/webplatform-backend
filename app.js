@@ -17,7 +17,7 @@ if (process.env.LOGGING_HTTP_REQUESTS === 'true') {
 
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors({
+const corsOptions = {
   origin: (origin, callback) => {
     if (!origin || config.cors.allowedOrigins.includes(origin)) {
       callback(null, origin);
@@ -28,8 +28,10 @@ app.use(cors({
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Firebase-Token', 'X-Discord-Code'], 
-}));
-app.options('*', cors()); 
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 app.use(authenticate());
 
 module.exports = app;
