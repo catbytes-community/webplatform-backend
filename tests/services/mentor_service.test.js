@@ -36,8 +36,7 @@ describe('Mentor Service', () => {
         user_id: defaultUserId,
         status: MENTOR_STATUSES.pending,
         about: mentorData.about,
-        contact: mentorData.contact,
-        tags: mentorData.tags
+        contact: mentorData.contact
       });
       expect(tagsRepo.updateMentorTags).toHaveBeenCalledWith(createdMentor.id, mentorData.tags);
       expect(rolesService.getAdminEmails).toHaveBeenCalled();
