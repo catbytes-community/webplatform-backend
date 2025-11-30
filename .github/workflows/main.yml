@@ -1,0 +1,22 @@
+name: Run all checks before merge
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  eslint:
+    uses: ./.github/workflows/node-env-command.yml
+    with:
+      node-version: '20'
+      commandDescription: 'Run ESLint'
+      command: 'npx eslint .'
+  
+  unittests:
+    uses: ./.github/workflows/node-env-command.yml
+    with:
+      node-version: '20'
+      commandDescription: 'Run Jest tests'
+      command: 'npm test'

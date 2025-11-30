@@ -2,78 +2,79 @@ const express = require("express");
 
 const router = express.Router();
 const userService = require("../services/user_service");
-const applService = require("../services/applications_service");
-const admin = require("firebase-admin");
+const authService = require("../services/auth_service");
+const { UserDoesNotExistError } = require("../errors");
 const { ROLE_NAMES } = require("../utils");
-const {verifyOwnership, verifyRole, OWNED_ENTITIES} = require("../middleware/authorization");
+const {verifyOwnership, verifyRoles, OWNED_ENTITIES} = require("../middleware/authorization");
 const { isValidIntegerId, respondWithError, isUniqueConstraintViolation, 
   isNotNullConstraintViolation, parseColumnNameFromConstraint } = require("./helpers");
 
+const logger = require('../logger')(__filename);
+
 router.use(express.json());
+
+router.post("/users/request-login-link", async (req, res) => {
+  const { email } = req.body;
+  try {
+    await authService.sendLoginLinkToEmail(email);
+    res.status(200).json({ message: "Login link sent successfully." });
+  } catch (error) {
+    if (error instanceof UserDoesNotExistError){
+      return respondWithError(res, 404, error.message);
+    }
+    logger.error(`Error sending login link: ${error.message}`);
+    respondWithError(res);
+  }
+});
 
 // POST /users/login
 router.post("/users/login", async (req, res) => {
-  const token = req.headers['token'];
-  if (!token) {
-    return respondWithError(res, 401, "No token provided");
-  }
+  const firebaseToken = req.get('X-Firebase-Token') || null;
+  const discordCode = req.get('X-Discord-Code') || null;
+  
   try {
-    const decodedToken = await admin.auth().verifyIdToken(token);
-    const email = decodedToken.email;
-    const firebaseId = decodedToken.uid;
+    let authResult;
 
-    if (!decodedToken.email_verified) {
-      return respondWithError(res, 403, "Email not verified");
+    if (firebaseToken) {
+      authResult = await authService.handleFirebaseAuth(firebaseToken);
+    } else if (discordCode) {
+      authResult = await authService.handleDiscordAuth(discordCode);
     }
+    else return respondWithError(res, 401, 'No token provided or invalid token');
 
-    const application = await applService.getApplicationByEmail(email);  
-    if (!application || !application.status === 'approved') {
-      return respondWithError(res, 403, "Application is not approved or does not exist");
-    }
+    res.cookie('userUID', authResult.firebaseId, { httpOnly: true, secure: true, sameSite: 'none' });
+    res.status(200).json({ user: authResult.user });
 
-    let user = await userService.getUserByEmail(email);
-    if (!user) {
-      user = await userService.createNewMemberUser(
-        application.name,
-        email,
-        application.about,
-        application.languages, 
-        application.discord_nickname
-      );
-    }
-
-    await userService.updateUserById(user.id, {firebase_id: firebaseId});  
-
-    res.cookie('userUID', firebaseId, { httpOnly: true, secure: true, sameSite: 'none' });
-    res.status(200).json({ user: user });
   } catch (error) {
-    console.error(error);
-    return respondWithError(res, 401, "Unauthorized");
+    if (error.status) {
+      return respondWithError(res, error.status, error.message);
+    }
+    return respondWithError(res, 500, "Authentication failed");
   }
 });
 
 // Get all users
-router.get("/users", verifyRole(ROLE_NAMES.member), async (req, res) => {
+router.get("/users", verifyRoles([ROLE_NAMES.member]), async (req, res) => {
   try {
     const users = await userService.getAllUsers();
     res.json({ users });
   } catch (err) {
-    console.error(err);
+    logger.error(err);
     respondWithError(res);
   }
 });
 
 // Create a new user
 router.post("/users", async (req, res) => {
-  const { name, email, about, languages } = req.body;
-  console.log(req.body); // Log the entire request body
+  const { name, email, about, languages, discordNickname } = req.body;
+  // console.log(req.body); // Log the entire request body
   try {
     // todo: firebase will only know user's email, we will need to get user's application by email
     // and populate user entity with that data here 
-    const user = await userService.createNewMemberUser(name, email, about, languages);       
+    const user = await userService.createNewMemberUser(name, email, about, languages, discordNickname);       
     res.status(201).json({ id: user.id });
   } catch (err) {
-    console.error(err);
+    logger.error(err);
     const violatedValue = parseColumnNameFromConstraint(err.constraint, 'users');
     if (isUniqueConstraintViolation(err.code)) {
       return respondWithError(
@@ -90,7 +91,7 @@ router.post("/users", async (req, res) => {
 });
 
 // Get user by ID
-router.get("/users/:id", verifyRole(ROLE_NAMES.member), async (req, res) => {
+router.get("/users/:id", verifyRoles([ROLE_NAMES.member]), async (req, res) => {
   const { id } = req.params;
   if (!isValidIntegerId(id)) {
     return respondWithError(res, 400, "Invalid user id supplied");
@@ -102,7 +103,7 @@ router.get("/users/:id", verifyRole(ROLE_NAMES.member), async (req, res) => {
     }
     res.json(userInfo);
   } catch (err) {
-    console.error(err);
+    logger.error(err);
     respondWithError(res);
   }
 });
@@ -121,7 +122,7 @@ router.put("/users/:id", verifyOwnership(OWNED_ENTITIES.USER), async (req, res) 
     }
     res.status(200).json(updatedUser);
   } catch (err) {
-    console.error(err);
+    logger.error(err);
     respondWithError(res);
   }
 });
@@ -137,11 +138,25 @@ router.delete("/users/:id", verifyOwnership(OWNED_ENTITIES.USER), async (req, re
     if (result === 0) {
       return respondWithError(res, 404, "User not found.");
     }
-    res.status(200).json({ user_id: id });
+    res.clearCookie("userUID", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+    });
+    res.status(200).json({ id: id });
   } catch (err) {
-    console.error(err);
+    logger.error(err);
     respondWithError(res);
   }
+});
+
+router.post("/users/logout", (req, res) => {
+  res.clearCookie("userUID", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+  });
+  res.status(200).json({ message: "Logged out successfully" });
 });
 
 module.exports = router;

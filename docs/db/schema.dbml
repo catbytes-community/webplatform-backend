@@ -7,6 +7,7 @@ Table applications {
   about text [not null]
   email email [unique, not null]
   video_link varchar
+  video_filename varchar
   discord_nickname varchar [unique, not null]
   created_at timestamp
   status enum 
@@ -19,6 +20,7 @@ Table users {
   id integer [primary key]
   name varchar [not null]
   email email [unique, not null]
+  contact varchar
   about text
   img_link varchar 
   discord_nickname varchar [unique, not null]
@@ -44,6 +46,8 @@ Table mentors {
   about text
   status enum
   created_at timestamp
+  last_modified_by integer [ref: > users.id]
+  last_modified_at timestamp
 } // tags are created dynamically from related table
 
 Table projects {
@@ -146,3 +150,5 @@ Ref: study_buddy.id <> users_learnings.learning_entity_id
 
 // links relationships: other resources to be added
 Ref: links.entity_id > projects.id
+
+Ref: "study_buddy"."id" < "study_buddy"."created_by"

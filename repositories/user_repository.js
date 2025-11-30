@@ -14,10 +14,18 @@ async function createNewUser(values) {
   return user;
 }
 
-async function getUserInfoById(id) {
+async function getUserInfoById(id, safeOutput = true) {
   const knex = getKnex();
-  const user = await knex("users").where("id", id).first();
-  if (user !== undefined){
+  const user = await knex("users")
+    .leftJoin("mentors", "users.id", "mentors.user_id")
+    .select(
+      "users.*",
+      "mentors.id as mentor_id",
+      knex.raw("CASE WHEN mentors.status = 'active' THEN TRUE ELSE FALSE END AS is_mentor_active")
+    )
+    .where("users.id", id)
+    .first();
+  if (user !== undefined && safeOutput){
     delete user["firebase_id"];
   }
   return user;
@@ -26,18 +34,10 @@ async function getUserInfoById(id) {
 async function getUserByFields(fields) {
   const knex = getKnex();
   const user = await knex("users").where(fields).first();
-  if (user !== undefined){
+  if (user !== undefined) {
     delete user["firebase_id"];
   }
   return user;
-}
-
-async function getUserRolesById(id) {
-  const knex = getKnex();
-  return await knex("roles")
-    .join("user_roles", "roles.id", "user_roles.role_id")
-    .where("user_roles.user_id", id)
-    .select("roles.role_name", "roles.id");
 }
 
 async function updateUserById(id, updates) {
@@ -57,5 +57,5 @@ async function deleteUserById(id) {
   return await knex("users").where("id", id).del();
 }
 
-module.exports = { getAllUsers, createNewUser, getUserInfoById, getUserRolesById, updateUserById, 
+module.exports = { getAllUsers, createNewUser, getUserInfoById, updateUserById, 
   deleteUserById, getUserByFields };

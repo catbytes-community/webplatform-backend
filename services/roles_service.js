@@ -1,5 +1,6 @@
 const repo = require('../repositories/roles_repository');
 const utils = require('../utils');
+const authRepo = require('../repositories/authorization_repository');
 
 async function assignRoleToUser(userId, roleName) {
   try {
@@ -10,8 +11,20 @@ async function assignRoleToUser(userId, roleName) {
   }
 }
 
+async function getUserRoles(userId) {
+  return await authRepo.getRolesByUserId(userId) ?? [];
+}
+
+async function deleteAllUserRoles(userId) {
+  return await repo.removeAllRolesFromUser(userId);
+}
+
 async function getAllRoles() {
   return await repo.getAllRoles();
 }
 
-module.exports = { getAllRoles, assignRoleToUser };
+async function getAdminEmails() {
+  return await repo.getEmailsByRole(utils.ROLE_NAMES.admin);
+}
+
+module.exports = { getAllRoles, assignRoleToUser, getUserRoles, deleteAllUserRoles, getAdminEmails };

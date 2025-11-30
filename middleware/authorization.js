@@ -1,23 +1,29 @@
-const utils = require('../utils');
 const repo = require('../repositories/authorization_repository');
 const { respondWithError } = require('../routes/helpers');
+const logger = require('../logger')(__filename);
 
-function verifyRole(roleName) {
+function verifyRoles(roleNames) {
   return async (req, res, next) => {
     try {
       const userId = req.userId;
       if (!userId) {
         return respondWithError(res, 401, "User not authenticated");
       }
+      const userRoles = await repo.getRolesByUserId(userId);
 
-      const roleId = utils.getRole(roleName);
-      const userRole = await repo.verifyRole(userId, roleId);
-      if (userRole.length === 0){
-        return respondWithError(res, 403, "You're not allowed to access this resource");
+      const hasRole = roleNames.some(roleName => {
+        return userRoles.some(userRole => userRole.role_name === roleName);
+      });
+
+      if (hasRole) {
+        req.userRoles = userRoles;
+        return next();
       }
-      next();
+
+      return respondWithError(res, 403, "You're not allowed to access this resource");
+
     } catch (err) {
-      console.error('Error verifying role:', err);
+      logger.error(err, 'Error verifying role');
       return respondWithError(res);
     }
   };
@@ -28,11 +34,33 @@ const OWNED_ENTITIES = {
   MENTOR: 'mentors'
 };
 
+
+async function isUserEntityOwner(entityTable, resourceId, userId) {
+  var ownershipField;
+  switch (entityTable) {
+  case OWNED_ENTITIES.USER:
+    ownershipField = "id";
+    break;
+  case OWNED_ENTITIES.MENTOR:
+    ownershipField = "user_id";
+    break;
+  default:
+    ownershipField = "created_by";
+    break;
+  }
+  const result = await repo.verifyOwnership(entityTable, resourceId, userId, ownershipField);
+  return result.rows || result.length !== 0;
+}
+
+async function verifyMentorOwnership(mentorId, userId) {
+  return isUserEntityOwner(OWNED_ENTITIES.MENTOR, mentorId, userId);
+}
+
 function verifyOwnership(entityTable) {
   return async (req, res, next) => {
-    console.log("Middleware invoked for:", req.url);
+    logger.debug(`Middleware invoked for: ${req.url}`);
     try {
-      const resourceId = req.params.id;
+      const resourceId = req.params?.id;
       const userId = req.userId;
       if (!userId) {
         return respondWithError(res, 401, "User not authenticated");
@@ -42,25 +70,23 @@ function verifyOwnership(entityTable) {
         return respondWithError(res, 400, `Invalid request: missing ${entityTable} ID or user information`);
       }
             
-      let resource;
+      let isOwner;
       if (entityTable === OWNED_ENTITIES.USER) {
-        resource = userId.toString() === resourceId.toString();
+        isOwner = userId.toString() === resourceId.toString();
       } else {
-        const result = await repo.verifyOwnership(entityTable, resourceId, userId);
-        resource = result.rows && result.length !== 0;
+        isOwner = await isUserEntityOwner(entityTable, resourceId, userId);
       }
     
-      if (!resource) {
+      if (!isOwner) {
         return respondWithError(res, 403, "You're not allowed to edit this resource");
       }
-    
       next();
     } catch (err) {
-      console.error('Error verifying ownership:', err);
+      logger.error(err, 'Error verifying ownership');
       return respondWithError(res);
     }
   };
 }
 
 
-module.exports = { verifyRole, verifyOwnership, OWNED_ENTITIES };
+module.exports = { verifyRoles, verifyOwnership, verifyMentorOwnership, OWNED_ENTITIES };

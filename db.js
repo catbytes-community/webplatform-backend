@@ -2,14 +2,14 @@ const knex = require('knex');
 const { loadSecrets } = require("./aws/ssm-helper");
 const config = require('config');
 
-require("dotenv").config();
+require('dotenv').config({ path: '.env.local' });
 
 let databaseUsername, databaseHost, databaseName, databasePassword, databasePort;
 let knexInstance = null;
 
 async function getDbSettings() {
   const isLocal = process.env.ENVIRONMENT === "local";
-  console.log("isLocal: ", isLocal);
+  console.log("Environment: ", isLocal ? "local" : process.env.NODE_ENV ?? "development");
   if (isLocal) {
     databaseUsername = process.env.DB_USER;
     databaseHost = process.env.DB_HOST || "localhost";
