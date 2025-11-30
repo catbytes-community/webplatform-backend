@@ -30,25 +30,28 @@ For other OS see documentation: https://docs.aws.amazon.com/cli/latest/userguide
 
 ### Configure AWS credentials
 
-Run in command line:
+1. Contact one of the backend devs to get your AWS access keys.
+
+2. Run in command line:
 ```bash
 aws configure
 ```
 
-You will be prompted to insert following parameters:
+3. You will be prompted to insert following parameters:
 
 * **AWS Access Key ID:**  Access key ID provided to you in .csv file
 * **AWS Secret Access Key:** Access key provided in .csv file
 * **Default region:** us-east-1
 * **Default output format:** json
 
-After this the service will be able to load secrets from AWS SSM and access database. 
+4. After this the service will be able to load secrets from AWS SSM and access database. 
 
 ### Connecting to the database via psql
+
+If you need to connect directly to the database, use the following command. For RDS this will only work from within the EC2. 
 
 ```bash
 psql -h catbytes-web-platform-db.ct2ag4a86wsn.eu-west-2.rds.amazonaws.com -U <username> -d postgres -p 5432
 ```
 
 Change `<username>` to the database admin username provided and insert the password.
-

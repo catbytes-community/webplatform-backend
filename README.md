@@ -12,6 +12,12 @@ Located in the `/docs/how-tos` directory. All important information on local run
 
 ### How to run project locally
 
+> ⚠️ For simple local run (no breaking changes) you can connect to the remote (DEV) database. 
+
+To do that, you have to authenticate with AWS CLI first (ref. `/docs/how-tos/local_run_and_configs.md`)
+
+🚨 For proper development it is **strongly recommended** to use local database. Here's how to do that:
+
 1. Follow `/docs/how-tos/setup_local_postgresql`, step "Setting up Local PostgreSQL instance"
 2. Use `.env.local` file for environment variables (default `.env` is picked up by Docker so to avoid confusion we use explicit local file for local development). Update your `.env.local` accordingly. Here is sample structure or reach out for up-to-date .env to fellow devs:
 ```
@@ -20,12 +26,20 @@ Located in the `/docs/how-tos` directory. All important information on local run
    DB_NAME=mydatabase
    DB_PASS=password
    DB_PORT=5432
-   ENVIRONMENT=local
+   ENVIRONMENT=local # the IMPORTANT part!!! this tells the service to use local resources.
 ```
 
-Note: ENVIRONMENT should be set to local for running the project locally, otherwise you have to authenticate with AWS CLI first (ref. `/docs/how-tos/local_run_and_configs.md`)
+✅ Once you are authenticated with AWS CLI or you have the local PostgreSQL setup, you can successfully run 
 
-Once you are authenticated with AWS CLI or you have the local PostgreSQL setup, you can successfully run `npm start` (or use `nodemon`) to start the server.
+```bash
+npm start
+``` 
+or
+```bash
+nodemon server.js
+```
+
+to start the server.
 
 ### Useful commands: Makefile
 
