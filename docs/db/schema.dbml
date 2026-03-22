@@ -133,10 +133,10 @@ Table resources {
   id integer [primary key]
   title varchar(255) [not null]
   type resource_type [not null]
-  audience resource_audience [not null]
+  audience audience [not null]
   description text
   attachment_filename varchar(255)
-  link varchar(500)
+  link varchar(255)
   created_by integer [ref: > users.id]
   created_at timestamp
   updated_at timestamp
@@ -149,7 +149,7 @@ Enum resource_type {
   file
 }
 
-Enum resource_audience {
+Enum audience {
   public
   member
   mentor

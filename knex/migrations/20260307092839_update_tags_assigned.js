@@ -3,7 +3,7 @@
  * @returns { Promise<void> }
  */
 exports.up = async function(knex) {
-  return knex.raw(`
+  await knex.raw(`
     ALTER TABLE tags_assigned 
     DROP CONSTRAINT IF EXISTS tags_assigned_assigned_to_check;
     
@@ -18,7 +18,7 @@ exports.up = async function(knex) {
  * @returns { Promise<void> }
  */
 exports.down = async function(knex) {
-  return knex.raw(`
+  await knex.raw(`
     ALTER TABLE tags_assigned 
     DROP CONSTRAINT IF EXISTS tags_assigned_assigned_to_check;
     
