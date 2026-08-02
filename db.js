@@ -1,34 +1,47 @@
-const knex = require('knex');
+const knex = require("knex");
 const { loadSecrets } = require("./aws/ssm-helper");
-const config = require('config');
+const config = require("config");
 
-require('dotenv').config({ path: '.env.local' });
+require("dotenv").config({ path: ".env.local" });
 
-let databaseUsername, databaseHost, databaseName, databasePassword, databasePort;
+let databaseUsername,
+  databaseHost,
+  databaseName,
+  databasePassword,
+  databasePort;
 let knexInstance = null;
 
 async function getDbSettings() {
   const isLocal = process.env.ENVIRONMENT === "local";
-  console.log("Environment: ", isLocal ? "local" : process.env.NODE_ENV ?? "development");
+  console.log(
+    "Environment: ",
+    isLocal ? "local" : (process.env.NODE_ENV ?? "development"),
+  );
   if (isLocal) {
     databaseUsername = process.env.DB_USER;
     databaseHost = process.env.DB_HOST || "localhost";
     databaseName = process.env.DB_NAME;
     databasePassword = process.env.DB_PASS;
     databasePort = process.env.DB_PORT || 5432;
-  }
-  else {
+  } else {
     // For remote RSD access, load secrets from AWS SSM
     const awsConfig = config.aws;
+    console.log("Loading secrets from SSM...");
     const credentials = await loadSecrets(
-      awsConfig.param_store_region, 
-      ['/catbytes_webplatform/db_username', '/catbytes_webplatform/db_password'], 
-      true);
+      awsConfig.param_store_region,
+      [
+        "/catbytes_webplatform/db_username",
+        "/catbytes_webplatform/db_password",
+      ],
+      true,
+    );
 
-    databaseUsername = credentials['db_username'];
+    console.log("Loading secrets from SSM...");
+
+    databaseUsername = credentials["db_username"];
     databaseHost = awsConfig.db_endpoint;
     databaseName = awsConfig.db_name;
-    databasePassword = credentials['db_password'];
+    databasePassword = credentials["db_password"];
     databasePort = awsConfig.databasePort;
   }
 
@@ -38,15 +51,16 @@ async function getDbSettings() {
     databaseName,
     databasePassword,
     databasePort,
-    ssl: isLocal ? false : { rejectUnauthorized: false }
+    ssl: isLocal ? false : { rejectUnauthorized: false },
   };
 }
 
 async function initDb() {
   const settings = await getDbSettings();
-  
+
+  console.log("Creating knex instance...");
   knexInstance = knex({
-    client: 'pg',
+    client: "pg",
     connection: {
       host: settings.databaseHost,
       user: settings.databaseUsername,
@@ -54,8 +68,8 @@ async function initDb() {
       database: settings.databaseName,
       port: settings.databasePort,
       connectionTimeoutMillis: 5000,
-      ssl: settings.ssl
-    },   
+      ssl: settings.ssl,
+    },
   });
 }
 
