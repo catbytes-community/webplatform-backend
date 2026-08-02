@@ -1,17 +1,17 @@
-const config = require('config');
+const config = require("config");
 const express = require("express");
-const cookieParser = require('cookie-parser');
+const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const { authenticate } = require("./middleware/authentication");
-const pinoHttp = require('pino-http');
-const { baseLogger } = require('./logger');
+const pinoHttp = require("pino-http");
+const { baseLogger } = require("./logger");
 
-require('dotenv').config({ path: '.env.local' });
+require("dotenv").config({ path: ".env.local" });
 
 const app = express();
 
 // Middleware
-if (process.env.LOGGING_HTTP_REQUESTS === 'true') {
+if (process.env.LOGGING_HTTP_REQUESTS === "true") {
   app.use(pinoHttp({ logger: baseLogger }));
 }
 
@@ -22,16 +22,27 @@ const corsOptions = {
     if (!origin || config.cors.allowedOrigins.includes(origin)) {
       callback(null, origin);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      callback(new Error("Not allowed by CORS"));
     }
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Firebase-Token', 'X-Discord-Code'], 
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: [
+    "Content-Type",
+    "Authorization",
+    "X-Firebase-Token",
+    "X-Discord-Code",
+  ],
 };
 
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
+app.options("*", cors(corsOptions));
+
+// health check public endpoint
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok" });
+});
+
 app.use(authenticate());
 
 module.exports = app;

@@ -38,11 +38,12 @@ jobs:
         run: |
           docker build \
             -t ${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr-repository }}:${{ github.sha }} \
+            -t ${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr-repository }}:latest \
             .
       - name: Push Docker image
         run: |
-          docker push \
-            ${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr-repository }}:${{ github.sha }}
+          docker push ${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr-repository }}:${{ github.sha }}
+          docker push ${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr-repository }}:latest
       - name: Output image URI
         run: |
           echo "Image pushed:"
