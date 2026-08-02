@@ -140,3 +140,103 @@ resource "aws_iam_role_policy_attachment" "github_ecr_push" {
   role       = aws_iam_role.github_actions_role.name
   policy_arn = aws_iam_policy.github_ecr_push.arn
 }
+
+data "aws_vpc" "backend" {
+  id = "vpc-0a7d613e16d1a2392"
+}
+
+data "aws_subnet" "private_a" {
+  id = "subnet-01e31d6d5a497be28"
+}
+
+data "aws_subnet" "private_b" {
+  id = "subnet-03168b1f077384212"
+}
+
+resource "aws_security_group" "app_runner" {
+  name        = "${var.project_name}-${var.environment}-app-runner"
+  description = "Security group for App Runner VPC connector"
+  vpc_id      = data.aws_vpc.backend.id
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = local.common_tags
+}
+
+resource "aws_apprunner_vpc_connector" "backend" {
+  vpc_connector_name = "${var.project_name}-${var.environment}-connector"
+
+  subnets = [
+    data.aws_subnet.private_a.id,
+    data.aws_subnet.private_b.id,
+  ]
+
+  security_groups = [
+    aws_security_group.app_runner.id,
+  ]
+
+  tags = local.common_tags
+}
+
+resource "aws_apprunner_auto_scaling_configuration_version" "backend" {
+  auto_scaling_configuration_name = "${var.project_name}-${var.environment}"
+
+  max_concurrency = 100
+  min_size        = 1
+  max_size        = 2
+
+  tags = local.common_tags
+}
+
+resource "aws_apprunner_service" "backend" {
+  service_name = "${var.project_name}-${var.environment}"
+
+  source_configuration {
+    authentication_configuration {
+      access_role_arn = aws_iam_role.app_runner_access_role.arn
+    }
+
+    auto_deployments_enabled = true
+
+    image_repository {
+      image_repository_type = "ECR"
+
+      image_identifier = "${aws_ecr_repository.backend.repository_url}:latest"
+
+      image_configuration {
+        port = "8080"
+      }
+    }
+  }
+
+  instance_configuration {
+    cpu               = "1 vCPU"
+    memory            = "2 GB"
+    instance_role_arn = aws_iam_role.app_runner_instance_role.arn
+  }
+
+  network_configuration {
+    egress_configuration {
+      egress_type       = "VPC"
+      vpc_connector_arn = aws_apprunner_vpc_connector.backend.arn
+    }
+  }
+
+  auto_scaling_configuration_arn = aws_apprunner_auto_scaling_configuration_version.backend.arn
+
+  health_check_configuration {
+    protocol            = "HTTP"
+    path                = "/health"
+    healthy_threshold   = 1
+    unhealthy_threshold = 5
+    interval            = 20
+    timeout             = 5
+  }
+
+  tags = local.common_tags
+}
