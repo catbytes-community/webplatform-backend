@@ -36,7 +36,7 @@ async function getDbSettings() {
       true,
     );
 
-    console.log("Loading secrets from SSM...");
+    console.log("Loaded secretd from SSM...");
 
     databaseUsername = credentials["db_username"];
     databaseHost = awsConfig.db_endpoint;
