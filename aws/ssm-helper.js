@@ -1,10 +1,15 @@
-const { SSMClient, GetParametersCommand } = require('@aws-sdk/client-ssm');
-const logger = require('../logger')(__filename);
+const { SSMClient, GetParametersCommand } = require("@aws-sdk/client-ssm");
+const logger = require("../logger")(__filename);
 
-async function loadSecrets(region, names, withDecryption = false, parseJson = false) {
+async function loadSecrets(
+  region,
+  names,
+  withDecryption = false,
+  parseJson = false,
+) {
   const ssmClient = new SSMClient({
     region: region,
-  });      
+  });
 
   try {
     logger.debug(`Fetching secrets from region: ${region}`);
@@ -13,18 +18,20 @@ async function loadSecrets(region, names, withDecryption = false, parseJson = fa
       WithDecryption: withDecryption,
     });
 
+    console.log("Calling SSM...");
     const result = await ssmClient.send(command);
+    console.log("SSM returned");
 
     const secrets = result.Parameters.reduce((acc, { Name, Value }) => {
-      const key = Name.split('/').pop();
+      const key = Name.split("/").pop();
       acc[key] = parseJson ? parseJsonValue(Value) : Value;
       return acc;
     }, {});
 
-    logger.debug(Object.keys(secrets), 'Fetched secrets');
+    logger.debug(Object.keys(secrets), "Fetched secrets");
     return secrets;
   } catch (err) {
-    logger.error(err, 'Error fetching parameters');
+    logger.error(err, "Error fetching parameters");
     throw err;
   }
 }
@@ -37,4 +44,4 @@ function parseJsonValue(value) {
   }
 }
 
-module.exports = { loadSecrets }; 
+module.exports = { loadSecrets };

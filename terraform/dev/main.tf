@@ -153,6 +153,8 @@ data "aws_subnet" "private_b" {
   id = "subnet-03168b1f077384212"
 }
 
+data "aws_caller_identity" "current" {}
+
 resource "aws_security_group" "app_runner" {
   name        = "${var.project_name}-${var.environment}-app-runner"
   description = "Security group for App Runner VPC connector"
@@ -239,4 +241,38 @@ resource "aws_apprunner_service" "backend" {
   }
 
   tags = local.common_tags
+}
+
+resource "aws_iam_role_policy" "app_runner_ssm" {
+  name = "${var.project_name}-${var.environment}-ssm"
+  role = aws_iam_role.app_runner_instance_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "ReadParameterStore"
+        Effect = "Allow"
+        Action = [
+          "ssm:GetParameter",
+          "ssm:GetParameters",
+          "ssm:GetParametersByPath",
+          "ssm:DescribeParameters"
+        ]
+        Resource = [
+          "arn:aws:ssm:eu-west-2:${data.aws_caller_identity.current.account_id}:parameter/catbytes_webplatform/*"
+        ]
+      },
+      {
+        Sid    = "DecryptSSMParameters"
+        Effect = "Allow"
+        Action = [
+          "kms:Decrypt"
+        ]
+        Resource = [
+          "arn:aws:kms:eu-west-2:${data.aws_caller_identity.current.account_id}:alias/aws/ssm"
+        ]
+      }
+    ]
+  })
 }
