@@ -19,8 +19,16 @@ async function loadSecrets(
     });
 
     console.log("Calling SSM...");
-    const result = await ssmClient.send(command);
-    console.log("SSM returned");
+
+    let result;
+
+    try {
+      result = await ssmClient.send(command);
+      console.log("SSM returned");
+    } catch (err) {
+      console.error("SSM ERROR:", err);
+      throw err;
+    }
 
     const secrets = result.Parameters.reduce((acc, { Name, Value }) => {
       const key = Name.split("/").pop();
