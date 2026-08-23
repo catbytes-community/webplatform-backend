@@ -6,31 +6,12 @@ locals {
   }
 }
 
-resource "aws_ecr_repository" "backend" {
+data "aws_ecr_repository" "backend" {
   name                 = var.ecr_repository_name
-  force_delete = false
-  image_tag_mutability = "MUTABLE"
-  image_scanning_configuration {
-    scan_on_push = true
-  }
-  encryption_configuration {
-    encryption_type = "AES256"
-  }
-  tags = local.common_tags
 }
 
-resource "aws_iam_openid_connect_provider" "github" {
+data "aws_iam_openid_connect_provider" "github" {
   url = "https://token.actions.githubusercontent.com"
-
-  client_id_list = [
-    "sts.amazonaws.com"
-  ]
-
-  thumbprint_list = [
-    "6938fd4d98bab03faadb97b34396831e3780aea1"
-  ]
-
-  tags = local.common_tags
 }
 
 resource "aws_iam_role" "github_actions_role" {
@@ -42,7 +23,7 @@ resource "aws_iam_role" "github_actions_role" {
       {
         Effect = "Allow"
         Principal = {
-          Federated = aws_iam_openid_connect_provider.github.arn
+          Federated = data.aws_iam_openid_connect_provider.github.arn
         }
         Action = "sts:AssumeRoleWithWebIdentity"
         Condition = {
@@ -51,7 +32,7 @@ resource "aws_iam_role" "github_actions_role" {
           }
           StringEquals = {
             "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
-            "token.actions.githubusercontent.com:sub" = "repo:catbytes-community/webplatform-backend:ref:refs/heads/develop"
+            "token.actions.githubusercontent.com:sub" = "repo:catbytes-community/webplatform-backend:ref:refs/heads/main"
           }
         }
       }
@@ -85,7 +66,7 @@ resource "aws_iam_policy" "github_ecr_push" {
           "ecr:UploadLayerPart",
           "ecr:BatchGetImage"
         ]
-        Resource = aws_ecr_repository.backend.arn
+        Resource = data.aws_ecr_repository.backend.arn
       }
     ]
   })
@@ -189,7 +170,7 @@ resource "aws_iam_role_policy" "ecs_task_s3" {
         ]
 
         Resource = [
-          "arn:aws:s3:::dev-catbytes-bucket/*"
+          "arn:aws:s3:::prod-catbytes-bucket/*"
         ]
       }
     ]
@@ -217,7 +198,7 @@ resource "aws_ecs_task_definition" "backend" {
   container_definitions = jsonencode([
     {
       name      = "backend"
-      image     = "${aws_ecr_repository.backend.repository_url}:latest"
+      image     = "${data.aws_ecr_repository.backend.repository_url}:latest"
       essential = true
 
       portMappings = [
@@ -231,7 +212,7 @@ resource "aws_ecs_task_definition" "backend" {
       environment = [
         {
           name  = "NODE_ENV"
-          value = "development"
+          value = "production"
         }
       ]
 
@@ -266,7 +247,7 @@ resource "aws_security_group" "ecs_tasks" {
 }
 
 resource "aws_vpc_security_group_ingress_rule" "rds_from_ecs" {
-  security_group_id = "sg-07a3345fe3d94d8f0"
+  security_group_id = "sg-0dff1a72405e49485"
 
   referenced_security_group_id = aws_security_group.ecs_tasks.id
 
@@ -420,7 +401,7 @@ resource "aws_ecs_service" "backend" {
 }
 
 resource "aws_acm_certificate" "backend" {
-  domain_name       = "devapi.catbytes.io"
+  domain_name       = "prodapi.catbytes.io"
   validation_method = "DNS"
 
   lifecycle {
@@ -465,16 +446,4 @@ resource "aws_lb_listener" "https" {
   }
 
   tags = local.common_tags
-}
-
-resource "aws_route53_record" "backend" {
-  zone_id = data.aws_route53_zone.catbytes.zone_id
-  name    = "devapi.catbytes.io"
-  type    = "A"
-
-  alias {
-    name                   = aws_lb.backend.dns_name
-    zone_id                = aws_lb.backend.zone_id
-    evaluate_target_health = true
-  }
 }
