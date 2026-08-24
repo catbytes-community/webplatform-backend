@@ -2,7 +2,6 @@ const nodemailer = require('nodemailer');
 const { SESv2Client, SendEmailCommand } = require('@aws-sdk/client-sesv2');
 const path = require('path');
 const config = require('config');
-const { loadSecrets } = require("../aws/ssm-helper");
 const { APPL_STATUSES, MENTOR_STATUSES } = require("../utils");
 const logger = require('../logger')(__filename);
 
