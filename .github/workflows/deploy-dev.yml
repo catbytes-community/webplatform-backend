@@ -20,3 +20,5 @@ jobs:
       aws-region: ${{ vars.AWS_REGION }}
       ecr-repository: ${{ vars.ECR_REPOSITORY }}
       role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+      ecs-cluster: catbytes-backend-dev
+      ecs-service: catbytes-backend-dev

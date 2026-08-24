@@ -86,6 +86,16 @@ resource "aws_iam_policy" "github_ecr_push" {
           "ecr:BatchGetImage"
         ]
         Resource = aws_ecr_repository.backend.arn
+      },
+      {
+        Effect = "Allow"
+
+        Action = [
+          "ecs:UpdateService",
+          "ecs:DescribeServices"
+        ]
+
+        Resource = aws_ecs_service.backend.id
       }
     ]
   })
