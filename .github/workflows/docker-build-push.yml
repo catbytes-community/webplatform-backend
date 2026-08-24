@@ -14,6 +14,13 @@ on:
       role-to-assume:
         required: true
         type: string
+      ecs-cluster:
+        required: true
+        type: string
+
+      ecs-service:
+        required: true
+        type: string
 
 jobs:
   build-and-push:
@@ -44,6 +51,18 @@ jobs:
         run: |
           docker push ${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr-repository }}:${{ github.sha }}
           docker push ${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr-repository }}:latest
+      - name: Deploy to ECS
+        run: |
+          aws ecs update-service \
+            --cluster ${{ inputs.ecs-cluster }} \
+            --service ${{ inputs.ecs-service }} \
+            --force-new-deployment \
+            --region ${{ inputs.aws-region }}
+
+          aws ecs wait services-stable \
+            --cluster ${{ inputs.ecs-cluster }} \
+            --services ${{ inputs.ecs-service }} \
+            --region ${{ inputs.aws-region }}
       - name: Output image URI
         run: |
           echo "Image pushed:"
