@@ -478,3 +478,42 @@ resource "aws_route53_record" "backend" {
     evaluate_target_health = true
   }
 }
+
+resource "aws_sesv2_email_identity" "catbytes" {
+  email_identity = "catbytes.io"
+}
+
+resource "aws_route53_record" "ses_dkim" {
+  count = 3
+
+  zone_id = data.aws_route53_zone.catbytes.zone_id
+  name    = "${aws_sesv2_email_identity.catbytes.dkim_signing_attributes[0].tokens[count.index]}._domainkey.catbytes.io"
+  type    = "CNAME"
+  ttl     = 300
+
+  records = [
+    "${aws_sesv2_email_identity.catbytes.dkim_signing_attributes[0].tokens[count.index]}.dkim.amazonses.com"
+  ]
+}
+
+resource "aws_iam_role_policy" "ecs_task_ses" {
+  name = "${var.project_name}-${var.environment}-ses"
+  role = aws_iam_role.ecs_task_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+
+    Statement = [
+      {
+        Effect = "Allow"
+
+        Action = [
+          "ses:SendEmail",
+          "ses:SendRawEmail"
+        ]
+
+        Resource = "*"
+      }
+    ]
+  })
+}
