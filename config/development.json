@@ -8,7 +8,7 @@
     "s3_bucket": "dev-catbytes-bucket"
   },
   "cors": {
-    "allowedOrigins": ["http://localhost:5173", "https://dev.catbytes.io"]
+    "allowedOrigins": ["http://localhost:5173", "https://dev.catbytes.io", "https://app.dev.catbytes.io"]
   },
-  "platform_url": "https://dev.catbytes.io/"
+  "platform_url": "https://app.dev.catbytes.io/"
 }
