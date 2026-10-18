@@ -6,9 +6,44 @@ locals {
   }
 }
 
+moved {
+  from = aws_lb.backend
+  to   = aws_lb.backend[0]
+}
+
+moved {
+  from = aws_lb_target_group.backend
+  to   = aws_lb_target_group.backend[0]
+}
+
+moved {
+  from = aws_lb_listener.http
+  to   = aws_lb_listener.http[0]
+}
+
+moved {
+  from = aws_lb_listener.https
+  to   = aws_lb_listener.https[0]
+}
+
+moved {
+  from = aws_route53_record.backend
+  to   = aws_route53_record.backend[0]
+}
+
+moved {
+  from = aws_security_group.alb
+  to   = aws_security_group.alb[0]
+}
+
+moved {
+  from = aws_vpc_security_group_ingress_rule.ecs_from_alb
+  to   = aws_vpc_security_group_ingress_rule.ecs_from_alb[0]
+}
+
 resource "aws_ecr_repository" "backend" {
   name                 = var.ecr_repository_name
-  force_delete = false
+  force_delete         = false
   image_tag_mutability = "MUTABLE"
   image_scanning_configuration {
     scan_on_push = true
@@ -300,6 +335,7 @@ data "aws_subnet" "public_c" {
 }
 
 resource "aws_security_group" "alb" {
+  count       = var.enable_alb ? 1 : 0
   name        = "${var.project_name}-${var.environment}-alb"
   description = "Security group for Catbytes backend Application Load Balancer"
   vpc_id      = data.aws_vpc.backend.id
@@ -331,9 +367,10 @@ resource "aws_security_group" "alb" {
 }
 
 resource "aws_vpc_security_group_ingress_rule" "ecs_from_alb" {
+  count             = var.enable_alb ? 1 : 0
   security_group_id = aws_security_group.ecs_tasks.id
 
-  referenced_security_group_id = aws_security_group.alb.id
+  referenced_security_group_id = aws_security_group.alb[0].id
 
   from_port   = 8080
   to_port     = 8080
@@ -343,12 +380,13 @@ resource "aws_vpc_security_group_ingress_rule" "ecs_from_alb" {
 }
 
 resource "aws_lb" "backend" {
+  count              = var.enable_alb ? 1 : 0
   name               = "${var.project_name}-${var.environment}-alb"
   internal           = false
   load_balancer_type = "application"
 
   security_groups = [
-    aws_security_group.alb.id
+    aws_security_group.alb[0].id
   ]
 
   subnets = [
@@ -361,6 +399,7 @@ resource "aws_lb" "backend" {
 }
 
 resource "aws_lb_target_group" "backend" {
+  count       = var.enable_alb ? 1 : 0
   name        = "${var.project_name}-${var.environment}-tg"
   port        = 8080
   protocol    = "HTTP"
@@ -383,13 +422,14 @@ resource "aws_lb_target_group" "backend" {
 }
 
 resource "aws_lb_listener" "http" {
-  load_balancer_arn = aws_lb.backend.arn
+  count             = var.enable_alb ? 1 : 0
+  load_balancer_arn = aws_lb.backend[0].arn
   port              = 80
   protocol          = "HTTP"
 
   default_action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.backend.arn
+    target_group_arn = aws_lb_target_group.backend[0].arn
   }
 
   tags = local.common_tags
@@ -399,7 +439,7 @@ resource "aws_ecs_service" "backend" {
   name            = "${var.project_name}-${var.environment}"
   cluster         = aws_ecs_cluster.backend.id
   task_definition = aws_ecs_task_definition.backend.arn
-  desired_count   = 1
+  desired_count   = 0
   launch_type     = "FARGATE"
 
   network_configuration {
@@ -416,10 +456,14 @@ resource "aws_ecs_service" "backend" {
     assign_public_ip = true
   }
 
-  load_balancer {
-    target_group_arn = aws_lb_target_group.backend.arn
-    container_name   = "backend"
-    container_port   = 8080
+  dynamic "load_balancer" {
+    for_each = var.enable_alb ? [1] : []
+
+    content {
+      target_group_arn = aws_lb_target_group.backend[0].arn
+      container_name   = "backend"
+      container_port   = 8080
+    }
   }
 
   depends_on = [
@@ -462,7 +506,8 @@ resource "aws_route53_record" "backend_certificate_validation" {
 }
 
 resource "aws_lb_listener" "https" {
-  load_balancer_arn = aws_lb.backend.arn
+  count             = var.enable_alb ? 1 : 0
+  load_balancer_arn = aws_lb.backend[0].arn
   port              = 443
   protocol          = "HTTPS"
 
@@ -471,20 +516,21 @@ resource "aws_lb_listener" "https" {
 
   default_action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.backend.arn
+    target_group_arn = aws_lb_target_group.backend[0].arn
   }
 
   tags = local.common_tags
 }
 
 resource "aws_route53_record" "backend" {
+  count   = var.enable_alb ? 1 : 0
   zone_id = data.aws_route53_zone.catbytes.zone_id
   name    = "devapi.catbytes.io"
   type    = "A"
 
   alias {
-    name                   = aws_lb.backend.dns_name
-    zone_id                = aws_lb.backend.zone_id
+    name                   = aws_lb.backend[0].dns_name
+    zone_id                = aws_lb.backend[0].zone_id
     evaluate_target_health = true
   }
 }
