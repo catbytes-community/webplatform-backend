@@ -1,0 +1,24 @@
+name: Deploy to Development
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  test:
+    uses: ./.github/workflows/node-env-command.yml
+    with:
+      node-version: "22"
+      commandDescription: "Run Jest tests"
+      command: "npm test"
+
+  deploy:
+    needs: test
+    uses: ./.github/workflows/docker-build-push.yml
+    with:
+      aws-region: ${{ vars.AWS_REGION }}
+      ecr-repository: ${{ vars.ECR_REPOSITORY }}
+      role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+      ecs-cluster: catbytes-backend-dev
+      ecs-service: catbytes-backend-dev

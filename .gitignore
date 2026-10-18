@@ -6,3 +6,24 @@ node_modules
 .vscode/
 /serviceAccountKey.json
 coverage/
+
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraform.lock.hcl
+
+# Terraform plans
+*.tfplan
+plan.out
+
+# Local variable files
+*.auto.tfvars
+terraform.tfvars
+!terraform.tfvars.example

@@ -1,7 +1,7 @@
 const nodemailer = require('nodemailer');
+const { SESv2Client, SendEmailCommand } = require('@aws-sdk/client-sesv2');
 const path = require('path');
 const config = require('config');
-const { loadSecrets } = require("../aws/ssm-helper");
 const { APPL_STATUSES, MENTOR_STATUSES } = require("../utils");
 const logger = require('../logger')(__filename);
 
@@ -12,23 +12,16 @@ const webplatformUrl = config.platform_url;
 let mailTransporter = null;
 
 async function initMailer() {
-  let mailerPassword;
   const nodemailerHbs = (await import('nodemailer-express-handlebars')).default;
 
-  if (process.env.ENVIRONMENT === "local") {
-    mailerPassword = process.env.MAILER_PASSWORD;
-  } else {
-    const params = await loadSecrets(config.aws.param_store_region, ['/catbytes_webplatform/mailer_password'], true);
-    mailerPassword = params['mailer_password'];
-  }
+  const sesClient = new SESv2Client({
+    region: config.aws.aws_region,
+  });
 
   mailTransporter = nodemailer.createTransport({
-    host: mailerConfig.out_host,
-    port: mailerConfig.out_port,
-    secure: false,
-    auth: {
-      user: mailerConfig.user,
-      pass: mailerPassword,
+    SES: {
+      sesClient,
+      SendEmailCommand
     }
   });
  
